@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import { motion } from 'framer-motion';
+import { motion, Easing } from 'framer-motion'; // Importando Easing
 import { Button } from "@/components/ui/button";
 import { ArrowRight } from "lucide-react";
 
@@ -16,7 +16,7 @@ export const Hero = () => {
 
   const item = {
     hidden: { y: 20, opacity: 0 },
-    show: { y: 0, opacity: 1, transition: { duration: 0.8, ease: "easeOut" } } // Alterado aqui
+    show: { y: 0, opacity: 1, transition: { duration: 0.8, ease: "easeOut" as Easing } } // Corrigido aqui
   };
 
   return (
