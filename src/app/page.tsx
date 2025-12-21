@@ -6,7 +6,6 @@ import { Hero } from "@/components/landing/hero";
 import { Stats } from "@/components/landing/stats";
 import { HybridShowcase } from "@/components/landing/hybrid-showcase";
 import { CTASection } from "@/components/landing/cta-section";
-import { MadeWithDyad } from "@/components/made-with-dyad";
 
 export default function Home() {
   return (
@@ -36,7 +35,6 @@ export default function Home() {
           
           <p>© {new Date().getFullYear()} Lostyo Systems. All rights reserved.</p>
         </div>
-        <MadeWithDyad />
       </footer>
     </div>
   );
