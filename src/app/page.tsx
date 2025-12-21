@@ -41,7 +41,7 @@ export default function Home() {
             </div>
 
             <p className="text-[10px] font-bold uppercase tracking-widest text-white/10">
-              © {new Date().getFullYear()} LostyoCord
+              © 2025 LostyoCord
             </p>
           </div>
         </div>
