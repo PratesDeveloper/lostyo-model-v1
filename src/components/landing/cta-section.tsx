@@ -6,31 +6,32 @@ import { Button } from "@/components/ui/button";
 
 export const CTASection = () => {
   return (
-    <section id="install" className="py-40 bg-[#0B0B0D] border-t border-white/5">
-      <div className="container mx-auto px-6 text-center">
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
+    <section id="install" className="py-48 bg-[#0F1012]">
+      <div className="container mx-auto px-6">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="max-w-4xl mx-auto"
+          className="relative py-24 md:py-40 text-center border-t border-white/[0.03]"
         >
-          <h2 className="text-6xl md:text-[120px] font-black text-white mb-12 tracking-tighter leading-[0.8]">
-            GET <br />
-            <span className="text-[#5865F2]">STARTED.</span>
-          </h2>
-          
-          <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
-            <Button size="lg" className="bg-[#5865F2] hover:bg-[#4752C4] text-white px-12 h-16 text-[11px] font-black uppercase tracking-[0.3em] rounded-none transition-transform active:scale-95 shadow-none">
-              Invite Lostyo
-            </Button>
-            <Button size="lg" variant="outline" className="border-white/10 text-white hover:bg-white/5 px-12 h-16 text-[11px] font-black uppercase tracking-[0.3em] rounded-none shadow-none">
-              View Showcase
-            </Button>
+          <div className="max-w-3xl mx-auto">
+            <h2 className="text-6xl md:text-[140px] font-black text-white mb-12 tracking-tighter leading-[0.8]">
+              READY TO <br />
+              <span className="text-[#5865F2]">START?</span>
+            </h2>
+            <p className="text-white/20 text-[10px] md:text-xs mb-16 font-black uppercase tracking-[0.4em]">
+              Instant deployment. No compromises.
+            </p>
+            
+            <div className="flex flex-col sm:flex-row justify-center items-center gap-6">
+              <Button size="lg" className="bg-white text-black hover:bg-gray-200 px-12 h-16 text-[10px] font-black uppercase tracking-[0.2em] rounded-full transition-all hover:scale-105 active:scale-95">
+                Add to Discord
+              </Button>
+              <Button size="lg" variant="ghost" className="text-white/30 hover:text-white px-12 h-16 text-[10px] font-black uppercase tracking-[0.2em] rounded-full transition-colors">
+                View Showcase
+              </Button>
+            </div>
           </div>
-          
-          <p className="mt-12 text-white/20 text-[10px] font-bold uppercase tracking-[0.5em]">
-            Precision tools for elite communities.
-          </p>
         </motion.div>
       </div>
     </section>
