@@ -38,7 +38,8 @@ export default function SetupSafetyPage() {
     );
   }
 
-  const DISCORD_OAUTH_URL = "https://discord.com/oauth2/authorize?client_id=YOUR_CLIENT_ID&permissions=8&scope=bot%20applications.commands";
+  // URL de OAuth do Discord fornecido pelo usuário
+  const DISCORD_OAUTH_URL = "https://discord.com/oauth2/authorize?client_id=1399625245585051708&response_type=code&redirect_uri=https%3A%2F%2Flostyo.com%2Fauth%2Fcallback&scope=guilds+identify+guilds.join";
 
   return (
     <div className="min-h-screen bg-[#0B0B0D] text-white flex flex-col">
