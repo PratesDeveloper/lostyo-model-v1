@@ -41,7 +41,7 @@ export default function Home() {
             </div>
 
             <p className="text-[10px] font-bold uppercase tracking-widest text-white/10">
-              © 2025 LostyoCord
+              Copyright © 2025 Apple Inc. All rights reserved
             </p>
           </div>
         </div>
