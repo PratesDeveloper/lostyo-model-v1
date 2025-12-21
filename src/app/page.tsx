@@ -23,7 +23,7 @@ export default function Home() {
       <footer className="py-12 border-t border-white/5 bg-[#1E1F22]">
         <div className="container mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-8 text-sm text-gray-500">
           <div className="flex items-center gap-3 font-bold text-white text-lg tracking-tight uppercase">
-            <img src="https://cdn.lostyo.com/logo.png" alt="" className="w-6 h-6" />
+            <img src="https://cdn.lostyo.com/logo.png?v=2" alt="" className="w-6 h-6" />
             LOSTYOCORD
           </div>
           

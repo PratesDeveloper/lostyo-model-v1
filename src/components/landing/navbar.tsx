@@ -10,7 +10,7 @@ export const Navbar = () => {
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
         <div className="flex items-center gap-3 font-bold text-xl tracking-tight">
           <img 
-            src="https://cdn.lostyo.com/logo.png" 
+            src="https://cdn.lostyo.com/logo.png?v=2" 
             alt="LostyoCord Logo" 
             className="w-8 h-8 rounded-lg object-contain"
             onError={(e) => {
