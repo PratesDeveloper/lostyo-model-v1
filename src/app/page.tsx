@@ -33,7 +33,7 @@ export default function Home() {
             <a href="https://lostyo.com/privacy" className="hover:text-[#5865F2] transition-colors">Privacy</a>
           </div>
           
-          <p>© {new Date().getFullYear()} Lostyo Systems. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} Lostyo. All rights reserved.</p>
         </div>
       </footer>
     </div>
