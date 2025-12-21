@@ -20,7 +20,7 @@ export const Hero = () => {
   };
 
   return (
-    <section className="relative min-h-[95vh] flex flex-col items-center justify-center pt-20 px-6 bg-[#0B0B0D]">
+    <section className="relative min-h-[95vh] flex flex-col items-center justify-center pt-20 px-6 bg-[#0B0B0D] bg-hero-gradient">
       <motion.div
         variants={container}
         initial="hidden"
