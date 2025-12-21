@@ -14,7 +14,7 @@ export const Navbar = () => {
       <nav className="w-full max-w-4xl h-14 bg-[#1A1A1E] rounded-full flex items-center justify-between px-2 shadow-xl">
         <div className="flex items-center gap-3 pl-4">
           <img 
-            src="https://cdn.lostyo.com/logo.png?v=2" 
+            src="/apple-touch-icon.png" 
             alt="LostyoCord" 
             className="w-7 h-7"
           />

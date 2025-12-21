@@ -29,7 +29,7 @@ export default function Home() {
         <div className="container mx-auto px-6">
           <div className="flex flex-col md:flex-row justify-between items-center gap-8">
             <div className="flex items-center gap-3">
-              <img src="https://cdn.lostyo.com/logo.png?v=2" alt="LostyoCord Logo" className="w-6 h-6 opacity-80" />
+              <img src="/apple-touch-icon.png" alt="LostyoCord Logo" className="w-6 h-6 opacity-80" />
               <span className="text-sm font-black tracking-tight text-white/80">LostyoCord</span>
             </div>
             
