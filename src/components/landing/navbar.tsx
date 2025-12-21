@@ -11,26 +11,26 @@ export const Navbar = () => {
       animate={{ y: 0, opacity: 1 }}
       className="fixed top-6 left-0 right-0 z-50 flex justify-center px-4"
     >
-      <nav className="w-full max-w-3xl h-14 bg-[#1A1A1E] rounded-full flex items-center justify-between px-2 shadow-xl">
+      <nav className="w-full max-w-4xl h-14 bg-[#1A1A1E] rounded-full flex items-center justify-between px-2 shadow-2xl">
         <div className="flex items-center gap-3 pl-4">
           <img 
             src="https://cdn.lostyo.com/logo.png?v=2" 
-            alt="Lostyo" 
+            alt="LostyoCord" 
             className="w-7 h-7"
           />
-          <span className="text-sm font-bold tracking-tight text-white">Lostyo</span>
+          <span className="text-sm font-black tracking-tight text-white">LostyoCord</span>
         </div>
         
-        <div className="hidden md:flex items-center gap-6 text-xs font-semibold text-white/40">
+        <div className="hidden md:flex items-center gap-8 text-[11px] font-bold uppercase tracking-widest text-white/30">
           <a href="#features" className="hover:text-white transition-colors">Features</a>
           <a href="#stats" className="hover:text-white transition-colors">Stats</a>
-          <a href="#install" className="hover:text-white transition-colors">Install</a>
+          <a href="#preview" className="hover:text-white transition-colors">Preview</a>
         </div>
 
         <div className="flex items-center gap-1">
           <Button 
             variant="ghost" 
-            className="text-white/40 hover:text-white hover:bg-white/5 h-10 px-5 rounded-full text-xs font-bold"
+            className="text-white/30 hover:text-white hover:bg-white/5 h-10 px-5 rounded-full text-xs font-bold"
           >
             Login
           </Button>

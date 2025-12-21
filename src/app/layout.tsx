@@ -8,8 +8,8 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Lostyo",
-  description: "Experience the future of Discord integration with the unified Lostyo Bot, Dashboard, and Extension.",
+  title: "LostyoCord",
+  description: "Experience the future of Discord integration with the unified LostyoCord Bot, Dashboard, and Extension.",
   icons: {
     icon: [
       { url: "/favicon.ico", sizes: "any" },
