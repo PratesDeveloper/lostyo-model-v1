@@ -8,18 +8,12 @@ export const Navbar = () => {
   return (
     <nav className="sticky top-0 z-50 w-full border-b border-white/5 bg-[#1E1F22]/80 backdrop-blur-md">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-        <div className="flex items-center gap-3 font-bold text-xl tracking-tight">
+        <div className="flex items-center gap-3">
           <img 
             src="https://cdn.lostyo.com/logo.png?v=2" 
-            alt="LostyoCord Logo" 
-            className="w-8 h-8 rounded-lg object-contain"
-            onError={(e) => {
-              // Fallback if logo doesn't load
-              e.currentTarget.style.display = 'none';
-            }}
+            alt="Logo" 
+            className="w-10 h-10 rounded-lg object-contain"
           />
-          <span className="uppercase tracking-wider text-[#5865F2]">LOSTYO</span>
-          <span className="text-white/40 font-light">CORD</span>
         </div>
         
         <div className="hidden md:flex items-center gap-8 text-sm font-medium text-gray-400">
