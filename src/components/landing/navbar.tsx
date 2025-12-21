@@ -35,9 +35,15 @@ export const Navbar = () => {
             Login
           </Button>
           <Button 
+            variant="ghost" 
+            className="text-white/30 hover:text-white hover:bg-white/5 h-10 px-5 rounded-full text-xs font-bold"
+          >
+            Install Extension
+          </Button>
+          <Button 
             className="bg-[#5865F2] hover:bg-[#4752C4] text-white h-10 px-6 rounded-full text-xs font-bold transition-transform active:scale-95"
           >
-            Dashboard
+            Add Bot
           </Button>
         </div>
       </nav>
