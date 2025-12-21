@@ -7,7 +7,6 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/components/auth/auth-provider';
 import { motion } from 'framer-motion';
-import { Discord } from 'lucide-react'; // Usando um ícone genérico, já que o Discord não está disponível no Lucide
 
 export default function LoginPage() {
   const { session } = useAuth();
