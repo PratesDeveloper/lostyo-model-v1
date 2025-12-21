@@ -7,6 +7,7 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/components/auth/auth-provider';
 import { motion } from 'framer-motion';
+import { Discord } from 'lucide-react'; // Usando um ícone genérico, já que o Discord não está disponível no Lucide
 
 export default function LoginPage() {
   const { session } = useAuth();
@@ -14,6 +15,7 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (session) {
+      // Redireciona para a página de segurança após o login
       router.push('/setup-safety');
     }
   }, [session, router]);
@@ -28,7 +30,7 @@ export default function LoginPage() {
         <div className="text-center mb-8">
           <img src="/apple-touch-icon.png" alt="LostyoCord" className="w-12 h-12 mx-auto mb-4" />
           <h1 className="text-2xl font-black text-white">Welcome back</h1>
-          <p className="text-white/40 text-sm">Please sign in to continue to safety setup</p>
+          <p className="text-white/40 text-sm">Sign in with Discord to manage your communities.</p>
         </div>
         
         <Auth
@@ -48,7 +50,8 @@ export default function LoginPage() {
           }}
           theme="dark"
           providers={['discord']}
-          redirectTo={`${window.location.origin}/setup-safety`}
+          onlyThirdPartyProviders={true} // Garante que apenas provedores de terceiros sejam mostrados
+          redirectTo={`${window.location.origin}/auth/callback`}
         />
       </motion.div>
     </div>
