@@ -34,7 +34,7 @@ export default function LoginPage() {
         className="max-w-md w-full bg-[#141417] p-8 rounded-[2.5rem] border border-white/5"
       >
         <div className="text-center mb-8">
-          <img src="/apple-touch-icon.png" alt="LostyoCord" className="w-12 h-12 mx-auto mb-4" />
+          <img src="https://cdn.lostyo.com/logo.png" alt="LostyoCord" className="w-12 h-12 mx-auto mb-4" />
           <h1 className="text-2xl font-black text-white">Welcome back</h1>
           <p className="text-white/40 text-sm">Sign in with Discord to manage your communities.</p>
         </div>
