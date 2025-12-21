@@ -8,8 +8,8 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Aether | The First Discord Hybrid",
-  description: "Experience the future of Discord integration with our unified Bot, Dashboard, and Extension.",
+  title: "LostyoCord | The First Discord Hybrid",
+  description: "Experience the future of Discord integration with the unified LostyoCord Bot, Dashboard, and Extension.",
 };
 
 export default function RootLayout({
