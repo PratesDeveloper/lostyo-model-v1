@@ -1,12 +1,14 @@
 "use client";
 
-import { supabase } from '@/integrations/supabase/client';
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/components/auth/auth-provider';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { LogIn } from 'lucide-react';
+
+// URL de OAuth do Discord fornecido pelo usuário
+const DISCORD_OAUTH_URL = "https://discord.com/oauth2/authorize?client_id=1399625245585051708&response_type=code&redirect_uri=https%3A%2F%2Flostyo.com%2Fauth%2Fcallback&scope=guilds+identify+guilds.join";
 
 export default function LoginPage() {
   const { session } = useAuth();
@@ -19,14 +21,9 @@ export default function LoginPage() {
     }
   }, [session, router]);
 
-  const handleDiscordLogin = async () => {
-    await supabase.auth.signInWithOAuth({
-      provider: 'discord',
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
-        scopes: 'guilds identify guilds.join',
-      },
-    });
+  const handleDiscordLogin = () => {
+    // Redirecionamento direto para o URL de OAuth do Discord
+    window.location.href = DISCORD_OAUTH_URL;
   };
 
   return (
