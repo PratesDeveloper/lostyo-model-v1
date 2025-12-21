@@ -14,10 +14,10 @@ export const DashboardPreview = () => {
             viewport={{ once: true }}
             className="text-3xl md:text-5xl font-black text-white mb-4 tracking-tight"
           >
-            Tudo sob controle.
+            Everything under control.
           </motion.h2>
           <p className="text-white/20 text-lg font-medium max-w-xl mx-auto">
-            Um painel limpo, rápido e intuitivo para você focar no que importa: sua comunidade.
+            A clean, fast, and intuitive dashboard to help you focus on what matters: your community.
           </p>
         </div>
 

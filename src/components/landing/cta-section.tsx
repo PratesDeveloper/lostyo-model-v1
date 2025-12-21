@@ -18,7 +18,7 @@ export const CTASection = () => {
             Start growing <br /> today.
           </h2>
           <p className="text-white/60 text-lg md:text-xl mb-12 font-medium max-w-xl mx-auto">
-            Join thousands of communities that trust Lostyo for their daily operations.
+            Join thousands of communities that trust LostyoCord for their daily operations.
           </p>
           
           <div className="flex flex-col sm:flex-row justify-center items-center gap-4">

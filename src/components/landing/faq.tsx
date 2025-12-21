@@ -11,12 +11,12 @@ import {
 
 const faqData = [
   {
-    question: "How do I get started with Lostyo?",
+    question: "How do I get started with LostyoCord?",
     answer: "Simply click the 'Add to Discord' button. Our setup wizard will guide you through permissions and basic configuration in less than a minute."
   },
   {
-    question: "Is Lostyo free to use?",
-    answer: "Yes! The core features of Lostyo are free forever. We offer optional premium plans for advanced analytics and higher customization limits."
+    question: "Is LostyoCord free to use?",
+    answer: "Yes! The core features of LostyoCord are free forever. We offer optional premium plans for advanced analytics and higher customization limits."
   },
   {
     question: "How secure is my data?",
