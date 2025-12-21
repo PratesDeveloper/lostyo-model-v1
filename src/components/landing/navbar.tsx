@@ -6,7 +6,7 @@ import { LayoutDashboard, LogIn } from "lucide-react";
 
 export const Navbar = () => {
   return (
-    <nav className="sticky top-0 z-50 w-full border-b border-white/5 bg-[#0D0D0E]/80 backdrop-blur-md">
+    <nav className="sticky top-0 z-50 w-full border-b border-white/5 bg-[#1E1F22]/80 backdrop-blur-md">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <img 
@@ -26,7 +26,7 @@ export const Navbar = () => {
           <Button variant="ghost" className="text-white hover:bg-white/10 hidden sm:flex gap-2">
             <LogIn size={18} /> Login
           </Button>
-          <Button className="bg-[#00D1FF] hover:bg-[#00B8E0] text-black font-bold gap-2">
+          <Button className="bg-[#5865F2] hover:bg-[#4752C4] text-white gap-2">
             <LayoutDashboard size={18} /> Dashboard
           </Button>
         </div>
