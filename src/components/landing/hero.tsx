@@ -20,18 +20,12 @@ export const Hero = () => {
   };
 
   return (
-    <section className="relative min-h-[95vh] flex flex-col items-center justify-center pt-20 px-6 bg-[#0B0B0D] overflow-hidden">
-      {/* Subtle background gradients with animation */}
-      <div className="absolute inset-0 z-0 opacity-20">
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-[#5865F2]/30 rounded-full filter blur-3xl animate-pulse-slow" />
-        <div className="absolute bottom-1/4 right-1/2 translate-x-1/2 translate-y-1/2 w-80 h-80 bg-white/10 rounded-full filter blur-3xl animate-pulse-slow delay-1000" />
-      </div>
-
+    <section className="relative min-h-[95vh] flex flex-col items-center justify-center pt-20 px-6 bg-[#0B0B0D]">
       <motion.div
         variants={container}
         initial="hidden"
         animate="show"
-        className="text-center max-w-4xl relative z-10"
+        className="text-center max-w-4xl"
       >
         <motion.div 
           variants={item}
