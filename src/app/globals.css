@@ -66,9 +66,3 @@
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
-
-@layer utilities {
-  .bg-hero-gradient {
-    background-image: radial-gradient(circle at center, rgba(88, 101, 242, 0.08) 0%, transparent 70%);
-  }
-}
