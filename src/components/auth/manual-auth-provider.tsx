@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { getAuthToken, verifyJWT } from '@/lib/auth/manual-auth';
+import { getAuthToken, removeAuthCookie } from '@/lib/auth/manual-auth-client';
 import { useRouter } from 'next/navigation';
 
 interface AuthContextType {
@@ -24,7 +24,7 @@ export const ManualAuthProvider = ({ children }: { children: React.ReactNode }) 
   const router = useRouter();
 
   useEffect(() => {
-    const checkAuth = async () => {
+    const checkAuth = () => {
       const token = getAuthToken();
       
       if (!token) {
@@ -34,10 +34,13 @@ export const ManualAuthProvider = ({ children }: { children: React.ReactNode }) 
       }
 
       try {
-        const payload = await verifyJWT(token);
+        // No cliente, apenas decodificamos a base64 do JWT para pegar o ID, 
+        // a validação real é feita no servidor via middleware/actions
+        const payload = JSON.parse(atob(token.split('.')[1]));
         setUserId(payload.userId);
       } catch (error) {
-        console.error('Token inválido:', error);
+        console.error('Sessão inválida:', error);
+        removeAuthCookie();
         setUserId(null);
       } finally {
         setIsLoading(false);
@@ -48,10 +51,9 @@ export const ManualAuthProvider = ({ children }: { children: React.ReactNode }) 
   }, []);
 
   const logout = () => {
-    // Remover o cookie de autenticação
-    document.cookie = `auth-token=; Path=/; HttpOnly=false; Secure=true; SameSite=Lax; Expires=Thu, 01 Jan 1970 00:00:00 GMT`;
+    removeAuthCookie();
     setUserId(null);
-    router.push('/login');
+    router.push('/');
   };
 
   return (
