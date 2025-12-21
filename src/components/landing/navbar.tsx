@@ -6,34 +6,43 @@ import { Button } from "@/components/ui/button";
 
 export const Navbar = () => {
   return (
-    <div className="fixed top-0 left-0 right-0 z-50 flex justify-center pt-6 px-6">
-      <nav className="w-full max-w-4xl h-14 border border-white/10 bg-[#161719] rounded-xl flex items-center justify-between px-6">
-        <div className="flex items-center gap-3">
-          <img 
-            src="https://cdn.lostyo.com/logo.png?v=2" 
-            alt="Logo" 
-            className="w-6 h-6 invert"
-          />
-          <span className="text-xs font-black tracking-[0.3em] uppercase">Lostyo</span>
+    <motion.div 
+      initial={{ y: -10, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      className="fixed top-8 left-0 right-0 z-50 flex justify-center px-6"
+    >
+      <nav className="w-full max-w-2xl h-11 border border-white/[0.04] bg-[#161719]/60 backdrop-blur-md rounded-full flex items-center justify-between px-3 shadow-[0_8px_32px_rgba(0,0,0,0.4)]">
+        <div className="flex items-center gap-2 pl-2">
+          <div className="w-5 h-5 bg-[#5865F2] rounded-md flex items-center justify-center">
+            <img 
+              src="https://cdn.lostyo.com/logo.png?v=2" 
+              alt="L" 
+              className="w-3.5 h-3.5 invert"
+            />
+          </div>
+          <span className="text-[9px] font-black tracking-[0.25em] text-white uppercase">Lostyo</span>
         </div>
         
-        <div className="hidden md:flex items-center gap-10 text-[10px] font-black tracking-widest text-white/40">
-          <a href="#features" className="hover:text-white transition-colors">FEATURES</a>
-          <a href="#stats" className="hover:text-white transition-colors">STATS</a>
-          <a href="#install" className="hover:text-white transition-colors">INSTALL</a>
+        <div className="hidden sm:flex items-center gap-8 text-[9px] font-bold tracking-[0.15em] text-white/40">
+          <a href="#features" className="hover:text-white transition-all duration-300">FEATURES</a>
+          <a href="#stats" className="hover:text-white transition-all duration-300">STATS</a>
+          <a href="#install" className="hover:text-white transition-all duration-300">INSTALL</a>
         </div>
 
-        <div className="flex items-center gap-4">
-          <button className="text-[10px] font-black tracking-widest uppercase text-white/40 hover:text-white transition-colors">
-            Login
-          </button>
+        <div className="flex items-center gap-1">
           <Button 
-            className="bg-[#5865F2] hover:bg-[#4752C4] text-white h-9 px-6 rounded-lg text-[10px] font-black uppercase tracking-widest border-none shadow-none"
+            variant="ghost" 
+            className="text-white/40 hover:text-white hover:bg-transparent h-7 px-3 rounded-full text-[9px] font-bold uppercase tracking-wider transition-colors"
+          >
+            Login
+          </Button>
+          <Button 
+            className="bg-white text-black hover:bg-gray-200 h-7 px-4 rounded-full text-[9px] font-bold uppercase tracking-wider transition-all"
           >
             Dashboard
           </Button>
         </div>
       </nav>
-    </div>
+    </motion.div>
   );
 };
