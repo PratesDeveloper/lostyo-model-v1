@@ -19,14 +19,13 @@ export default function Home() {
         <CTASection />
       </main>
 
-      <footer className="py-12 border-t border-white/5 bg-[#1E1F22]">
-        <div className="container mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-8 text-sm text-gray-500">
+      <footer className="py-6 border-t border-white/5 bg-[#1E1F22]">
+        <div className="container mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-6 text-xs text-gray-500">
           <div className="flex items-center gap-3">
-            <img src="https://cdn.lostyo.com/logo.png?v=2" alt="Logo" className="w-8 h-8" />
+            <img src="https://cdn.lostyo.com/logo.png?v=2" alt="Logo" className="w-6 h-6" />
           </div>
           
-          <div className="flex gap-8">
-            <a href="https://twitter.com/lostyo" className="hover:text-[#5865F2] transition-colors">Twitter</a>
+          <div className="flex gap-6">
             <a href="https://lostyo.com/support" className="hover:text-[#5865F2] transition-colors">Support</a>
             <a href="https://lostyo.com/terms" className="hover:text-[#5865F2] transition-colors">Terms</a>
             <a href="https://lostyo.com/privacy" className="hover:text-[#5865F2] transition-colors">Privacy</a>
