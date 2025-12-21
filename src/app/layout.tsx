@@ -9,7 +9,7 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: "Lostyo",
-  description: "Experience the future of Discord integration with the unified Lostyo Bot, Dashboard, and Extension.",
+  description: "Experience the future of Discord integration with the unified Lostyo ecosystem.",
   icons: {
     icon: [
       { url: "/favicon.ico", sizes: "any" },
@@ -36,9 +36,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en">
       <body
-        className={`${inter.variable} font-sans antialiased bg-[#313338] text-white`}
+        className={`${inter.variable} font-sans antialiased bg-[#F4F4F7] text-[#1A1A1E]`}
       >
         {children}
       </body>
