@@ -10,9 +10,9 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "LostyoCord",
   description: "Experience the future of Discord integration with the unified LostyoCord Bot, Dashboard, and Extension.",
+  manifest: "/site.webmanifest",
   icons: {
     icon: [
-      { url: "/favicon.ico", sizes: "any" },
       { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
       { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
       { url: "/android-chrome-192x192.png", sizes: "192x192", type: "image/png" },
@@ -21,12 +21,7 @@ export const metadata: Metadata = {
     apple: [
       { url: "/apple-touch-icon.png" },
     ],
-    other: [
-      {
-        rel: "manifest",
-        url: "/site.webmanifest",
-      },
-    ],
+    shortcut: ["/favicon.ico"],
   },
 };
 
