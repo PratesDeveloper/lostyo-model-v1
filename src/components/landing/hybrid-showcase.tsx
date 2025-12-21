@@ -2,81 +2,102 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Bot, Zap, Layout } from 'lucide-react';
+import { Shield, Zap, Globe } from 'lucide-react';
 
 const Feature = ({ icon: Icon, title, desc, index }: { icon: any, title: string, desc: string, index: number }) => (
   <motion.div 
-    initial={{ opacity: 0, x: -20 }}
-    whileInView={{ opacity: 1, x: 0 }}
+    initial={{ opacity: 0, y: 10 }}
+    whileInView={{ opacity: 1, y: 0 }}
     transition={{ delay: index * 0.1 }}
     viewport={{ once: true }}
-    className="group"
+    className="flex gap-6 items-start"
   >
-    <div className="mb-4 inline-flex p-3 rounded-2xl bg-white/[0.02] border border-white/[0.05] text-[#5865F2]">
-      <Icon size={20} />
+    <div className="mt-1 p-2 rounded-lg bg-[#5865F2]/10 text-[#5865F2]">
+      <Icon size={18} strokeWidth={2.5} />
     </div>
-    <h3 className="text-lg font-bold text-white mb-2 tracking-tight">{title}</h3>
-    <p className="text-white/30 text-sm leading-relaxed max-w-xs">{desc}</p>
+    <div>
+      <h3 className="text-sm font-black text-white mb-2 uppercase tracking-widest">{title}</h3>
+      <p className="text-white/30 text-xs leading-relaxed max-w-xs font-bold tracking-tight">{desc}</p>
+    </div>
   </motion.div>
 );
 
 export const HybridShowcase = () => {
   return (
-    <section id="features" className="py-40">
+    <section id="features" className="py-48 bg-[#0F1012]">
       <div className="container mx-auto px-6">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-24 items-center">
-          <div>
-            <div className="text-[10px] font-black text-[#5865F2] uppercase tracking-[0.4em] mb-4">Architecture</div>
-            <h2 className="text-4xl md:text-5xl font-black text-white mb-16 tracking-tighter leading-tight">
-              A MASTERPIECE <br />
-              OF INTEGRATION.
-            </h2>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-32 items-center">
+          <div className="space-y-16">
+            <div className="space-y-6">
+              <div className="text-[9px] font-black text-[#5865F2] uppercase tracking-[0.5em]">The Ecosystem</div>
+              <h2 className="text-5xl md:text-7xl font-black text-white tracking-tighter leading-[0.9]">
+                POWER <br />
+                REDEFINED.
+              </h2>
+              <p className="text-white/20 text-sm max-w-md font-bold leading-relaxed uppercase tracking-tighter">
+                We've built a platform that scales with your ambition. Professional tools for professional communities.
+              </p>
+            </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+            <div className="space-y-12">
               <Feature 
                 index={0}
-                icon={Bot}
-                title="AI Automation"
-                desc="Smart logic that scales with your community needs."
+                icon={Shield}
+                title="Secure Automation"
+                desc="Military-grade moderation logic that handles the heavy lifting."
               />
               <Feature 
                 index={1}
-                icon={Layout}
-                title="Live Panel"
-                desc="Zero latency control over every single setting."
+                icon={Globe}
+                title="Instant Dashboard"
+                desc="Manage your settings from anywhere with zero latency sync."
               />
               <Feature 
                 index={2}
                 icon={Zap}
-                title="Direct Injection"
-                desc="Extension layer for native Discord management."
+                title="Direct Extension"
+                desc="The browser layer that brings web features into Discord."
               />
             </div>
           </div>
           
-          <div className="relative">
+          <div className="relative flex justify-center items-center">
              <motion.div 
-               animate={{ y: [0, -15, 0] }}
-               transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-               className="relative z-10 p-1 bg-black rounded-[40px] border border-white/10 shadow-[0_0_100px_rgba(88,101,242,0.1)]"
+               style={{ perspective: 1000 }}
+               className="relative z-10 w-full max-w-md"
              >
-               <div className="bg-[#1E1F22] rounded-[36px] overflow-hidden aspect-video flex flex-col p-6">
-                  <div className="flex gap-1.5 mb-8">
-                    <div className="w-2 h-2 rounded-full bg-white/10" />
-                    <div className="w-2 h-2 rounded-full bg-white/10" />
-                    <div className="w-2 h-2 rounded-full bg-white/10" />
+               <motion.div 
+                 animate={{ rotateY: [-2, 2, -2], rotateX: [1, -1, 1] }}
+                 transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
+                 className="p-8 bg-[#161719]/80 backdrop-blur-3xl rounded-[32px] border border-white/[0.05] shadow-[0_32px_64px_rgba(0,0,0,0.6)]"
+               >
+                  <div className="flex justify-between items-center mb-10">
+                    <div className="flex gap-1.5">
+                      <div className="w-2 h-2 rounded-full bg-white/5" />
+                      <div className="w-2 h-2 rounded-full bg-white/5" />
+                    </div>
+                    <div className="h-4 w-4 rounded bg-[#5865F2]/20" />
                   </div>
-                  <div className="space-y-4">
-                    <div className="h-2 w-1/3 bg-white/5 rounded-full" />
-                    <div className="h-8 w-full bg-white/[0.02] border border-white/[0.05] rounded-xl" />
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="h-24 bg-[#5865F2]/10 border border-[#5865F2]/20 rounded-2xl" />
-                      <div className="h-24 bg-white/[0.02] border border-white/[0.05] rounded-2xl" />
+                  
+                  <div className="space-y-6">
+                    <div className="h-10 w-full bg-white/[0.02] border border-white/[0.03] rounded-xl flex items-center px-4">
+                      <div className="h-1.5 w-24 bg-white/10 rounded-full" />
+                    </div>
+                    
+                    <div className="grid grid-cols-3 gap-3">
+                      <div className="h-20 bg-[#5865F2] rounded-2xl shadow-[0_0_20px_rgba(88,101,242,0.3)]" />
+                      <div className="h-20 bg-white/[0.02] border border-white/[0.03] rounded-2xl" />
+                      <div className="h-20 bg-white/[0.02] border border-white/[0.03] rounded-2xl" />
+                    </div>
+                    
+                    <div className="space-y-3">
+                      <div className="h-1.5 w-full bg-white/5 rounded-full" />
+                      <div className="h-1.5 w-2/3 bg-white/5 rounded-full" />
                     </div>
                   </div>
-               </div>
+               </motion.div>
              </motion.div>
-             <div className="absolute -top-10 -right-10 w-40 h-40 bg-[#5865F2]/20 blur-[60px] rounded-full -z-10" />
+             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-[#5865F2]/10 blur-[100px] rounded-full -z-10" />
           </div>
         </div>
       </div>
