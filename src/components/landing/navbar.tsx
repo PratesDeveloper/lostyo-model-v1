@@ -4,8 +4,12 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Button } from "@/components/ui/button";
 import Link from 'next/link';
+import { useAuth } from '@/components/auth/auth-provider';
+import { supabase } from '@/integrations/supabase/client';
 
 export const Navbar = () => {
+  const { session } = useAuth();
+
   return (
     <motion.div 
       initial={{ y: -20, opacity: 0 }}
@@ -29,18 +33,32 @@ export const Navbar = () => {
         </div>
 
         <div className="flex items-center gap-1">
+          {session ? (
+            <Button 
+              onClick={() => supabase.auth.signOut()}
+              variant="ghost" 
+              className="text-white/30 hover:text-white hover:bg-white/5 h-10 px-5 rounded-full text-xs font-bold"
+            >
+              Logout
+            </Button>
+          ) : (
+            <Link href="/login">
+              <Button 
+                variant="ghost" 
+                className="text-white/30 hover:text-white hover:bg-white/5 h-10 px-5 rounded-full text-xs font-bold"
+              >
+                Login
+              </Button>
+            </Link>
+          )}
+          
           <Button 
             variant="ghost" 
             className="text-white/30 hover:text-white hover:bg-white/5 h-10 px-5 rounded-full text-xs font-bold"
           >
-            Login
+            Extension
           </Button>
-          <Button 
-            variant="ghost" 
-            className="text-white/30 hover:text-white hover:bg-white/5 h-10 px-5 rounded-full text-xs font-bold"
-          >
-            Install Extension
-          </Button>
+          
           <Link href="/setup-safety">
             <Button 
               className="bg-[#5865F2] hover:bg-[#4752C4] text-white h-10 px-6 rounded-full text-xs font-bold transition-transform active:scale-95"
