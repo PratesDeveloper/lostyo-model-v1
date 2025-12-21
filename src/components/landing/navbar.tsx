@@ -6,31 +6,36 @@ import { LayoutDashboard, LogIn } from "lucide-react";
 
 export const Navbar = () => {
   return (
-    <nav className="fixed top-0 z-50 w-full border-b border-white/[0.05] bg-[#1E1F22]/70 backdrop-blur-xl">
-      <div className="container mx-auto px-6 h-16 flex items-center justify-between">
-        <div className="flex items-center gap-3">
+    <div className="fixed top-4 left-0 right-0 z-50 flex justify-center px-4">
+      <nav className="w-full max-w-4xl h-14 border border-white/[0.08] bg-[#1E1F22]/80 backdrop-blur-xl rounded-2xl flex items-center justify-between px-4 shadow-2xl">
+        <div className="flex items-center">
           <img 
             src="https://cdn.lostyo.com/logo.png?v=2" 
             alt="Lostyo" 
-            className="w-9 h-9 transition-transform hover:scale-110 duration-300"
+            className="w-8 h-8 transition-transform hover:scale-110 duration-300"
           />
         </div>
         
-        <div className="hidden md:flex items-center gap-10 text-[13px] font-medium tracking-wide text-gray-400">
+        <div className="hidden md:flex items-center gap-8 text-[12px] font-bold tracking-widest text-gray-400">
           <a href="#features" className="hover:text-white transition-colors">FEATURES</a>
           <a href="#stats" className="hover:text-white transition-colors">STATS</a>
-          <a href="#install" className="hover:text-white transition-colors">GET STARTED</a>
+          <a href="#install" className="hover:text-white transition-colors">INSTALL</a>
         </div>
 
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" className="text-gray-300 hover:text-white hover:bg-white/5 hidden sm:flex gap-2 text-sm font-medium">
-            <LogIn size={16} /> Login
+        <div className="flex items-center gap-2">
+          <Button 
+            variant="ghost" 
+            className="text-gray-300 hover:text-white hover:bg-white/5 h-9 px-4 rounded-xl text-xs font-bold gap-2"
+          >
+            <LogIn size={14} /> Login
           </Button>
-          <Button className="bg-[#5865F2] hover:bg-[#4752C4] text-white px-5 h-9 rounded-full text-sm font-semibold shadow-lg shadow-[#5865F2]/20 transition-all hover:translate-y-[-1px]">
+          <Button 
+            className="bg-[#5865F2] hover:bg-[#4752C4] text-white h-9 px-5 rounded-xl text-xs font-bold shadow-lg shadow-[#5865F2]/20 transition-all hover:translate-y-[-1px]"
+          >
             Dashboard
           </Button>
         </div>
-      </div>
-    </nav>
+      </nav>
+    </div>
   );
 };
