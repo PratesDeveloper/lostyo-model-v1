@@ -38,8 +38,10 @@ export default function SetupSafetyPage() {
     );
   }
 
-  // URL de OAuth do Discord fornecido pelo usuário
-  const DISCORD_OAUTH_URL = "https://discord.com/oauth2/authorize?client_id=1399625245585051708&response_type=code&redirect_uri=https%3A%2F%2Flostyo.com%2Fauth%2Fcallback&scope=guilds+identify+guilds.join";
+  // Construindo a URL de OAuth do Discord a partir de variáveis de ambiente
+  const DISCORD_CLIENT_ID = process.env.NEXT_PUBLIC_DISCORD_CLIENT_ID;
+  const DISCORD_REDIRECT_URI = process.env.NEXT_PUBLIC_DISCORD_REDIRECT_URI;
+  const DISCORD_OAUTH_URL = `https://discord.com/oauth2/authorize?client_id=${DISCORD_CLIENT_ID}&response_type=code&redirect_uri=${encodeURIComponent(DISCORD_REDIRECT_URI || '')}&scope=guilds+identify+guilds.join`;
 
   return (
     <div className="min-h-screen bg-[#0B0B0D] text-white flex flex-col">

@@ -36,20 +36,24 @@ interface JWTData {
   expiresAt: number;
 }
 
-// Configurações do Discord OAuth (substitua pelos seus valores reais)
-const DISCORD_CLIENT_ID = process.env.DISCORD_CLIENT_ID || '1399625245585051708';
-const DISCORD_CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET || '';
-const DISCORD_REDIRECT_URI = process.env.DISCORD_REDIRECT_URI || 'https://lostyo.com/auth/callback';
+// Configurações do Discord OAuth (agora lidas de variáveis de ambiente)
+const DISCORD_CLIENT_ID = process.env.DISCORD_CLIENT_ID;
+const DISCORD_CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET;
+const DISCORD_REDIRECT_URI = process.env.DISCORD_REDIRECT_URI;
 
 // Chave secreta para assinar os JWTs (deve ser uma variável de ambiente segura)
 const JWT_SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET || 'sua_chave_secreta_super_segura_aqui'
+  process.env.JWT_SECRET || 'sua_chave_secreta_super_segura_aqui' // Use uma chave forte em produção
 );
 
 /**
  * Troca o código de autorização por um access token do Discord
  */
 export async function exchangeCodeForToken(code: string): Promise<DiscordTokenResponse & { user: DiscordUser }> {
+  if (!DISCORD_CLIENT_ID || !DISCORD_CLIENT_SECRET || !DISCORD_REDIRECT_URI) {
+    throw new Error('Variáveis de ambiente do Discord não configuradas.');
+  }
+
   // 1. Trocar o código por tokens
   const tokenResponse = await fetch('https://discord.com/api/oauth2/token', {
     method: 'POST',
@@ -66,7 +70,9 @@ export async function exchangeCodeForToken(code: string): Promise<DiscordTokenRe
   });
 
   if (!tokenResponse.ok) {
-    throw new Error(`Falha ao obter token: ${tokenResponse.status} ${tokenResponse.statusText}`);
+    const errorData = await tokenResponse.json();
+    console.error('Discord Token Error:', errorData);
+    throw new Error(`Falha ao obter token: ${tokenResponse.status} ${tokenResponse.statusText} - ${errorData.error_description || JSON.stringify(errorData)}`);
   }
 
   const tokenData: DiscordTokenResponse = await tokenResponse.json();
@@ -79,7 +85,9 @@ export async function exchangeCodeForToken(code: string): Promise<DiscordTokenRe
   });
 
   if (!userResponse.ok) {
-    throw new Error(`Falha ao obter dados do usuário: ${userResponse.status} ${userResponse.statusText}`);
+    const errorData = await userResponse.json();
+    console.error('Discord User Data Error:', errorData);
+    throw new Error(`Falha ao obter dados do usuário: ${userResponse.status} ${userResponse.statusText} - ${errorData.message || JSON.stringify(errorData)}`);
   }
 
   const userData: DiscordUser = await userResponse.json();
