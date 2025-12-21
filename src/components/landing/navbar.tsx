@@ -11,7 +11,7 @@ export const Navbar = () => {
       animate={{ y: 0, opacity: 1 }}
       className="fixed top-6 left-0 right-0 z-50 flex justify-center px-4"
     >
-      <nav className="w-full max-w-4xl h-14 bg-[#1A1A1E] rounded-full flex items-center justify-between px-2 shadow-2xl">
+      <nav className="w-full max-w-4xl h-14 bg-[#1A1A1E] rounded-full flex items-center justify-between px-2 shadow-xl">
         <div className="flex items-center gap-3 pl-4">
           <img 
             src="https://cdn.lostyo.com/logo.png?v=2" 
