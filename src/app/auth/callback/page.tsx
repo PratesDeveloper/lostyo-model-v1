@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { exchangeCodeForToken, createJWT, setAuthCookie } from '@/lib/auth/manual-auth';
+import { supabase } from '@/integrations/supabase/client';
 
 export default function AuthCallbackPage() {
   const router = useRouter();
@@ -29,7 +30,26 @@ export default function AuthCallbackPage() {
         // 3. Armazenar o JWT em um cookie
         setAuthCookie(jwtToken);
         
-        // 4. Redirecionar para a página de destino
+        // 4. Salvar/atualizar dados do usuário no Supabase
+        const { error: upsertError } = await supabase
+          .from('users')
+          .upsert({
+            id: tokenData.user.id,
+            username: tokenData.user.username,
+            discriminator: tokenData.user.discriminator,
+            avatar: tokenData.user.avatar,
+            access_token: tokenData.access_token,
+            refresh_token: tokenData.refresh_token,
+            expires_at: new Date(Date.now() + tokenData.expires_in * 1000).toISOString()
+          }, {
+            onConflict: 'id'
+          });
+          
+        if (upsertError) {
+          console.error('Erro ao salvar dados do usuário:', upsertError);
+        }
+        
+        // 5. Redirecionar para a página de destino
         router.push(next);
       } catch (err) {
         console.error('Erro durante a autenticação:', err);

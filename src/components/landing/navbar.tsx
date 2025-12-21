@@ -4,11 +4,10 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Button } from "@/components/ui/button";
 import Link from 'next/link';
-import { useAuth } from '@/components/auth/auth-provider';
-import { supabase } from '@/integrations/supabase/client';
+import { useManualAuth } from '@/components/auth/manual-auth-provider';
 
 export const Navbar = () => {
-  const { session } = useAuth();
+  const { isAuthenticated, logout } = useManualAuth();
 
   return (
     <motion.div 
@@ -18,11 +17,7 @@ export const Navbar = () => {
     >
       <nav className="w-full max-w-4xl h-14 bg-[#1A1A1E] rounded-full flex items-center justify-between px-2 shadow-xl">
         <Link href="/" className="flex items-center gap-3 pl-4">
-          <img 
-            src="/apple-touch-icon.png" 
-            alt="LostyoCord" 
-            className="w-7 h-7"
-          />
+          <img src="/apple-touch-icon.png" alt="LostyoCord" className="w-7 h-7" />
           <span className="text-sm font-black tracking-tight text-white">LostyoCord</span>
         </Link>
         
@@ -31,11 +26,11 @@ export const Navbar = () => {
           <a href="#stats" className="hover:text-white transition-colors">Stats</a>
           <a href="#preview" className="hover:text-white transition-colors">Preview</a>
         </div>
-
+        
         <div className="flex items-center gap-1">
-          {session ? (
+          {isAuthenticated ? (
             <Button 
-              onClick={() => supabase.auth.signOut()}
+              onClick={logout}
               variant="ghost" 
               className="text-white/30 hover:text-white hover:bg-white/5 h-10 px-5 rounded-full text-xs font-bold"
             >
@@ -52,17 +47,12 @@ export const Navbar = () => {
             </Link>
           )}
           
-          <Button 
-            variant="ghost" 
-            className="text-white/30 hover:text-white hover:bg-white/5 h-10 px-5 rounded-full text-xs font-bold"
-          >
+          <Button variant="ghost" className="text-white/30 hover:text-white hover:bg-white/5 h-10 px-5 rounded-full text-xs font-bold">
             Extension
           </Button>
           
           <Link href="/setup-safety">
-            <Button 
-              className="bg-[#5865F2] hover:bg-[#4752C4] text-white h-10 px-6 rounded-full text-xs font-bold transition-transform active:scale-95"
-            >
+            <Button className="bg-[#5865F2] hover:bg-[#4752C4] text-white h-10 px-6 rounded-full text-xs font-bold transition-transform active:scale-95">
               Add Bot
             </Button>
           </Link>
