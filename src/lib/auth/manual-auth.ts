@@ -46,13 +46,17 @@ const JWT_SECRET = new TextEncoder().encode(
   process.env.JWT_SECRET || 'sua_chave_secreta_super_segura_aqui' // Use uma chave forte em produção
 );
 
-/**
- * Troca o código de autorização por um access token do Discord
+/** 
+ * Troca o código de autorização por um access token do Discord 
  */
 export async function exchangeCodeForToken(code: string): Promise<DiscordTokenResponse & { user: DiscordUser }> {
   if (!DISCORD_CLIENT_ID || !DISCORD_CLIENT_SECRET || !DISCORD_REDIRECT_URI) {
     throw new Error('Variáveis de ambiente do Discord não configuradas.');
   }
+
+  console.log('Iniciando troca de código por token...');
+  console.log('Client ID:', DISCORD_CLIENT_ID);
+  console.log('Redirect URI:', DISCORD_REDIRECT_URI);
 
   // 1. Trocar o código por tokens
   const tokenResponse = await fetch('https://discord.com/api/oauth2/token', {
@@ -69,13 +73,16 @@ export async function exchangeCodeForToken(code: string): Promise<DiscordTokenRe
     }),
   });
 
+  console.log('Resposta do token endpoint:', tokenResponse.status, tokenResponse.statusText);
+  
   if (!tokenResponse.ok) {
-    const errorData = await tokenResponse.json();
-    console.error('Discord Token Error:', errorData);
-    throw new Error(`Falha ao obter token: ${tokenResponse.status} ${tokenResponse.statusText} - ${errorData.error_description || JSON.stringify(errorData)}`);
+    const errorText = await tokenResponse.text();
+    console.error('Erro ao obter token:', errorText);
+    throw new Error(`Falha ao obter token: ${tokenResponse.status} ${tokenResponse.statusText} - ${errorText}`);
   }
 
   const tokenData: DiscordTokenResponse = await tokenResponse.json();
+  console.log('Token data obtido com sucesso');
 
   // 2. Obter informações do usuário usando o access token
   const userResponse = await fetch('https://discord.com/api/users/@me', {
@@ -84,13 +91,16 @@ export async function exchangeCodeForToken(code: string): Promise<DiscordTokenRe
     },
   });
 
+  console.log('Resposta do user endpoint:', userResponse.status, userResponse.statusText);
+  
   if (!userResponse.ok) {
-    const errorData = await userResponse.json();
-    console.error('Discord User Data Error:', errorData);
-    throw new Error(`Falha ao obter dados do usuário: ${userResponse.status} ${userResponse.statusText} - ${errorData.message || JSON.stringify(errorData)}`);
+    const errorText = await userResponse.text();
+    console.error('Erro ao obter dados do usuário:', errorText);
+    throw new Error(`Falha ao obter dados do usuário: ${userResponse.status} ${userResponse.statusText} - ${errorText}`);
   }
 
   const userData: DiscordUser = await userResponse.json();
+  console.log('Dados do usuário obtidos com sucesso:', userData);
 
   return {
     ...tokenData,
@@ -98,8 +108,8 @@ export async function exchangeCodeForToken(code: string): Promise<DiscordTokenRe
   };
 }
 
-/**
- * Cria um JWT personalizado com os dados do usuário
+/** 
+ * Cria um JWT personalizado com os dados do usuário 
  */
 export async function createJWT(tokenData: DiscordTokenResponse & { user: DiscordUser }): Promise<string> {
   const { access_token, refresh_token, expires_in, user } = tokenData;
@@ -120,8 +130,8 @@ export async function createJWT(tokenData: DiscordTokenResponse & { user: Discor
   return jwt;
 }
 
-/**
- * Verifica e decodifica um JWT
+/** 
+ * Verifica e decodifica um JWT 
  */
 export async function verifyJWT(token: string): Promise<JWTData> {
   try {
@@ -132,8 +142,8 @@ export async function verifyJWT(token: string): Promise<JWTData> {
   }
 }
 
-/**
- * Armazena o JWT em um cookie seguro
+/** 
+ * Armazena o JWT em um cookie seguro 
  */
 export function setAuthCookie(token: string) {
   if (typeof document !== 'undefined') {
@@ -141,8 +151,8 @@ export function setAuthCookie(token: string) {
   }
 }
 
-/**
- * Remove o cookie de autenticação
+/** 
+ * Remove o cookie de autenticação 
  */
 export function removeAuthCookie() {
   if (typeof document !== 'undefined') {
@@ -150,8 +160,8 @@ export function removeAuthCookie() {
   }
 }
 
-/**
- * Obtém o token JWT dos cookies
+/** 
+ * Obtém o token JWT dos cookies 
  */
 export function getAuthToken(): string | null {
   if (typeof document === 'undefined') return null;
