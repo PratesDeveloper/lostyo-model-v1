@@ -29,6 +29,7 @@ interface DiscordUser {
 }
 
 interface JWTData {
+  [key: string]: any; // Adicionando assinatura de índice
   userId: string;
   accessToken: string;
   refreshToken: string;
@@ -117,7 +118,7 @@ export async function createJWT(tokenData: DiscordTokenResponse & { user: Discor
 export async function verifyJWT(token: string): Promise<JWTData> {
   try {
     const { payload } = await jwtVerify(token, JWT_SECRET);
-    return payload as JWTData;
+    return payload as unknown as JWTData; // Convertendo explicitamente
   } catch (error) {
     throw new Error('Token JWT inválido');
   }
@@ -127,14 +128,18 @@ export async function verifyJWT(token: string): Promise<JWTData> {
  * Armazena o JWT em um cookie seguro
  */
 export function setAuthCookie(token: string) {
-  document.cookie = `auth-token=${token}; Path=/; HttpOnly=false; Secure=true; SameSite=Lax; Max-Age=604800`; // 7 dias
+  if (typeof document !== 'undefined') {
+    document.cookie = `auth-token=${token}; Path=/; HttpOnly=false; Secure=true; SameSite=Lax; Max-Age=604800`; // 7 dias
+  }
 }
 
 /**
  * Remove o cookie de autenticação
  */
 export function removeAuthCookie() {
-  document.cookie = `auth-token=; Path=/; HttpOnly=false; Secure=true; SameSite=Lax; Expires=Thu, 01 Jan 1970 00:00:00 GMT`;
+  if (typeof document !== 'undefined') {
+    document.cookie = `auth-token=; Path=/; HttpOnly=false; Secure=true; SameSite=Lax; Expires=Thu, 01 Jan 1970 00:00:00 GMT`;
+  }
 }
 
 /**

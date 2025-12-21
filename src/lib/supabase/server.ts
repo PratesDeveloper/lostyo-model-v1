@@ -14,11 +14,12 @@ export function createServerSupabaseClient() {
     {
       cookies: {
         get(name: string) {
-          return cookieStore.get(name)?.value
+          const cookie = cookieStore.get(name)
+          return cookie?.value
         },
         set(name: string, value: string, options: any) {
           try {
-            cookieStore.set(name, value, options)
+            cookieStore.set({ name, value, ...options })
           } catch (error) {
             // The `set` method was called from a Server Component.
             // This can be ignored if you have middleware refreshing
@@ -27,7 +28,7 @@ export function createServerSupabaseClient() {
         },
         remove(name: string, options: any) {
           try {
-            cookieStore.delete(name, options)
+            cookieStore.delete({ name, ...options })
           } catch (error) {
             // The `delete` method was called from a Server Component.
             // This can be ignored if you have middleware refreshing
