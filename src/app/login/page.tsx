@@ -1,12 +1,12 @@
 "use client";
 
-import { Auth } from '@supabase/auth-ui-react';
-import { ThemeSupa } from '@supabase/auth-ui-shared';
 import { supabase } from '@/integrations/supabase/client';
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/components/auth/auth-provider';
 import { motion } from 'framer-motion';
+import { Button } from '@/components/ui/button';
+import { LogIn } from 'lucide-react';
 
 export default function LoginPage() {
   const { session } = useAuth();
@@ -18,6 +18,16 @@ export default function LoginPage() {
       router.push('/setup-safety');
     }
   }, [session, router]);
+
+  const handleDiscordLogin = async () => {
+    await supabase.auth.signInWithOAuth({
+      provider: 'discord',
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+        scopes: 'guilds identify guilds.join',
+      },
+    });
+  };
 
   return (
     <div className="min-h-screen bg-[#0B0B0D] flex items-center justify-center px-6">
@@ -32,26 +42,13 @@ export default function LoginPage() {
           <p className="text-white/40 text-sm">Sign in with Discord to manage your communities.</p>
         </div>
         
-        <Auth
-          supabaseClient={supabase}
-          appearance={{
-            theme: ThemeSupa,
-            variables: {
-              default: {
-                colors: {
-                  brand: '#5865F2',
-                  brandAccent: '#4752C4',
-                  inputBackground: 'rgba(255,255,255,0.05)',
-                  inputText: 'white',
-                }
-              }
-            }
-          }}
-          theme="dark"
-          providers={['discord']}
-          onlyThirdPartyProviders={true} // Garante que apenas provedores de terceiros sejam mostrados
-          redirectTo={`${window.location.origin}/auth/callback`}
-        />
+        <Button
+          onClick={handleDiscordLogin}
+          className="w-full h-12 bg-[#5865F2] hover:bg-[#4752C4] text-white font-bold text-base rounded-xl transition-all flex items-center justify-center gap-3"
+        >
+          <LogIn size={20} />
+          Continue with Discord
+        </Button>
       </motion.div>
     </div>
   );
