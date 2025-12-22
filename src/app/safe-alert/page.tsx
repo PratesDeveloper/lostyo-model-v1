@@ -26,7 +26,7 @@ export default function SafeAlertPage() {
           {/* Permission Screenshot */}
           <div className="mb-6 rounded-xl overflow-hidden border border-[#2A2A2E]">
             <img 
-              src="/pasted-image-2025-12-22T03-42-05-444Z.png" 
+              src="https://cdn.lostyo.com/discord-admin-permissions.png" 
               alt="Discord Admin Permissions"
               className="w-full h-auto"
             />
