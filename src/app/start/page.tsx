@@ -63,13 +63,13 @@ function StartPageContent() {
       const pollBotStatus = async () => {
         console.log(`[BotCheck] Requesting status for guild: ${guildId}`);
         try {
+          // Chamada direta para o RPC com o parâmetro correto
           const { data, error } = await supabase.rpc('is_bot_in_guild', { 
             guild_id_input: String(guildId) 
           });
           
           if (error) {
             console.error("[BotCheck] Supabase RPC Error:", error.message, error.details);
-            // Se o erro for de cache (404), tentamos uma consulta direta se possível no futuro
             return false;
           }
 
