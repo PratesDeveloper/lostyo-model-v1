@@ -1,32 +1,35 @@
 "use client";
 import React from 'react';
-import { motion } from 'framer-motion';
+import { motion, type Variants, type Transition } from 'framer-motion'; // Importando os tipos necessários
 import { Button } from "@/components/ui/button";
 import { ArrowRight, MessageSquare, Users, ShieldCheck } from "lucide-react";
 
+// Definindo os tipos de transição de forma explícita
+const defaultTransition: Transition = {
+  duration: 0.8,
+  ease: "easeOut" // Framer Motion entende strings comuns como 'easeOut'
+};
+
+const containerVariants: Variants = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.12
+    }
+  }
+};
+
+const itemVariants: Variants = {
+  hidden: { y: 20, opacity: 0 },
+  show: { 
+    y: 0, 
+    opacity: 1, 
+    transition: defaultTransition 
+  }
+};
+
 export const Hero = () => {
-  const container = {
-    hidden: { opacity: 0 },
-    show: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.12
-      }
-    }
-  };
-
-  const item = {
-    hidden: { y: 20, opacity: 0 },
-    show: {
-      y: 0,
-      opacity: 1,
-      transition: {
-        duration: 0.8,
-        ease: "easeOut"
-      }
-    }
-  };
-
   // Depoimentos de usuários
   const testimonials = [
     { id: 1, name: "GamerHub", role: "120k members", text: "Increased engagement by 240% in just one month" },
@@ -37,23 +40,23 @@ export const Hero = () => {
   return (
     <section className="relative min-h-[95vh] flex flex-col items-center justify-center pt-20 px-6 bg-[#0B0B0D] overflow-hidden">
       <motion.div 
-        variants={container} 
+        variants={containerVariants} 
         initial="hidden" 
         animate="show" 
         className="text-center max-w-4xl relative z-10"
       >
-        <motion.div variants={item} className="inline-block mb-6 px-4 py-1.5 rounded-full bg-[#1A1A1E] text-[10px] font-bold uppercase tracking-[0.2em] text-[#5865F2]">
+        <motion.div variants={itemVariants} className="inline-block mb-6 px-4 py-1.5 rounded-full bg-[#1A1A1E] text-[10px] font-bold uppercase tracking-[0.2em] text-[#5865F2]">
           Community Management
         </motion.div>
         <motion.h1 
-          variants={item} 
+          variants={itemVariants} 
           className="text-5xl md:text-8xl font-black mb-6 tracking-tight leading-[1.1] text-white"
         >
           The simple way to <br /> <span className="text-white/20">grow your server.</span>
         </motion.h1>
         
         <motion.p 
-          variants={item} 
+          variants={itemVariants} 
           className="text-white/40 text-lg md:text-xl max-w-2xl mx-auto mb-12 font-medium leading-relaxed"
         >
           Everything you need to manage, protect, and engage your Discord community in one flat, fast ecosystem.
@@ -61,7 +64,7 @@ export const Hero = () => {
         
         {/* Benefícios únicos */}
         <motion.div 
-          variants={item}
+          variants={itemVariants}
           className="flex flex-col sm:flex-row justify-center items-center gap-6 mb-12"
         >
           <div className="flex items-center gap-2">
@@ -78,7 +81,7 @@ export const Hero = () => {
           </div>
         </motion.div>
         
-        <motion.div variants={item} className="flex flex-col sm:flex-row justify-center items-center gap-4">
+        <motion.div variants={itemVariants} className="flex flex-col sm:flex-row justify-center items-center gap-4">
           <Button 
             size="lg" 
             className="bg-white text-black hover:bg-gray-200 px-10 h-14 text-sm font-bold rounded-full group transition-all"
