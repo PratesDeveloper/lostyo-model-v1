@@ -179,24 +179,30 @@ export default function StartPage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.4 }}
         >
-          {steps.map((step) => {
+          {steps.map((step, index) => {
             const Icon = step.icon;
             const isCompleted = completedSteps.includes(step.id);
             const isStep1 = step.id === 1;
             
+            // Check if previous step is completed
+            const isPreviousCompleted = index === 0 || completedSteps.includes(steps[index - 1].id);
+            const isDisabled = !isPreviousCompleted && !isCompleted;
+            
             return (
               <motion.div
                 key={step.id}
-                whileHover={{ y: -5 }}
-                className="bg-[#141417] p-6 rounded-2xl flex flex-col items-center text-center border border-[#1A1A1E] hover:border-[#5865F2]/30 transition-all"
+                whileHover={isDisabled ? {} : { y: -5 }}
+                className={cn(
+                  "bg-[#141417] p-6 rounded-2xl flex flex-col items-center text-center border transition-all",
+                  isDisabled ? "border-[#1A1A1E] opacity-50" : "border-[#1A1A1E] hover:border-[#5865F2]/30"
+                )}
               >
                 <motion.div 
-                  className={`w-12 h-12 rounded-xl flex items-center justify-center mb-4 ${
-                    isCompleted 
-                      ? 'bg-green-500/20 text-green-500' 
-                      : 'bg-red-500/20 text-red-500'
-                  }`}
-                  whileTap={{ scale: 0.95 }}
+                  className={cn(
+                    "w-12 h-12 rounded-xl flex items-center justify-center mb-4",
+                    isCompleted ? "bg-green-500/20 text-green-500" : "bg-red-500/20 text-red-500"
+                  )}
+                  whileTap={isDisabled ? {} : { scale: 0.95 }}
                 >
                   <Icon size={24} />
                 </motion.div>
@@ -228,12 +234,13 @@ export default function StartPage() {
                   </div>
                 ) : (
                   <Button 
-                    className={`w-full h-10 text-xs font-bold rounded-full ${
-                      isCompleted 
-                        ? 'bg-green-500 hover:bg-green-600' 
-                        : 'bg-[#5865F2] hover:bg-[#4752C4]'
-                    }`}
-                    onClick={() => handleCompleteStep(step.id)}
+                    className={cn(
+                      "w-full h-10 text-xs font-bold rounded-full",
+                      isCompleted ? "bg-green-500 hover:bg-green-600" : "bg-[#5865F2] hover:bg-[#4752C4]",
+                      isDisabled && "opacity-50 cursor-not-allowed"
+                    )}
+                    onClick={() => !isDisabled && handleCompleteStep(step.id)}
+                    disabled={isDisabled}
                   >
                     {isCompleted ? 'Completed' : step.action}
                   </Button>
