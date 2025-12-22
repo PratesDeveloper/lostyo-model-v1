@@ -216,14 +216,14 @@ export default function StartPage() {
                         Logged In
                       </Button>
                     ) : (
-                      <Link href={step.link} passHref className="w-full">
+                      <a href={step.link} className="w-full">
                         <Button 
                           className="w-full h-10 text-xs font-bold rounded-full bg-[#5865F2] hover:bg-[#4752C4]"
                           onClick={() => handleCompleteStep(step.id)}
                         >
                           {step.action}
                         </Button>
-                      </Link>
+                      </a>
                     )}
                   </div>
                 ) : (
