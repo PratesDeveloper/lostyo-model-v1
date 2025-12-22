@@ -8,10 +8,10 @@ const supabase = createClient(
 
 export async function GET(
   request: Request,
-  { params }: { params: { guildId: string } }
+  { params }: { params: Promise<{ guildId: string }> }
 ) {
   try {
-    const { guildId } = params;
+    const { guildId } = await params;
 
     if (!guildId) {
       return NextResponse.json(
