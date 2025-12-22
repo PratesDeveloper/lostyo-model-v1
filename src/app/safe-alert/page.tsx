@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Button } from "@/components/ui/button";
-import { Shield, ArrowRight, Check, X, Info } from 'lucide-react';
+import { Check, ArrowRight, Info, ShieldAlert } from 'lucide-react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 
@@ -10,108 +10,112 @@ export default function SafeAlertPage() {
   const discordOAuthUrl = `https://discord.com/oauth2/authorize?client_id=1399625245585051708&permissions=8&redirect_uri=https%3A%2F%2Flostyo.com%2Fstart&integration_type=0&scope=bot`;
 
   const permissions = [
-    { name: "View Channels", checked: true },
-    { name: "Manage Roles", checked: true },
-    { name: "Manage Channels", checked: true },
-    { name: "Administrator", checked: true, highlight: true },
-    { name: "Create Expressions", checked: true },
-    { name: "View Audit Log", checked: true },
+    "Manage Roles",
+    "Manage Channels",
+    "Kick Members",
+    "Ban Members",
+    "Manage Webhooks",
+    "Manage Server",
   ];
 
   return (
-    <div className="min-h-screen bg-[#0B0B0D] flex flex-col items-center justify-center p-6 font-sans">
-      <div className="max-w-xl w-full">
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="bg-[#141417] rounded-[2.5rem] overflow-hidden border border-[#1A1A1E] shadow-2xl"
-        >
-          {/* Header Section */}
-          <div className="p-8 md:p-10 text-center border-b border-[#1A1A1E]">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-[#5865F2]/10 mb-6">
-              <Shield className="w-8 h-8 text-[#5865F2]" />
+    <div className="min-h-screen bg-[#1E1F22] flex flex-col items-center justify-center p-4 font-sans selection:bg-[#5865F2]/30">
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="w-full max-w-[480px] bg-[#313338] rounded-lg shadow-[0_8px_16px_rgba(0,0,0,0.24)] overflow-hidden"
+      >
+        {/* Discord Header Mockup */}
+        <div className="p-8 pb-0 flex flex-col items-center text-center">
+          <div className="relative mb-4">
+            <div className="w-24 h-24 rounded-full bg-[#5865F2] flex items-center justify-center shadow-lg border-4 border-[#313338]">
+              <img src="https://cdn.lostyo.com/logo.png" alt="LostyoCord" className="w-14 h-14" />
             </div>
-            <h1 className="text-2xl md:text-3xl font-black text-white mb-3 tracking-tight">
-              Safety Check
-            </h1>
-            <p className="text-white/40 text-sm font-medium leading-relaxed">
-              LostyoCord requires specific permissions to automate your community management effectively.
-            </p>
+            <div className="absolute bottom-0 right-0 w-7 h-7 bg-[#23A559] border-4 border-[#313338] rounded-full flex items-center justify-center">
+              <Check size={14} className="text-white" strokeWidth={4} />
+            </div>
           </div>
+          
+          <h1 className="text-[#F2F3F5] text-2xl font-bold mb-1">LostyoCord</h1>
+          <p className="text-[#B5BAC1] text-sm font-medium mb-6">wants to access your Discord account</p>
+        </div>
 
-          {/* Discord Mockup Permission List */}
-          <div className="p-8 bg-[#0B0B0D]/50">
-            <div className="bg-[#1A1C1E] rounded-2xl p-6 border border-white/5 shadow-inner">
-              <div className="flex items-center justify-between mb-6">
-                <span className="text-[10px] font-bold uppercase tracking-widest text-white/20">Requested Permissions</span>
-                <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-[#5865F2]/10 border border-[#5865F2]/20">
-                  <div className="w-1.5 h-1.5 rounded-full bg-[#5865F2] animate-pulse" />
-                  <span className="text-[9px] font-bold text-[#5865F2] uppercase tracking-tighter">Required for Core</span>
-                </div>
+        {/* Permissions List Section */}
+        <div className="px-8 pb-8">
+          <div className="h-[1px] bg-[#3F4147] w-full mb-6" />
+          
+          <div className="space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="w-6 h-6 rounded bg-[#23A559]/10 flex items-center justify-center">
+                <Check size={16} className="text-[#23A559]" strokeWidth={3} />
               </div>
+              <span className="text-[#DBDEE1] text-sm font-semibold">Join servers for you</span>
+            </div>
 
-              <div className="grid grid-cols-1 gap-3">
-                {permissions.map((perm, i) => (
-                  <div 
-                    key={i} 
-                    className={`flex items-center justify-between p-3 rounded-xl transition-colors ${
-                      perm.highlight ? 'bg-[#5865F2]/10 border border-[#5865F2]/20' : 'bg-white/5'
-                    }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className={`w-5 h-5 rounded-md flex items-center justify-center ${
-                        perm.checked ? 'bg-[#23A559]' : 'bg-white/10'
-                      }`}>
-                        {perm.checked ? <Check size={14} className="text-white" strokeWidth={3} /> : <X size={14} className="text-white/20" />}
-                      </div>
-                      <span className={`text-sm font-bold ${perm.highlight ? 'text-white' : 'text-white/60'}`}>
-                        {perm.name}
-                      </span>
-                    </div>
-                    {perm.highlight && (
-                      <div className="px-2 py-0.5 bg-[#5865F2] rounded-md">
-                        <span className="text-[8px] font-black text-white uppercase tracking-tighter">Critical</span>
-                      </div>
-                    )}
+            <div className="h-[1px] bg-[#3F4147] w-full my-4" />
+
+            <div className="flex flex-col gap-4">
+               <div className="flex items-start gap-3">
+                  <div className="mt-0.5">
+                    <Check size={18} className="text-[#B5BAC1]" strokeWidth={2.5} />
+                  </div>
+                  <div>
+                    <span className="text-[#DBDEE1] text-sm font-bold block">Administrator</span>
+                    <span className="text-[#B5BAC1] text-[13px] leading-tight block mt-1">
+                      This allows LostyoCord to bypass channel-specific restrictions and manage the server with full access.
+                    </span>
+                  </div>
+               </div>
+
+               {/* The warning box identical to Discord */}
+               <div className="bg-[#F0B232]/10 border border-[#F0B232]/20 rounded-md p-3 flex gap-3">
+                  <ShieldAlert className="text-[#F0B232] shrink-0" size={20} />
+                  <p className="text-[#F0B232] text-xs font-medium leading-normal">
+                    The bot is requesting the <span className="font-bold underline">Administrator</span> permission. This is a high-level permission that allows full control over the server.
+                  </p>
+               </div>
+            </div>
+
+            <div className="h-[1px] bg-[#3F4147] w-full my-4" />
+            
+            <div className="space-y-3">
+              <p className="text-[#B5BAC1] text-[11px] font-bold uppercase tracking-wider">Other permissions included:</p>
+              <div className="grid grid-cols-2 gap-y-2">
+                {permissions.map((p, i) => (
+                  <div key={i} className="flex items-center gap-2">
+                    <Check size={12} className="text-[#B5BAC1]" />
+                    <span className="text-[#B5BAC1] text-xs">{p}</span>
                   </div>
                 ))}
               </div>
-
-              <div className="mt-6 flex items-start gap-3 p-4 rounded-xl bg-amber-500/5 border border-amber-500/10">
-                <Info className="w-5 h-5 text-amber-500 shrink-0" />
-                <p className="text-[11px] text-amber-500/80 font-medium leading-relaxed">
-                  The <strong>Administrator</strong> permission is required to bypass channel-specific restrictions and ensure all automation modules (Moderation, Logs, Rewards) function without manual role adjustments.
-                </p>
-              </div>
             </div>
           </div>
+        </div>
 
-          {/* Action Buttons */}
-          <div className="p-8 flex flex-col gap-3 border-t border-[#1A1A1E]">
-            <Link href={discordOAuthUrl} className="w-full">
-              <Button 
-                className="w-full h-14 text-sm font-bold rounded-full bg-[#5865F2] hover:bg-[#4752C4] text-white transition-all active:scale-95 shadow-lg shadow-[#5865F2]/20"
-              >
-                I Understand - Continue
-                <ArrowRight className="ml-2" size={18} />
-              </Button>
-            </Link>
-            
-            <Link href="/start" className="w-full">
-              <Button 
-                variant="ghost" 
-                className="w-full h-14 text-sm font-bold rounded-full bg-transparent text-white/30 hover:text-white hover:bg-white/5 transition-all"
-              >
-                Cancel Setup
-              </Button>
-            </Link>
-          </div>
-        </motion.div>
+        {/* Discord Footer Action Bar */}
+        <div className="bg-[#2B2D31] p-4 flex flex-row-reverse gap-3">
+          <Link href={discordOAuthUrl} className="flex-1">
+            <Button 
+              className="w-full bg-[#5865F2] hover:bg-[#4752C4] text-white font-medium rounded-[3px] h-11 text-sm transition-colors"
+            >
+              Authorize
+            </Button>
+          </Link>
+          
+          <Link href="/start" className="flex-1">
+            <Button 
+              variant="ghost" 
+              className="w-full text-white hover:underline font-medium h-11 text-sm bg-transparent border-none"
+            >
+              Cancel
+            </Button>
+          </Link>
+        </div>
+      </motion.div>
 
-        <p className="mt-8 text-center text-[10px] font-bold uppercase tracking-[0.2em] text-white/10">
-          Lostyo Security Protocol • v2.0
-        </p>
-      </div>
+      <p className="mt-4 text-[#B5BAC1] text-[12px] opacity-50">
+        LostyoCord is not affiliated with Discord Inc.
+      </p>
     </div>
   );
 }
