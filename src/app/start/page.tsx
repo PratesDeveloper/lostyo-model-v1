@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Check, Lock, Puzzle, Bot, ArrowRight, Sparkles } from 'lucide-react';
+import { Check, Lock, Puzzle, Bot, ArrowRight } from 'lucide-react';
 
 export default function StartPage() {
   const [completedSteps, setCompletedSteps] = useState<number[]>([]);
@@ -52,14 +52,8 @@ export default function StartPage() {
   }, [completedSteps, steps.length]);
 
   return (
-    <div className="min-h-screen bg-[#0B0B0D] flex flex-col items-center justify-center p-6 relative overflow-hidden">
-      {/* Elementos decorativos de fundo */}
-      <div className="absolute top-0 left-0 w-full h-full overflow-hidden">
-        <div className="absolute -top-40 -left-40 w-80 h-80 bg-[#5865F2]/5 rounded-full blur-3xl"></div>
-        <div className="absolute -bottom-40 -right-40 w-80 h-80 bg-[#5865F2]/5 rounded-full blur-3xl"></div>
-      </div>
-
-      <div className="max-w-3xl w-full relative z-10">
+    <div className="min-h-screen bg-[#0B0B0D] flex flex-col items-center justify-center p-6">
+      <div className="max-w-3xl w-full">
         <div className="text-center mb-12">
           <motion.h1 
             initial={{ opacity: 0, y: -20 }}
@@ -186,7 +180,7 @@ export default function StartPage() {
 
         {/* Botão final que aparece quando todas as etapas forem concluídas */}
         <AnimatePresence>
-          {showFinalButton && (
+          {showFinalButton ? (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -195,35 +189,38 @@ export default function StartPage() {
               className="flex flex-col items-center mb-8"
             >
               <motion.div
-                className="relative"
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.98 }}
-                initial={{ scale: 0.8 }}
-                animate={{ scale: 1 }}
-                transition={{ 
-                  type: "spring", 
-                  stiffness: 300, 
-                  damping: 20,
-                  delay: 0.2
-                }}
               >
                 <Link href="/dashboard">
-                  <Button className="bg-green-500 hover:bg-green-600 text-white px-8 h-14 rounded-full font-bold text-lg group transition-all shadow-lg hover:shadow-green-500/20">
+                  <Button className="bg-green-500 hover:bg-green-600 text-white px-8 h-14 rounded-full font-bold text-lg group transition-all">
                     Go to Dashboard
-                    <Sparkles className="ml-2 group-hover:rotate-12 transition-transform" size={20} />
+                    <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" size={20} />
                   </Button>
                 </Link>
-                {/* Efeito de brilho */}
-                <div className="absolute inset-0 rounded-full bg-green-500 opacity-30 blur-xl -z-10 animate-pulse"></div>
               </motion.div>
               <motion.p 
                 className="text-white/60 text-sm mt-4"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ delay: 0.5 }}
+                transition={{ delay: 0.3 }}
               >
                 You're all set! Welcome to LostyoCord
               </motion.p>
+            </motion.div>
+          ) : (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="flex flex-col items-center mb-8"
+            >
+              <Button 
+                disabled 
+                className="bg-gray-500 text-white px-8 h-14 rounded-full font-bold text-lg cursor-not-allowed opacity-50"
+              >
+                Complete all steps to continue
+              </Button>
             </motion.div>
           )}
         </AnimatePresence>
