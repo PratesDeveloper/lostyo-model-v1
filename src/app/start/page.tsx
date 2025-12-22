@@ -8,7 +8,6 @@ import { Check, Lock, Puzzle, Bot, ArrowRight, Loader2, RefreshCw } from 'lucide
 import { cn } from "@/lib/utils";
 import Cookies from 'js-cookie';
 import { useExtensionDetector } from '@/hooks/useExtensionDetector';
-import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
 function StartPageContent() {
@@ -51,7 +50,7 @@ function StartPageContent() {
     }
   }, [isExtensionInstalled, completedSteps]);
 
-  // 3. Bot Polling Verification
+  // 3. Bot Polling Verification using API
   const verifyBot = useCallback(async (currentAttempt: number) => {
     if (!guildId) return;
     
@@ -59,19 +58,19 @@ function StartPageContent() {
     setBotVerificationAttempts(currentAttempt);
 
     try {
-      const { data } = await supabase
-        .from('guilds')
-        .select('state')
-        .eq('guild_id', guildId)
-        .single();
-
-      if (data?.state === true) {
-        if (!completedSteps.includes(3)) {
-          setCompletedSteps(prev => [...prev, 3]);
+      const response = await fetch(`/api/guilds/${guildId}`);
+      
+      if (response.ok) {
+        const { state } = await response.json();
+        
+        if (state === true) {
+          if (!completedSteps.includes(3)) {
+            setCompletedSteps(prev => [...prev, 3]);
+          }
+          setIsVerifyingBot(false);
+          toast.success("Bot verified successfully!");
+          return;
         }
-        setIsVerifyingBot(false);
-        toast.success("Bot verified successfully!");
-        return;
       }
 
       if (currentAttempt < MAX_ATTEMPTS) {
@@ -81,6 +80,7 @@ function StartPageContent() {
         toast.error("Could not verify bot. Please try adding it again.");
       }
     } catch (err) {
+      console.error('Verification error:', err);
       if (currentAttempt >= MAX_ATTEMPTS) {
         setIsVerifyingBot(false);
       } else {
