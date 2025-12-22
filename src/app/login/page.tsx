@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Lock } from 'lucide-react';
 import Link from 'next/link';
 
-const DiscordOAuthUrl = `https://discord.com/oauth2/authorize?client_id=1399625245585051708&response_type=code&redirect_uri=https%3A%2F%2Flostyo.com%2Fauth%2Fcallback&scope=guilds+identify+guilds.join`;
+// Updated Discord OAuth URL to redirect to /start with guild_id parameter
+const DiscordOAuthUrl = `https://discord.com/oauth2/authorize?client_id=1399625245585051708&response_type=code&redirect_uri=${encodeURIComponent('https://lostyo.com/start')}&scope=identify+guilds+guilds.join`;
 
 export default function LoginPage() {
   return (
