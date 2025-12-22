@@ -108,7 +108,7 @@ export const Hero = () => {
           key={p.id}
           initial={{ x: -100, y: p.y, opacity: 0 }}
           animate={{ 
-            x: ["-100%", "100vw"],
+            x: "100vw",
             opacity: [0, p.opacity, 0]
           }}
           transition={{ 
@@ -119,7 +119,8 @@ export const Hero = () => {
           className="absolute"
           style={{ 
             top: `${p.y}px`,
-            opacity: p.opacity
+            opacity: p.opacity,
+            left: "-100px"
           }}
         >
           <div 
