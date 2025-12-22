@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Button } from "@/components/ui/button";
-import { Shield, AlertTriangle, ArrowRight, CheckCircle2 } from 'lucide-react';
+import { Shield, ArrowRight, CheckCircle2 } from 'lucide-react';
 import Link from 'next/link';
 
 export default function SafeAlertPage() {
@@ -21,6 +21,15 @@ export default function SafeAlertPage() {
             <p className="text-white/50 text-sm">
               Why LostyoCord needs admin permissions
             </p>
+          </div>
+
+          {/* Permission Screenshot */}
+          <div className="mb-6 rounded-xl overflow-hidden border border-[#2A2A2E]">
+            <img 
+              src="/pasted-image-2025-12-22T03-42-05-444Z.png" 
+              alt="Discord Admin Permissions"
+              className="w-full h-auto"
+            />
           </div>
 
           {/* Benefits List */}
