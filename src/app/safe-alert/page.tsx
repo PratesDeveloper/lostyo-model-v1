@@ -6,14 +6,11 @@ import { Check, AlertTriangle, Info } from 'lucide-react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 
-// Import Discord's gg sans font
-import './style.css';
-
 export default function SafeAlertPage() {
   const discordOAuthUrl = `https://discord.com/oauth2/authorize?client_id=1399625245585051708&permissions=8&redirect_uri=https%3A%2F%2Flostyo.com%2Fstart&integration_type=0&scope=bot`;
 
   return (
-    <div className="min-h-screen bg-[#313338] flex items-center justify-center p-4" style={{ fontFamily: "'gg sans Normal Regular', sans-serif" }}>
+    <div className="min-h-screen bg-[#313338] flex items-center justify-center p-4 font-sans">
       <motion.div 
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
@@ -25,7 +22,7 @@ export default function SafeAlertPage() {
           <div className="bg-[#F0B232]/10 border border-[#F0B232]/20 rounded-[4px] p-3 flex gap-3">
             <AlertTriangle className="text-[#F0B232] shrink-0 mt-0.5" size={18} />
             <div>
-              <p className="text-[#F0B232] text-[13px] font-bold" style={{ fontFamily: "'gg sans Bold', sans-serif" }}>
+              <p className="text-[#F0B232] text-[13px] font-bold">
                 Administrator Permission Required
               </p>
               <p className="text-[#F0B232] text-[12px] leading-relaxed mt-1">
@@ -38,7 +35,7 @@ export default function SafeAlertPage() {
           <div className="bg-[#4E5058]/10 border border-[#4E5058]/20 rounded-[4px] p-3 flex gap-3">
             <Info className="text-[#B5BAC1] shrink-0 mt-0.5" size={18} />
             <div>
-              <p className="text-[#F2F3F5] text-[13px] font-bold" style={{ fontFamily: "'gg sans Bold', sans-serif" }}>
+              <p className="text-[#F2F3F5] text-[13px] font-bold">
                 Why this permission?
               </p>
               <p className="text-[#B5BAC1] text-[12px] leading-relaxed mt-1">
@@ -50,7 +47,7 @@ export default function SafeAlertPage() {
           {/* Permissions List */}
           <div className="bg-[#1E1F22] rounded-[4px] border border-[#1E1F22] overflow-hidden">
             <div className="px-4 py-3 bg-[#1E1F22] border-b border-[#1E1F22]">
-              <p className="text-[#B5BAC1] text-[11px] font-bold uppercase tracking-wider" style={{ fontFamily: "'gg sans Bold', sans-serif" }}>
+              <p className="text-[#B5BAC1] text-[11px] font-bold uppercase tracking-wider">
                 Permissions
               </p>
             </div>
@@ -60,7 +57,7 @@ export default function SafeAlertPage() {
               <div className="px-4 py-3 flex items-start gap-3 bg-[#5865F2]/5">
                 <Check size={16} className="text-[#5865F2] mt-0.5" strokeWidth={3} />
                 <div className="flex-1">
-                  <p className="text-[#F2F3F5] text-[14px] font-bold flex items-center gap-2" style={{ fontFamily: "'gg sans Bold', sans-serif" }}>
+                  <p className="text-[#F2F3F5] text-[14px] font-bold flex items-center gap-2">
                     Administrator
                     <span className="bg-[#5865F2] text-white text-[10px] px-1.5 py-0.5 rounded-[2px] font-black uppercase">Critical</span>
                   </p>
@@ -110,7 +107,6 @@ export default function SafeAlertPage() {
             <Button 
               variant="ghost" 
               className="w-full h-10 text-[14px] font-medium text-[#F2F3F5] hover:bg-[#404249] rounded-[4px] transition-colors"
-              style={{ fontFamily: "'gg sans Medium Regular', sans-serif" }}
             >
               Cancel
             </Button>
@@ -119,7 +115,6 @@ export default function SafeAlertPage() {
           <Link href={discordOAuthUrl} className="flex-1">
             <Button 
               className="w-full h-10 bg-[#5865F2] hover:bg-[#4752C4] text-white text-[14px] font-bold rounded-[4px] transition-colors"
-              style={{ fontFamily: "'gg sans Bold', sans-serif" }}
             >
               Authorize
             </Button>
@@ -127,7 +122,7 @@ export default function SafeAlertPage() {
         </div>
       </motion.div>
 
-      <p className="mt-4 text-[#B5BAC1] text-[10px] opacity-40 text-center" style={{ fontFamily: "'gg sans Normal Regular', sans-serif" }}>
+      <p className="mt-4 text-[#B5BAC1] text-[10px] opacity-40 text-center">
         LostyoCord is not affiliated with Discord Inc.
       </p>
     </div>
