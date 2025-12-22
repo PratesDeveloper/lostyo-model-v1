@@ -2,11 +2,12 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Button } from "@/components/ui/button";
-import { ArrowRight, MessageSquare, Users, Settings, Lock, BarChart, Globe } from "lucide-react";
+import { ArrowRight, MessageSquare, Users, Settings, Lock, BarChart, Globe, Shield, Zap, Heart, Star, Cloud, ZapIcon, Key, Eye, Mail, Phone, MapPin, Clock, Calendar, Camera, Music, Video, FileText, Download, Upload, Share2, Bookmark, Tag, Gift, Trophy, Target, Flag, Compass, Navigation, Anchor, Wifi, Bluetooth, Battery, WifiIcon } from "lucide-react";
 
 // Define the type for particle properties
 interface Particle {
   id: number;
+  x: number;
   y: number;
   size: number;
   opacity: number;
@@ -20,10 +21,11 @@ export const Hero = () => {
   const particleIdCounter = React.useRef(50); // Start counter at 50 to avoid conflicts
 
   // Function to create a new particle
-  const createParticle = (id: number): Particle => {
+  const createParticle = (id: number, initial: boolean = false): Particle => {
     if (!containerRef.current) {
       return {
         id,
+        x: 0,
         y: 0,
         size: 20,
         opacity: 0.5,
@@ -32,25 +34,29 @@ export const Hero = () => {
       };
     }
     
+    const containerWidth = containerRef.current.offsetWidth;
     const containerHeight = containerRef.current.offsetHeight;
+    
     const iconComponents = [
-      MessageSquare,
-      Users,
-      Settings,
-      Lock,
-      BarChart,
-      Globe
+      MessageSquare, Users, Settings, Lock, BarChart, Globe, Shield, Zap, Heart, Star,
+      Cloud, ZapIcon, Key, Eye, Mail, Phone, MapPin, Clock, Calendar, Camera,
+      Music, Video, FileText, Download, Upload, Share2, Bookmark, Tag, Gift, Trophy,
+      Target, Flag, Compass, Navigation, Anchor, Wifi, Bluetooth, Battery, WifiIcon
     ];
     
     const RandomIcon = iconComponents[Math.floor(Math.random() * iconComponents.length)];
     
+    // For initial particles, distribute them randomly across the screen
+    const initialX = initial ? Math.random() * containerWidth : -100;
+    
     return {
       id,
+      x: initialX,
       y: Math.random() * containerHeight,
-      size: Math.random() * 20 + 10, // Size between 10 and 30
-      opacity: Math.random() * 0.5 + 0.2, // Opacity between 0.2 and 0.7
+      size: Math.random() * (1.5 - 0.5) + 0.5, // Size between 0.5vh and 1.5vh
+      opacity: Math.random() * 0.5 + 0.3, // Opacity between 0.3 and 0.8
       speed: Math.random() * 20 + 10, // Speed between 10 and 30 seconds
-      icon: <RandomIcon />
+      icon: <RandomIcon strokeWidth={1.8} /> // Slightly bolder icons
     };
   };
 
@@ -58,7 +64,7 @@ export const Hero = () => {
   React.useEffect(() => {
     const initialParticles: Particle[] = [];
     for (let i = 0; i < 50; i++) {
-      initialParticles.push(createParticle(i));
+      initialParticles.push(createParticle(i, true)); // true for initial particles
     }
     setParticles(initialParticles);
   }, []);
@@ -106,7 +112,7 @@ export const Hero = () => {
       {particles.map((p) => (
         <motion.div
           key={p.id}
-          initial={{ x: -100, y: p.y, opacity: 0 }}
+          initial={{ x: p.x, y: p.y, opacity: 0 }}
           animate={{ 
             x: "100vw",
             opacity: [0, p.opacity, 0]
@@ -120,14 +126,14 @@ export const Hero = () => {
           style={{ 
             top: `${p.y}px`,
             opacity: p.opacity,
-            left: "-100px"
+            left: `${p.x}px`
           }}
         >
           <div 
             className="text-[#5865F2]"
             style={{ 
-              width: `${p.size}px`, 
-              height: `${p.size}px` 
+              width: `${p.size}vh`, 
+              height: `${p.size}vh` 
             }}
           >
             {p.icon}
