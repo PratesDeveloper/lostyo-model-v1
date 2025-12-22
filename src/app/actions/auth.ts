@@ -25,7 +25,7 @@ export async function handleDiscordAuth(code: string) {
     const cookieStore = await cookies();
     cookieStore.set('auth-token', jwtToken, {
       path: '/',
-      httpOnly: false, // Mantido false para o ManualAuthProvider ler no cliente
+      httpOnly: false,
       secure: true,
       sameSite: 'lax',
       maxAge: 60 * 60 * 24 * 7 // 7 dias
@@ -33,7 +33,7 @@ export async function handleDiscordAuth(code: string) {
 
     return { success: true };
   } catch (error: any) {
-    console.error("Auth Action Error:", error);
+    console.error("Auth Action Error:", error.message);
     return { success: false, error: error.message };
   }
 }

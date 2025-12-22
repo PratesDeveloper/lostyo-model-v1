@@ -38,14 +38,8 @@ export default function SetupSafetyPage() {
     );
   }
 
-  // Construindo a URL de OAuth do Discord a partir de variáveis de ambiente
   const DISCORD_CLIENT_ID = process.env.NEXT_PUBLIC_DISCORD_CLIENT_ID;
   const DISCORD_REDIRECT_URI = process.env.NEXT_PUBLIC_DISCORD_REDIRECT_URI;
-  
-  console.log('Variáveis de ambiente na página setup-safety:', {
-    DISCORD_CLIENT_ID,
-    DISCORD_REDIRECT_URI
-  });
 
   if (!DISCORD_CLIENT_ID || !DISCORD_REDIRECT_URI) {
     return (

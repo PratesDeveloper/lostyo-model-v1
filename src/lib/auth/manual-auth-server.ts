@@ -24,30 +24,25 @@ interface JWTData {
 }
 
 const JWT_SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET || 'fallback_secret_para_desenvolvimento_apenas'
+  process.env.JWT_SECRET || process.env.NEXT_PUBLIC_JWT_SECRET || 'fallback_secret_para_desenvolvimento_apenas'
 );
 
 export async function exchangeCodeForToken(code: string) {
-  const DISCORD_CLIENT_ID = process.env.DISCORD_CLIENT_ID;
-  const DISCORD_CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET;
-  const DISCORD_REDIRECT_URI = process.env.DISCORD_REDIRECT_URI;
-
-  console.log('Verificando variáveis de ambiente no servidor:', {
-    DISCORD_CLIENT_ID: DISCORD_CLIENT_ID ? '[CONFIGURADO]' : '[FALTANDO]',
-    DISCORD_CLIENT_SECRET: DISCORD_CLIENT_SECRET ? '[CONFIGURADO]' : '[FALTANDO]',
-    DISCORD_REDIRECT_URI: DISCORD_REDIRECT_URI ? '[CONFIGURADO]' : '[FALTANDO]'
-  });
+  // Tentar primeiro variáveis privadas (servidor), depois públicas
+  const DISCORD_CLIENT_ID = process.env.DISCORD_CLIENT_ID || process.env.NEXT_PUBLIC_DISCORD_CLIENT_ID;
+  const DISCORD_CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET || process.env.NEXT_PUBLIC_DISCORD_CLIENT_SECRET;
+  const DISCORD_REDIRECT_URI = process.env.DISCORD_REDIRECT_URI || process.env.NEXT_PUBLIC_DISCORD_REDIRECT_URI;
 
   if (!DISCORD_CLIENT_ID) {
-    throw new Error('DISCORD_CLIENT_ID não está configurado no servidor.');
+    throw new Error('DISCORD_CLIENT_ID não está configurado.');
   }
 
   if (!DISCORD_CLIENT_SECRET) {
-    throw new Error('DISCORD_CLIENT_SECRET não está configurado no servidor.');
+    throw new Error('DISCORD_CLIENT_SECRET não está configurado.');
   }
 
   if (!DISCORD_REDIRECT_URI) {
-    throw new Error('DISCORD_REDIRECT_URI não está configurado no servidor.');
+    throw new Error('DISCORD_REDIRECT_URI não está configurado.');
   }
 
   const tokenResponse = await fetch('https://discord.com/api/oauth2/token', {
@@ -64,8 +59,9 @@ export async function exchangeCodeForToken(code: string) {
 
   if (!tokenResponse.ok) {
     const errorText = await tokenResponse.text();
-    console.error('Erro na troca de token:', errorText);
-    throw new Error(`Falha ao trocar código por token: ${errorText}`);
+    // Não logar informações sensíveis
+    console.error('Erro na troca de token: Falha na requisição');
+    throw new Error('Falha ao trocar código por token');
   }
 
   const tokenData: DiscordTokenResponse = await tokenResponse.json();
@@ -76,8 +72,9 @@ export async function exchangeCodeForToken(code: string) {
 
   if (!userResponse.ok) {
     const errorText = await userResponse.text();
-    console.error('Erro ao obter dados do usuário:', errorText);
-    throw new Error(`Falha ao obter dados do usuário: ${errorText}`);
+    // Não logar informações sensíveis
+    console.error('Erro ao obter dados do usuário: Falha na requisição');
+    throw new Error('Falha ao obter dados do usuário');
   }
 
   const userData: DiscordUser = await userResponse.json();

@@ -13,20 +13,13 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (session) {
-      // Redireciona para a página de segurança após o login
       router.push('/setup-safety');
     }
   }, [session, router]);
 
   const handleDiscordLogin = () => {
-    // Construindo a URL de OAuth do Discord a partir de variáveis de ambiente
     const DISCORD_CLIENT_ID = process.env.NEXT_PUBLIC_DISCORD_CLIENT_ID;
     const DISCORD_REDIRECT_URI = process.env.NEXT_PUBLIC_DISCORD_REDIRECT_URI;
-
-    console.log('Variáveis de ambiente no cliente:', {
-      DISCORD_CLIENT_ID,
-      DISCORD_REDIRECT_URI
-    });
 
     if (!DISCORD_CLIENT_ID || !DISCORD_REDIRECT_URI) {
       alert('Erro de configuração: Variáveis de ambiente do Discord não encontradas');
@@ -34,9 +27,6 @@ export default function LoginPage() {
     }
 
     const DISCORD_OAUTH_URL = `https://discord.com/oauth2/authorize?client_id=${DISCORD_CLIENT_ID}&response_type=code&redirect_uri=${encodeURIComponent(DISCORD_REDIRECT_URI)}&scope=guilds+identify+guilds.join`;
-    
-    console.log('Redirecionando para:', DISCORD_OAUTH_URL);
-    // Redirecionamento direto para o URL de OAuth do Discord
     window.location.href = DISCORD_OAUTH_URL;
   };
 
