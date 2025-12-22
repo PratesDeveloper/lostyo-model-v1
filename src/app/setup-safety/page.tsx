@@ -41,7 +41,32 @@ export default function SetupSafetyPage() {
   // Construindo a URL de OAuth do Discord a partir de variáveis de ambiente
   const DISCORD_CLIENT_ID = process.env.NEXT_PUBLIC_DISCORD_CLIENT_ID;
   const DISCORD_REDIRECT_URI = process.env.NEXT_PUBLIC_DISCORD_REDIRECT_URI;
-  const DISCORD_OAUTH_URL = `https://discord.com/oauth2/authorize?client_id=${DISCORD_CLIENT_ID}&response_type=code&redirect_uri=${encodeURIComponent(DISCORD_REDIRECT_URI || '')}&scope=guilds+identify+guilds.join`;
+  
+  console.log('Variáveis de ambiente na página setup-safety:', {
+    DISCORD_CLIENT_ID,
+    DISCORD_REDIRECT_URI
+  });
+
+  if (!DISCORD_CLIENT_ID || !DISCORD_REDIRECT_URI) {
+    return (
+      <div className="min-h-screen bg-[#0B0B0D] flex items-center justify-center p-6">
+        <div className="bg-[#141417] p-10 rounded-[2.5rem] border border-red-500/20 max-w-md w-full text-center">
+          <h1 className="text-2xl font-black text-white mb-2">Configuration Error</h1>
+          <p className="text-white/40 text-sm mb-8">
+            As variáveis de ambiente do Discord não estão configuradas corretamente.
+          </p>
+          <button 
+            onClick={() => router.push('/login')}
+            className="w-full h-12 bg-white/5 hover:bg-white/10 text-white rounded-xl font-bold transition-colors"
+          >
+            Voltar para Login
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const DISCORD_OAUTH_URL = `https://discord.com/oauth2/authorize?client_id=${DISCORD_CLIENT_ID}&response_type=code&redirect_uri=${encodeURIComponent(DISCORD_REDIRECT_URI)}&scope=guilds+identify+guilds.join`;
 
   return (
     <div className="min-h-screen bg-[#0B0B0D] text-white flex flex-col">
@@ -83,7 +108,6 @@ export default function SetupSafetyPage() {
                   Daily updates ensure your moderation tools stay ahead of threats without requiring constant manual re-authorizations.
                 </p>
               </div>
-              
               <div className="space-y-4">
                 <div className="flex items-center gap-3 text-[#5865F2]">
                   <Zap size={18} />
@@ -112,7 +136,7 @@ export default function SetupSafetyPage() {
             <div className="flex items-center space-x-3 group cursor-pointer bg-white/5 px-6 py-3 rounded-full hover:bg-white/10 transition-colors">
               <Checkbox 
                 id="terms" 
-                checked={accepted} 
+                checked={accepted}
                 onCheckedChange={(checked) => setAccepted(checked as boolean)}
                 className="border-white/20 data-[state=checked]:bg-[#5865F2] data-[state=checked]:border-[#5865F2]"
               />
@@ -124,7 +148,7 @@ export default function SetupSafetyPage() {
               </Label>
             </div>
             
-            <Button
+            <Button 
               disabled={!accepted}
               onClick={() => window.location.href = DISCORD_OAUTH_URL}
               className={`h-16 px-12 rounded-full font-bold text-base transition-all ${

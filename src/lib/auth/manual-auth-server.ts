@@ -32,8 +32,22 @@ export async function exchangeCodeForToken(code: string) {
   const DISCORD_CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET;
   const DISCORD_REDIRECT_URI = process.env.DISCORD_REDIRECT_URI;
 
-  if (!DISCORD_CLIENT_ID || !DISCORD_CLIENT_SECRET || !DISCORD_REDIRECT_URI) {
-    throw new Error('Configuração do Discord incompleta no servidor.');
+  console.log('Verificando variáveis de ambiente no servidor:', {
+    DISCORD_CLIENT_ID: DISCORD_CLIENT_ID ? '[CONFIGURADO]' : '[FALTANDO]',
+    DISCORD_CLIENT_SECRET: DISCORD_CLIENT_SECRET ? '[CONFIGURADO]' : '[FALTANDO]',
+    DISCORD_REDIRECT_URI: DISCORD_REDIRECT_URI ? '[CONFIGURADO]' : '[FALTANDO]'
+  });
+
+  if (!DISCORD_CLIENT_ID) {
+    throw new Error('DISCORD_CLIENT_ID não está configurado no servidor.');
+  }
+
+  if (!DISCORD_CLIENT_SECRET) {
+    throw new Error('DISCORD_CLIENT_SECRET não está configurado no servidor.');
+  }
+
+  if (!DISCORD_REDIRECT_URI) {
+    throw new Error('DISCORD_REDIRECT_URI não está configurado no servidor.');
   }
 
   const tokenResponse = await fetch('https://discord.com/api/oauth2/token', {
@@ -48,14 +62,24 @@ export async function exchangeCodeForToken(code: string) {
     }),
   });
 
-  if (!tokenResponse.ok) throw new Error('Falha ao trocar código por token');
+  if (!tokenResponse.ok) {
+    const errorText = await tokenResponse.text();
+    console.error('Erro na troca de token:', errorText);
+    throw new Error(`Falha ao trocar código por token: ${errorText}`);
+  }
+
   const tokenData: DiscordTokenResponse = await tokenResponse.json();
 
   const userResponse = await fetch('https://discord.com/api/users/@me', {
     headers: { authorization: `${tokenData.token_type} ${tokenData.access_token}` },
   });
 
-  if (!userResponse.ok) throw new Error('Falha ao obter dados do usuário');
+  if (!userResponse.ok) {
+    const errorText = await userResponse.text();
+    console.error('Erro ao obter dados do usuário:', errorText);
+    throw new Error(`Falha ao obter dados do usuário: ${errorText}`);
+  }
+
   const userData: DiscordUser = await userResponse.json();
 
   return { ...tokenData, user: userData };
