@@ -1,22 +1,27 @@
 "use client";
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { Button } from "@/components/ui/button";
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Check, Lock, Puzzle, Bot, ArrowRight, Loader2 } from 'lucide-react';
 import { cn } from "@/lib/utils";
 import Cookies from 'js-cookie';
 import { useExtensionDetector } from '@/hooks/useExtensionDetector';
+import { supabase } from "@/integrations/supabase/client";
 
-export default function StartPage() {
+function StartPageContent() {
   const [completedSteps, setCompletedSteps] = useState<number[]>([]);
   const [showFinalButton, setShowFinalButton] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
   const [checkingExtension, setCheckingExtension] = useState(false);
+  const [checkingBot, setCheckingBot] = useState(false);
   const [extensionCheckTimer, setExtensionCheckTimer] = useState<NodeJS.Timeout | null>(null);
+  const [botCheckTimer, setBotCheckTimer] = useState<NodeJS.Timeout | null>(null);
   
   const isExtensionInstalled = useExtensionDetector();
+  const searchParams = useSearchParams();
 
   const DiscordOAuthUrl = `https://discord.com/oauth2/authorize?client_id=1399625245585051708&response_type=code&redirect_uri=https%3A%2F%2Flostyo.com%2Fauth%2Fcallback&scope=identify+guilds+guilds.join`;
 
@@ -26,7 +31,6 @@ export default function StartPage() {
       const accessToken = Cookies.get('discord_access_token');
       if (accessToken) {
         setIsAuthenticated(true);
-        // Mark step 1 as completed if authenticated
         if (!completedSteps.includes(1)) {
           setCompletedSteps([1]);
         }
@@ -49,7 +53,47 @@ export default function StartPage() {
         setExtensionCheckTimer(null);
       }
     }
-  }, [isExtensionInstalled, completedSteps]);
+  }, [isExtensionInstalled, completedSteps, extensionCheckTimer]);
+
+  // Handle guild_id from URL and start polling for bot status
+  useEffect(() => {
+    const guildId = searchParams.get('guild_id');
+    
+    if (guildId && completedSteps.includes(1) && !completedSteps.includes(3) && !checkingBot) {
+      setCheckingBot(true);
+      
+      const pollBotStatus = async () => {
+        try {
+          const { data, error } = await supabase.rpc('is_bot_in_guild', { 
+            guild_id_input: guildId 
+          });
+          
+          if (!error && data === true) {
+            setCompletedSteps(prev => [...prev, 3]);
+            setCheckingBot(false);
+            if (botCheckTimer) clearInterval(botCheckTimer);
+            return true;
+          }
+        } catch (err) {
+          console.error("Error checking bot status:", err);
+        }
+        return false;
+      };
+
+      // Initial check
+      pollBotStatus();
+
+      // Set up interval
+      const interval = setInterval(async () => {
+        const isFinished = await pollBotStatus();
+        if (isFinished) {
+          clearInterval(interval);
+        }
+      }, 5000);
+
+      setBotCheckTimer(interval);
+    }
+  }, [searchParams, completedSteps, checkingBot, botCheckTimer]);
 
   const steps = [
     {
@@ -82,36 +126,25 @@ export default function StartPage() {
   const handleCompleteStep = (stepId: number) => {
     const step = steps.find(s => s.id === stepId);
     
-    // Check authentication for steps that require it
     if (step?.requiresAuth && !isAuthenticated) {
-      // Redirect to login if not authenticated
       window.location.href = DiscordOAuthUrl;
       return;
     }
     
-    // Handle extension installation step
     if (stepId === 2) {
-      // Open Google in new tab for testing
       window.open('https://google.com', '_blank');
-      
-      // Start checking for extension every 5 seconds
       setCheckingExtension(true);
       
-      // Clear any existing timer
       if (extensionCheckTimer) {
         clearTimeout(extensionCheckTimer);
       }
       
-      // Create new timer
       const timer = setInterval(() => {
-        // This will trigger the useExtensionDetector hook to re-check
-        // We'll dispatch the event to force a check
         window.dispatchEvent(new CustomEvent('lostyo-ready'));
       }, 5000);
       
       setExtensionCheckTimer(timer);
       
-      // Also check immediately after a short delay
       setTimeout(() => {
         window.dispatchEvent(new CustomEvent('lostyo-ready'));
       }, 2000);
@@ -119,9 +152,7 @@ export default function StartPage() {
       return;
     }
     
-    // Handle bot addition step - redirect to safe-alert page
     if (stepId === 3) {
-      // Redirect to safe-alert page instead of directly to Discord
       window.location.href = '/safe-alert';
       return;
     }
@@ -131,14 +162,12 @@ export default function StartPage() {
     }
   };
 
-  // Cleanup timer on unmount
   useEffect(() => {
     return () => {
-      if (extensionCheckTimer) {
-        clearTimeout(extensionCheckTimer);
-      }
+      if (extensionCheckTimer) clearTimeout(extensionCheckTimer);
+      if (botCheckTimer) clearInterval(botCheckTimer);
     };
-  }, [extensionCheckTimer]);
+  }, [extensionCheckTimer, botCheckTimer]);
 
   useEffect(() => {
     if (completedSteps.length === steps.length) {
@@ -181,7 +210,6 @@ export default function StartPage() {
             Follow these simple steps to set up LostyoCord
           </motion.p>
 
-          {/* Progress indicator */}
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -253,13 +281,13 @@ export default function StartPage() {
             const isCompleted = completedSteps.includes(step.id);
             const isStep1 = step.id === 1;
             const isStep2 = step.id === 2;
+            const isStep3 = step.id === 3;
             
-            // Check if previous step is completed
             const isPreviousCompleted = index === 0 || completedSteps.includes(steps[index - 1].id);
             const isDisabled = !isPreviousCompleted && !isCompleted;
             
-            // For step 2, show checking state if we're actively looking for extension
-            const isChecking = isStep2 && checkingExtension && !isCompleted;
+            const isCheckingExt = isStep2 && checkingExtension && !isCompleted;
+            const isCheckingBotStatus = isStep3 && checkingBot && !isCompleted;
             
             return (
               <motion.div
@@ -284,7 +312,6 @@ export default function StartPage() {
                   {step.description}
                 </p>
                 
-                {/* Login button - always visible but shows status */}
                 {isStep1 ? (
                   <div className="w-full">
                     {isAuthenticated ? (
@@ -314,7 +341,7 @@ export default function StartPage() {
                       >
                         Extension Installed
                       </Button>
-                    ) : isChecking ? (
+                    ) : isCheckingExt ? (
                       <Button 
                         className="w-full h-10 text-xs font-bold rounded-full bg-yellow-500 hover:bg-yellow-600 text-black"
                         disabled
@@ -333,24 +360,42 @@ export default function StartPage() {
                     )}
                   </div>
                 ) : (
-                  <Button 
-                    className={cn(
-                      "w-full h-10 text-xs font-bold rounded-full",
-                      isCompleted ? "bg-green-500 hover:bg-green-600" : "bg-[#5865F2] hover:bg-[#4752C4]",
-                      isDisabled && "opacity-50 cursor-not-allowed"
+                  <div className="w-full">
+                    {isCompleted ? (
+                      <Button 
+                        className="w-full h-10 text-xs font-bold rounded-full bg-green-500 hover:bg-green-600"
+                        disabled
+                      >
+                        Bot Added
+                      </Button>
+                    ) : isCheckingBotStatus ? (
+                      <Button 
+                        className="w-full h-10 text-xs font-bold rounded-full bg-yellow-500 hover:bg-yellow-600 text-black"
+                        disabled
+                      >
+                        <Loader2 size={14} className="mr-2 animate-spin" />
+                        Verifying...
+                      </Button>
+                    ) : (
+                      <Button 
+                        className={cn(
+                          "w-full h-10 text-xs font-bold rounded-full",
+                          "bg-[#5865F2] hover:bg-[#4752C4]",
+                          isDisabled && "opacity-50 cursor-not-allowed"
+                        )}
+                        onClick={() => !isDisabled && handleCompleteStep(step.id)}
+                        disabled={isDisabled}
+                      >
+                        {step.action}
+                      </Button>
                     )}
-                    onClick={() => !isDisabled && handleCompleteStep(step.id)}
-                    disabled={isDisabled}
-                  >
-                    {isCompleted ? 'Completed' : step.action}
-                  </Button>
+                  </div>
                 )}
               </motion.div>
             );
           })}
         </motion.div>
 
-        {/* Botão final que aparece quando todas as etapas forem concluídas */}
         <div className="flex flex-col items-center mb-8">
           <Link href={showFinalButton ? "/dashboard" : "#"} passHref>
             <motion.button
@@ -407,7 +452,6 @@ export default function StartPage() {
           )}
         </div>
 
-        {/* Botão de voltar - sempre visível */}
         <motion.div
           className="text-center"
           initial={{ opacity: 0 }}
@@ -425,5 +469,18 @@ export default function StartPage() {
         </motion.div>
       </div>
     </div>
+  );
+}
+
+export default function StartPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-[#0B0B0D] flex flex-col items-center justify-center p-6">
+        <Loader2 className="animate-spin text-[#5865F2] w-12 h-12" />
+        <p className="text-white/40 mt-4">Loading...</p>
+      </div>
+    }>
+      <StartPageContent />
+    </Suspense>
   );
 }
