@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import Link from 'next/link';
-import { Check, Circle, Lock, Puzzle, Bot } from 'lucide-react';
+import { Check, Circle, Lock, Puzzle, Bot, ArrowRight } from 'lucide-react';
 
 export default function StartPage() {
   const [completedSteps, setCompletedSteps] = useState<number[]>([]);
@@ -37,9 +37,17 @@ export default function StartPage() {
     }
   };
 
+  const allStepsCompleted = steps.length === completedSteps.length;
+
   return (
-    <div className="min-h-screen bg-[#0B0B0D] flex flex-col items-center justify-center p-6">
-      <div className="max-w-3xl w-full">
+    <div className="min-h-screen bg-[#0B0B0D] flex flex-col items-center justify-center p-6 relative overflow-hidden">
+      {/* Background effect with large icon */}
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+        <div className="absolute w-[800px] h-[800px] rounded-full bg-[#5865F2]/5 blur-3xl"></div>
+        <Bot className="absolute w-[400px] h-[400px] text-[#5865F2]/5" />
+      </div>
+      
+      <div className="max-w-3xl w-full relative z-10">
         <div className="text-center mb-12">
           <h1 className="text-3xl md:text-5xl font-black text-white mb-4 tracking-tight">
             Get Started with LostyoCord
@@ -121,6 +129,23 @@ export default function StartPage() {
               </div>
             );
           })}
+        </div>
+        
+        {/* Dashboard button - only enabled when all steps are completed */}
+        <div className="text-center mb-8">
+          <Link href="/dashboard">
+            <Button 
+              disabled={!allStepsCompleted}
+              className={`h-14 px-8 rounded-full text-base font-bold transition-all ${
+                allStepsCompleted
+                  ? 'bg-[#5865F2] hover:bg-[#4752C4] text-white'
+                  : 'bg-gray-700 text-gray-400 cursor-not-allowed'
+              }`}
+            >
+              Go to Dashboard
+              <ArrowRight className="ml-2 h-5 w-5" />
+            </Button>
+          </Link>
         </div>
         
         <div className="text-center">
