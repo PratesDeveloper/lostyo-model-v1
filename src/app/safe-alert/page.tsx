@@ -5,9 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Shield, ArrowRight, CheckCircle2 } from 'lucide-react';
 import Link from 'next/link';
 
-const discordOAuthUrl = `https://discord.com/oauth2/authorize?client_id=1399625245585051708&permissions=8&response_type=code&redirect_uri=https%3A%2F%2Flostyo.com%2Fstart&integration_type=0&scope=bot+identify`;
-
 export default function SafeAlertPage() {
+  const discordOAuthUrl = `https://discord.com/oauth2/authorize?client_id=1399625245585051708&permissions=8&redirect_uri=https%3A%2F%2Flostyo.com%2Fstart&integration_type=0&scope=bot`;
+
   return (
     <div className="min-h-screen bg-[#0B0B0D] flex items-center justify-center p-4">
       <div className="w-full max-w-md">
