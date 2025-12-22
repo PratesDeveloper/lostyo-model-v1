@@ -64,27 +64,25 @@ function StartPageContent() {
         console.log(`[BotCheck] Requesting status for guild: ${guildId}`);
         try {
           const { data, error } = await supabase.rpc('is_bot_in_guild', { 
-            guild_id_input: guildId 
+            guild_id_input: String(guildId) 
           });
           
           if (error) {
-            console.error("[BotCheck] Supabase RPC Error:", error);
+            console.error("[BotCheck] Supabase RPC Error:", error.message, error.details);
+            // Se o erro for de cache (404), tentamos uma consulta direta se possível no futuro
             return false;
           }
 
-          console.log(`[BotCheck] Response data:`, data);
+          console.log(`[BotCheck] Server response:`, data);
           
           if (data === true) {
-            console.log("[BotCheck] Bot confirmed in guild! Completing step 3.");
+            console.log("[BotCheck] Success! Bot active. Completing step 3.");
             setCompletedSteps(prev => [...prev, 3]);
             setCheckingBot(false);
-            if (botCheckTimer) clearInterval(botCheckTimer);
             return true;
-          } else {
-            console.log("[BotCheck] Bot not yet detected or state is false.");
           }
         } catch (err) {
-          console.error("[BotCheck] Unexpected Error:", err);
+          console.error("[BotCheck] Critical error:", err);
         }
         return false;
       };
@@ -99,8 +97,9 @@ function StartPageContent() {
       }, 5000);
 
       setBotCheckTimer(interval);
+      return () => clearInterval(interval);
     }
-  }, [searchParams, completedSteps, checkingBot, botCheckTimer]);
+  }, [searchParams, completedSteps, checkingBot]);
 
   const steps = [
     { id: 1, title: "Login", description: "Access your dashboard and manage your communities", icon: Lock, action: "Login", link: DiscordOAuthUrl, requiresAuth: false },
