@@ -1,9 +1,10 @@
 "use client";
 import React, { useState, useEffect } from 'react';
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/ui/button"; // Mantendo a importação caso precise de outros botões
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Check, Lock, Puzzle, Bot, ArrowRight } from 'lucide-react';
+import { cn } from "@/lib/utils"; // Importar a função cn para combinar classes Tailwind
 
 export default function StartPage() {
   const [completedSteps, setCompletedSteps] = useState<number[]>([]);
@@ -178,24 +179,22 @@ export default function StartPage() {
         </motion.div>
 
         {/* Botão final que aparece quando todas as etapas forem concluídas */}
-        <motion.div
-          className="flex flex-col items-center mb-8"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-        >
+        <div className="flex flex-col items-center mb-8">
           <Link href={showFinalButton ? "/dashboard" : "#"} passHref>
             <motion.button
-              className={`px-8 h-14 rounded-full font-bold text-lg group transition-all duration-300 ease-in-out
-                ${showFinalButton 
-                  ? 'bg-green-500 hover:bg-green-600 text-white' 
+              className={cn(
+                "px-8 h-14 rounded-full font-bold text-lg group transition-all duration-300 ease-in-out flex items-center justify-center",
+                showFinalButton
+                  ? 'bg-green-500 hover:bg-green-600 text-white'
                   : 'bg-gray-500 text-white cursor-not-allowed opacity-50'
-                }`}
+              )}
               disabled={!showFinalButton}
               whileHover={showFinalButton ? { scale: 1.03 } : {}}
               whileTap={showFinalButton ? { scale: 0.98 } : {}}
+              layout // Animate layout changes for smooth size transitions
+              transition={{ duration: 0.3, ease: "easeInOut" }}
             >
-              <AnimatePresence mode="wait">
+              <AnimatePresence mode="wait" initial={false}>
                 {showFinalButton ? (
                   <motion.span
                     key="dashboard-text"
@@ -234,7 +233,7 @@ export default function StartPage() {
               You're all set! Welcome to LostyoCord
             </motion.p>
           )}
-        </motion.div>
+        </div>
 
         {/* Botão de voltar - sempre visível */}
         <motion.div
