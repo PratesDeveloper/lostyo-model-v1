@@ -8,7 +8,7 @@ export const Navbar = () => {
     <div className="fixed top-6 left-0 right-0 z-50 flex justify-center px-4">
       <nav className="w-full max-w-4xl h-14 bg-[#1A1A1E] rounded-full flex items-center justify-between px-2 shadow-xl">
         <div className="flex items-center gap-3 pl-4">
-          <img src="/apple-touch-icon.png" alt="LostyoCord" className="w-7 h-7" />
+          <img src="https://cdn.lostyo.com/logo.png" alt="LostyoCord" className="w-7 h-7" />
           <span className="text-sm font-black tracking-tight text-white">LostyoCord</span>
         </div>
         <div className="hidden md:flex items-center gap-8 text-[11px] font-bold uppercase tracking-widest text-white/30">

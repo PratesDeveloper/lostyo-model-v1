@@ -3,14 +3,30 @@ import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Check, Lock, Puzzle, Bot, ArrowRight } from 'lucide-react';
+import { Check, Lock, Puzzle, Bot, ArrowRight, Loader2 } from 'lucide-react';
 import { cn } from "@/lib/utils";
+import Cookies from 'js-cookie';
 
 export default function StartPage() {
   const [completedSteps, setCompletedSteps] = useState<number[]>([]);
   const [showFinalButton, setShowFinalButton] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const DiscordOAuthUrl = `https://discord.com/oauth2/authorize?client_id=1399625245585051708&response_type=code&redirect_uri=https%3A%2F%2Flostyo.com%2Fauth%2Fcallback&scope=identify+guilds+guilds.join`;
+
+  // Check authentication status on mount
+  useEffect(() => {
+    const checkAuth = () => {
+      const accessToken = Cookies.get('discord_access_token');
+      if (accessToken) {
+        setIsAuthenticated(true);
+      }
+      setLoading(false);
+    };
+    
+    checkAuth();
+  }, []);
 
   const steps = [
     {
@@ -19,25 +35,37 @@ export default function StartPage() {
       description: "Access your dashboard and manage your communities",
       icon: Lock,
       action: "Login",
-      link: DiscordOAuthUrl
+      link: DiscordOAuthUrl,
+      requiresAuth: false
     },
     {
       id: 2,
       title: "Install Extension",
       description: "Enhance your Discord experience with our browser extension",
       icon: Puzzle,
-      action: "Install Extension"
+      action: "Install Extension",
+      requiresAuth: true
     },
     {
       id: 3,
       title: "Add Bot",
       description: "Add the LostyoCord bot to your Discord server",
       icon: Bot,
-      action: "Add to Discord"
+      action: "Add to Discord",
+      requiresAuth: true
     }
   ];
 
   const handleCompleteStep = (stepId: number) => {
+    const step = steps.find(s => s.id === stepId);
+    
+    // Check authentication for steps that require it
+    if (step?.requiresAuth && !isAuthenticated) {
+      // Redirect to login if not authenticated
+      window.location.href = DiscordOAuthUrl;
+      return;
+    }
+    
     if (!completedSteps.includes(stepId)) {
       setCompletedSteps([...completedSteps, stepId]);
     }
@@ -53,6 +81,15 @@ export default function StartPage() {
       setShowFinalButton(false);
     }
   }, [completedSteps, steps.length]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#0B0B0D] flex flex-col items-center justify-center p-6">
+        <Loader2 className="animate-spin text-[#5865F2] w-12 h-12" />
+        <p className="text-white/40 mt-4">Checking authentication...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#0B0B0D] flex flex-col items-center justify-center p-6">
@@ -145,6 +182,7 @@ export default function StartPage() {
           {steps.map((step) => {
             const Icon = step.icon;
             const isCompleted = completedSteps.includes(step.id);
+            const isStep1 = step.id === 1;
             
             return (
               <motion.div
@@ -166,19 +204,28 @@ export default function StartPage() {
                 <p className="text-white/30 text-xs mb-4">
                   {step.description}
                 </p>
-                {step.link ? (
-                  <Link href={step.link} passHref className="w-full">
-                    <Button 
-                      className={`w-full h-10 text-xs font-bold rounded-full ${
-                        isCompleted 
-                          ? 'bg-green-500 hover:bg-green-600' 
-                          : 'bg-[#5865F2] hover:bg-[#4752C4]'
-                      }`}
-                      onClick={() => handleCompleteStep(step.id)}
-                    >
-                      {isCompleted ? 'Completed' : step.action}
-                    </Button>
-                  </Link>
+                
+                {/* Login button - always visible but shows status */}
+                {isStep1 ? (
+                  <div className="w-full">
+                    {isAuthenticated ? (
+                      <Button 
+                        className="w-full h-10 text-xs font-bold rounded-full bg-green-500 hover:bg-green-600"
+                        disabled
+                      >
+                        Logged In
+                      </Button>
+                    ) : (
+                      <Link href={step.link} passHref className="w-full">
+                        <Button 
+                          className="w-full h-10 text-xs font-bold rounded-full bg-[#5865F2] hover:bg-[#4752C4]"
+                          onClick={() => handleCompleteStep(step.id)}
+                        >
+                          {step.action}
+                        </Button>
+                      </Link>
+                    )}
+                  </div>
                 ) : (
                   <Button 
                     className={`w-full h-10 text-xs font-bold rounded-full ${
