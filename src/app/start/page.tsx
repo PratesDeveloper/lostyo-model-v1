@@ -6,12 +6,17 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Check, Lock, Puzzle, Bot, ArrowRight, Loader2 } from 'lucide-react';
 import { cn } from "@/lib/utils";
 import Cookies from 'js-cookie';
+import { useExtensionDetector } from '@/hooks/useExtensionDetector';
 
 export default function StartPage() {
   const [completedSteps, setCompletedSteps] = useState<number[]>([]);
   const [showFinalButton, setShowFinalButton] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [checkingExtension, setCheckingExtension] = useState(false);
+  const [extensionCheckTimer, setExtensionCheckTimer] = useState<NodeJS.Timeout | null>(null);
+  
+  const isExtensionInstalled = useExtensionDetector();
 
   const DiscordOAuthUrl = `https://discord.com/oauth2/authorize?client_id=1399625245585051708&response_type=code&redirect_uri=https%3A%2F%2Flostyo.com%2Fauth%2Fcallback&scope=identify+guilds+guilds.join`;
 
@@ -31,6 +36,20 @@ export default function StartPage() {
     
     checkAuth();
   }, []);
+
+  // Check extension status and update step 2
+  useEffect(() => {
+    if (isExtensionInstalled && completedSteps.includes(1)) {
+      if (!completedSteps.includes(2)) {
+        setCompletedSteps(prev => [...prev, 2]);
+      }
+      setCheckingExtension(false);
+      if (extensionCheckTimer) {
+        clearTimeout(extensionCheckTimer);
+        setExtensionCheckTimer(null);
+      }
+    }
+  }, [isExtensionInstalled, completedSteps]);
 
   const steps = [
     {
@@ -70,10 +89,49 @@ export default function StartPage() {
       return;
     }
     
+    // Handle extension installation step
+    if (stepId === 2) {
+      // Open Google in new tab for testing
+      window.open('https://google.com', '_blank');
+      
+      // Start checking for extension every 5 seconds
+      setCheckingExtension(true);
+      
+      // Clear any existing timer
+      if (extensionCheckTimer) {
+        clearTimeout(extensionCheckTimer);
+      }
+      
+      // Create new timer
+      const timer = setInterval(() => {
+        // This will trigger the useExtensionDetector hook to re-check
+        // We'll dispatch the event to force a check
+        window.dispatchEvent(new CustomEvent('lostyo-ready'));
+      }, 5000);
+      
+      setExtensionCheckTimer(timer);
+      
+      // Also check immediately after a short delay
+      setTimeout(() => {
+        window.dispatchEvent(new CustomEvent('lostyo-ready'));
+      }, 2000);
+      
+      return;
+    }
+    
     if (!completedSteps.includes(stepId)) {
       setCompletedSteps([...completedSteps, stepId]);
     }
   };
+
+  // Cleanup timer on unmount
+  useEffect(() => {
+    return () => {
+      if (extensionCheckTimer) {
+        clearTimeout(extensionCheckTimer);
+      }
+    };
+  }, [extensionCheckTimer]);
 
   useEffect(() => {
     if (completedSteps.length === steps.length) {
@@ -187,10 +245,14 @@ export default function StartPage() {
             const Icon = step.icon;
             const isCompleted = completedSteps.includes(step.id);
             const isStep1 = step.id === 1;
+            const isStep2 = step.id === 2;
             
             // Check if previous step is completed
             const isPreviousCompleted = index === 0 || completedSteps.includes(steps[index - 1].id);
             const isDisabled = !isPreviousCompleted && !isCompleted;
+            
+            // For step 2, show checking state if we're actively looking for extension
+            const isChecking = isStep2 && checkingExtension && !isCompleted;
             
             return (
               <motion.div
@@ -234,6 +296,33 @@ export default function StartPage() {
                           {step.action}
                         </Button>
                       </a>
+                    )}
+                  </div>
+                ) : isStep2 ? (
+                  <div className="w-full">
+                    {isCompleted ? (
+                      <Button 
+                        className="w-full h-10 text-xs font-bold rounded-full bg-green-500 hover:bg-green-600"
+                        disabled
+                      >
+                        Extension Installed
+                      </Button>
+                    ) : isChecking ? (
+                      <Button 
+                        className="w-full h-10 text-xs font-bold rounded-full bg-yellow-500 hover:bg-yellow-600 text-black"
+                        disabled
+                      >
+                        <Loader2 size={14} className="mr-2 animate-spin" />
+                        Checking...
+                      </Button>
+                    ) : (
+                      <Button 
+                        className="w-full h-10 text-xs font-bold rounded-full bg-[#5865F2] hover:bg-[#4752C4]"
+                        onClick={() => handleCompleteStep(step.id)}
+                        disabled={isDisabled}
+                      >
+                        Install Extension
+                      </Button>
                     )}
                   </div>
                 ) : (
