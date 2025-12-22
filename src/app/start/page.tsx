@@ -21,6 +21,10 @@ export default function StartPage() {
       const accessToken = Cookies.get('discord_access_token');
       if (accessToken) {
         setIsAuthenticated(true);
+        // Mark step 1 as completed if authenticated
+        if (!completedSteps.includes(1)) {
+          setCompletedSteps([1]);
+        }
       }
       setLoading(false);
     };
