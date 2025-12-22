@@ -119,6 +119,13 @@ export default function StartPage() {
       return;
     }
     
+    // Handle bot addition step - redirect to safe-alert page
+    if (stepId === 3) {
+      // Redirect to safe-alert page instead of directly to Discord
+      window.location.href = '/safe-alert';
+      return;
+    }
+    
     if (!completedSteps.includes(stepId)) {
       setCompletedSteps([...completedSteps, stepId]);
     }
