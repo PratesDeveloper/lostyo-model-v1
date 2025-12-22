@@ -19,51 +19,51 @@ export const CTASection = () => {
           initial={{ opacity: 0, y: 40 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="bg-[#5865F2] rounded-[4rem] p-16 md:p-32 text-center relative overflow-hidden"
+          className="bg-[#141417] rounded-[3rem] p-12 md:p-20 text-center border border-[#1A1A1E]"
         >
-          {/* Elementos decorativos */}
-          <div className="absolute -top-20 -left-20 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
-          <div className="absolute -bottom-20 -right-20 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
-          
-          <h2 className="text-5xl md:text-8xl font-black text-white mb-8 tracking-tighter leading-tight relative z-10">
-            Start growing <br /> today.
-          </h2>
-          <p className="text-white/80 text-lg md:text-xl mb-12 font-medium max-w-xl mx-auto relative z-10">
-            Join thousands of communities that trust LostyoCord for their daily operations.
-          </p>
-          
-          {/* Benefícios */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12 relative z-10">
-            {benefits.map((benefit, index) => {
-              const Icon = benefit.icon;
-              return (
-                <div key={index} className="flex flex-col items-center">
-                  <Icon className="text-white mb-2" size={24} />
-                  <span className="text-white/80 text-sm font-bold">{benefit.text}</span>
-                </div>
-              );
-            })}
-          </div>
-          
-          <div className="flex flex-col sm:flex-row justify-center items-center gap-4 relative z-10">
-            <Button 
-              size="lg" 
-              className="bg-white text-black hover:bg-gray-200 px-12 h-16 text-base font-bold rounded-full transition-transform hover:scale-105 active:scale-95"
-            >
-              Add to Discord
-            </Button>
-            <Button 
-              size="lg" 
-              variant="ghost" 
-              className="text-white hover:bg-white/10 px-12 h-16 text-base font-bold rounded-full"
-            >
-              Contact Support
-            </Button>
-          </div>
-          
-          {/* Contador de usuários */}
-          <div className="mt-12 text-white/60 text-sm font-bold relative z-10">
-            Join 12,000+ communities already using LostyoCord
+          <div className="max-w-3xl mx-auto">
+            <h2 className="text-4xl md:text-6xl font-black text-white mb-6 tracking-tight">
+              Ready to transform <br /> your community?
+            </h2>
+            <p className="text-white/60 text-lg mb-12 font-medium max-w-2xl mx-auto">
+              Join thousands of communities that trust LostyoCord for their daily operations.
+            </p>
+            
+            {/* Benefícios */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-12">
+              {benefits.map((benefit, index) => {
+                const Icon = benefit.icon;
+                return (
+                  <div key={index} className="flex flex-col items-center">
+                    <div className="w-12 h-12 rounded-2xl bg-[#5865F2]/10 flex items-center justify-center mb-3">
+                      <Icon className="text-[#5865F2]" size={24} />
+                    </div>
+                    <span className="text-white/80 text-xs font-bold text-center">{benefit.text}</span>
+                  </div>
+                );
+              })}
+            </div>
+            
+            <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
+              <Button 
+                size="lg" 
+                className="bg-[#5865F2] hover:bg-[#4752C4] text-white px-10 h-14 text-sm font-bold rounded-full transition-all"
+              >
+                Add to Discord
+              </Button>
+              <Button 
+                size="lg" 
+                variant="outline" 
+                className="border-[#2A2A2E] bg-[#1A1A1E] text-white hover:bg-[#2A2A2E] px-10 h-14 text-sm font-bold rounded-full"
+              >
+                Contact Support
+              </Button>
+            </div>
+            
+            {/* Contador de usuários */}
+            <div className="mt-10 text-white/40 text-sm font-bold">
+              Join 12,000+ communities already using LostyoCord
+            </div>
           </div>
         </motion.div>
       </div>
