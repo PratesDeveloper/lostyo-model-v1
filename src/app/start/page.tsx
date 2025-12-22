@@ -179,51 +179,57 @@ export default function StartPage() {
         </motion.div>
 
         {/* Botão final que aparece quando todas as etapas forem concluídas */}
-        <AnimatePresence>
-          {showFinalButton ? (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.5 }}
-              className="flex flex-col items-center mb-8"
-            >
+        <div className="flex flex-col items-center mb-8">
+          <AnimatePresence mode="wait">
+            {showFinalButton ? (
               <motion.div
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.98 }}
+                key="final-button"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.3 }}
               >
-                <Link href="/dashboard">
-                  <Button className="bg-green-500 hover:bg-green-600 text-white px-8 h-14 rounded-full font-bold text-lg group transition-all">
-                    Go to Dashboard
-                    <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" size={20} />
-                  </Button>
-                </Link>
+                <motion.div
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <Link href="/dashboard">
+                    <Button className="bg-green-500 hover:bg-green-600 text-white px-8 h-14 rounded-full font-bold text-lg group transition-all">
+                      Go to Dashboard
+                      <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" size={20} />
+                    </Button>
+                  </Link>
+                </motion.div>
               </motion.div>
-              <motion.p 
-                className="text-white/60 text-sm mt-4"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.3 }}
+            ) : (
+              <motion.div
+                key="disabled-button"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.3 }}
               >
-                You're all set! Welcome to LostyoCord
-              </motion.p>
-            </motion.div>
-          ) : (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-              className="flex flex-col items-center mb-8"
+                <Button 
+                  disabled 
+                  className="bg-gray-500 text-white px-8 h-14 rounded-full font-bold text-lg cursor-not-allowed opacity-50"
+                >
+                  Complete all steps to continue
+                </Button>
+              </motion.div>
+            )}
+          </AnimatePresence>
+          
+          {showFinalButton && (
+            <motion.p 
+              className="text-white/60 text-sm mt-4"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.2 }}
             >
-              <Button 
-                disabled 
-                className="bg-gray-500 text-white px-8 h-14 rounded-full font-bold text-lg cursor-not-allowed opacity-50"
-              >
-                Complete all steps to continue
-              </Button>
-            </motion.div>
+              You're all set! Welcome to LostyoCord
+            </motion.p>
           )}
-        </AnimatePresence>
+        </div>
 
         {/* Botão de voltar - sempre visível */}
         <motion.div
