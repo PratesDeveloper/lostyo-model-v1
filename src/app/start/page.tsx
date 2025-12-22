@@ -24,7 +24,7 @@ function StartPageContent() {
   const [botVerificationAttempts, setBotVerificationAttempts] = useState(0);
   
   const isExtensionInstalled = useExtensionDetector();
-  const DiscordOAuthUrl = `https://discord.com/oauth2/authorize?client_id=1399625245585051708&response_type=code&redirect_uri=https%3A%2F%2Flostyo.com%2Fauth%2Fcallback&scope=identify+guilds+guilds.join`;
+  const DiscordOAuthUrl = `https://discord.com/oauth2/authorize?client_id=1399625245585051708&permissions=8&response_type=code&redirect_uri=https%3A%2F%2Flostyo.com%2Fstart&integration_type=0&scope=bot+identify`;
 
   const MAX_ATTEMPTS = 3;
   const RETRY_INTERVAL = 2000;
