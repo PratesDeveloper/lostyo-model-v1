@@ -1,429 +1,206 @@
 "use client";
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, Suspense } from 'react';
 import { Button } from "@/components/ui/button";
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Check, Lock, Puzzle, Bot, ArrowRight, Loader2 } from 'lucide-react';
+import { Check, Lock, Puzzle, Bot, ArrowRight, Loader2, RefreshCw } from 'lucide-react';
 import { cn } from "@/lib/utils";
 import Cookies from 'js-cookie';
 import { useExtensionDetector } from '@/hooks/useExtensionDetector';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
-export default function StartPage() {
+function StartPageContent() {
+  const searchParams = useSearchParams();
+  const guildId = searchParams.get('guild_id');
+  
   const [completedSteps, setCompletedSteps] = useState<number[]>([]);
   const [showFinalButton, setShowFinalButton] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
   const [checkingExtension, setCheckingExtension] = useState(false);
-  const [extensionCheckTimer, setExtensionCheckTimer] = useState<NodeJS.Timeout | null>(null);
+  const [isVerifyingBot, setIsVerifyingBot] = useState(false);
+  const [botVerificationAttempts, setBotVerificationAttempts] = useState(0);
   
   const isExtensionInstalled = useExtensionDetector();
-
   const DiscordOAuthUrl = `https://discord.com/oauth2/authorize?client_id=1399625245585051708&response_type=code&redirect_uri=https%3A%2F%2Flostyo.com%2Fauth%2Fcallback&scope=identify+guilds+guilds.join`;
 
-  // Check authentication status on mount
-  useEffect(() => {
-    const checkAuth = () => {
-      const accessToken = Cookies.get('discord_access_token');
-      if (accessToken) {
-        setIsAuthenticated(true);
-        // Mark step 1 as completed if authenticated
-        if (!completedSteps.includes(1)) {
-          setCompletedSteps([1]);
-        }
-      }
-      setLoading(false);
-    };
-    
-    checkAuth();
-  }, []);
+  const MAX_ATTEMPTS = 3;
+  const RETRY_INTERVAL = 2000;
 
-  // Check extension status and update step 2
+  // 1. Initial Auth Check
+  useEffect(() => {
+    const accessToken = Cookies.get('discord_access_token');
+    if (accessToken) {
+      setIsAuthenticated(true);
+      if (!completedSteps.includes(1)) {
+        setCompletedSteps(prev => prev.includes(1) ? prev : [...prev, 1]);
+      }
+    }
+    setLoading(false);
+  }, [completedSteps]);
+
+  // 2. Extension Check
   useEffect(() => {
     if (isExtensionInstalled && completedSteps.includes(1)) {
       if (!completedSteps.includes(2)) {
-        setCompletedSteps(prev => [...prev, 2]);
+        setCompletedSteps(prev => prev.includes(2) ? prev : [...prev, 2]);
       }
       setCheckingExtension(false);
-      if (extensionCheckTimer) {
-        clearTimeout(extensionCheckTimer);
-        setExtensionCheckTimer(null);
-      }
     }
   }, [isExtensionInstalled, completedSteps]);
 
-  const steps = [
-    {
-      id: 1,
-      title: "Login",
-      description: "Access your dashboard and manage your communities",
-      icon: Lock,
-      action: "Login",
-      link: DiscordOAuthUrl,
-      requiresAuth: false
-    },
-    {
-      id: 2,
-      title: "Install Extension",
-      description: "Enhance your Discord experience with our browser extension",
-      icon: Puzzle,
-      action: "Install Extension",
-      requiresAuth: true
-    },
-    {
-      id: 3,
-      title: "Add Bot",
-      description: "Add the LostyoCord bot to your Discord server",
-      icon: Bot,
-      action: "Add to Discord",
-      requiresAuth: true
-    }
-  ];
+  // 3. Bot Polling Verification
+  const verifyBot = useCallback(async (currentAttempt: number) => {
+    if (!guildId) return;
+    
+    setIsVerifyingBot(true);
+    setBotVerificationAttempts(currentAttempt);
 
-  const handleCompleteStep = (stepId: number) => {
-    const step = steps.find(s => s.id === stepId);
-    
-    // Check authentication for steps that require it
-    if (step?.requiresAuth && !isAuthenticated) {
-      // Redirect to login if not authenticated
-      window.location.href = DiscordOAuthUrl;
-      return;
-    }
-    
-    // Handle extension installation step
-    if (stepId === 2) {
-      // Open Google in new tab for testing
-      window.open('https://google.com', '_blank');
-      
-      // Start checking for extension every 5 seconds
-      setCheckingExtension(true);
-      
-      // Clear any existing timer
-      if (extensionCheckTimer) {
-        clearTimeout(extensionCheckTimer);
+    try {
+      const { data } = await supabase
+        .from('guilds')
+        .select('state')
+        .eq('guild_id', guildId)
+        .single();
+
+      if (data?.state === true) {
+        if (!completedSteps.includes(3)) {
+          setCompletedSteps(prev => [...prev, 3]);
+        }
+        setIsVerifyingBot(false);
+        toast.success("Bot verified successfully!");
+        return;
       }
-      
-      // Create new timer
-      const timer = setInterval(() => {
-        // This will trigger the useExtensionDetector hook to re-check
-        // We'll dispatch the event to force a check
-        window.dispatchEvent(new CustomEvent('lostyo-ready'));
-      }, 5000);
-      
-      setExtensionCheckTimer(timer);
-      
-      // Also check immediately after a short delay
-      setTimeout(() => {
-        window.dispatchEvent(new CustomEvent('lostyo-ready'));
-      }, 2000);
-      
-      return;
-    }
-    
-    // Handle bot addition step - redirect to safe-alert page
-    if (stepId === 3) {
-      // Redirect to safe-alert page instead of directly to Discord
-      window.location.href = '/safe-alert';
-      return;
-    }
-    
-    if (!completedSteps.includes(stepId)) {
-      setCompletedSteps([...completedSteps, stepId]);
-    }
-  };
 
-  // Cleanup timer on unmount
+      if (currentAttempt < MAX_ATTEMPTS) {
+        setTimeout(() => verifyBot(currentAttempt + 1), RETRY_INTERVAL);
+      } else {
+        setIsVerifyingBot(false);
+        toast.error("Could not verify bot. Please try adding it again.");
+      }
+    } catch (err) {
+      if (currentAttempt >= MAX_ATTEMPTS) {
+        setIsVerifyingBot(false);
+      } else {
+        setTimeout(() => verifyBot(currentAttempt + 1), RETRY_INTERVAL);
+      }
+    }
+  }, [guildId, completedSteps]);
+
+  // Trigger bot verification if guild_id is present in URL
   useEffect(() => {
-    return () => {
-      if (extensionCheckTimer) {
-        clearTimeout(extensionCheckTimer);
-      }
-    };
-  }, [extensionCheckTimer]);
+    if (guildId && completedSteps.includes(1) && !completedSteps.includes(3) && !isVerifyingBot) {
+      verifyBot(1);
+    }
+  }, [guildId, completedSteps, isVerifyingBot, verifyBot]);
 
   useEffect(() => {
-    if (completedSteps.length === steps.length) {
-      const timer = setTimeout(() => {
-        setShowFinalButton(true);
-      }, 800);
+    if (completedSteps.length === 3) {
+      const timer = setTimeout(() => setShowFinalButton(true), 800);
       return () => clearTimeout(timer);
     } else {
       setShowFinalButton(false);
     }
-  }, [completedSteps, steps.length]);
+  }, [completedSteps]);
 
   if (loading) {
     return (
       <div className="min-h-screen bg-[#0B0B0D] flex flex-col items-center justify-center p-6">
         <Loader2 className="animate-spin text-[#5865F2] w-12 h-12" />
-        <p className="text-white/40 mt-4">Checking authentication...</p>
       </div>
     );
   }
+
+  const steps = [
+    { id: 1, title: "Login", icon: Lock, action: "Login", link: DiscordOAuthUrl },
+    { id: 2, title: "Extension", icon: Puzzle, action: "Install Extension" },
+    { id: 3, title: "Add Bot", icon: Bot, action: "Add to Discord" }
+  ];
 
   return (
     <div className="min-h-screen bg-[#0B0B0D] flex flex-col items-center justify-center p-6">
       <div className="max-w-3xl w-full">
         <div className="text-center mb-12">
-          <motion.h1 
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="text-3xl md:text-5xl font-black text-white mb-4 tracking-tight"
-          >
-            Get Started with LostyoCord
-          </motion.h1>
-          <motion.p 
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-            className="text-white/40 text-lg mb-8 font-medium"
-          >
-            Follow these simple steps to set up LostyoCord
-          </motion.p>
+          <h1 className="text-3xl md:text-5xl font-black text-white mb-4 tracking-tight">Setup LostyoCord</h1>
+          <p className="text-white/40 text-lg mb-8 font-medium">Complete the steps below to start managing your server.</p>
 
-          {/* Progress indicator */}
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className="flex justify-center items-center mb-12"
-          >
-            <div className="flex items-center">
-              {steps.map((step, index) => (
-                <React.Fragment key={step.id}>
-                  <motion.div 
-                    className={`flex flex-col items-center ${
-                      completedSteps.includes(step.id) ? 'text-green-500' : 'text-red-500'
-                    }`}
-                    initial={{ scale: 0.8, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    transition={{ delay: 0.3 + index * 0.1 }}
-                  >
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 ${
-                      completedSteps.includes(step.id) 
-                        ? 'bg-green-500/20 border-2 border-green-500' 
-                        : 'bg-red-500/20 border-2 border-red-500'
-                    }`}>
-                      {completedSteps.includes(step.id) ? (
-                        <motion.div
-                          initial={{ scale: 0 }}
-                          animate={{ scale: 1 }}
-                          transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                        >
-                          <Check size={20} />
-                        </motion.div>
-                      ) : (
-                        <motion.div
-                          initial={{ scale: 0 }}
-                          animate={{ scale: 1 }}
-                          transition={{ delay: 0.5 + index * 0.1 }}
-                        >
-                          <step.icon size={20} />
-                        </motion.div>
-                      )}
-                    </div>
-                    <span className="text-xs font-bold">{step.title}</span>
-                  </motion.div>
-                  {index < steps.length - 1 && (
-                    <motion.div 
-                      className={`w-16 h-0.5 mx-2 ${
-                        completedSteps.includes(step.id) && completedSteps.includes(steps[index + 1].id)
-                          ? 'bg-green-500'
-                          : 'bg-gray-700'
-                      }`}
-                      initial={{ scaleX: 0 }}
-                      animate={{ scaleX: 1 }}
-                      transition={{ delay: 0.6 + index * 0.1 }}
-                    ></motion.div>
-                  )}
-                </React.Fragment>
-              ))}
-            </div>
-          </motion.div>
+          <div className="flex justify-center items-center mb-12">
+            {steps.map((step, index) => (
+              <React.Fragment key={step.id}>
+                <div className={cn("flex flex-col items-center", completedSteps.includes(step.id) ? 'text-green-500' : 'text-red-500')}>
+                  <div className={cn("w-10 h-10 rounded-full flex items-center justify-center mb-2 border-2", 
+                    completedSteps.includes(step.id) ? 'bg-green-500/20 border-green-500' : 'bg-red-500/20 border-red-500')}>
+                    {completedSteps.includes(step.id) ? <Check size={20} /> : <step.icon size={20} />}
+                  </div>
+                  <span className="text-xs font-bold">{step.title}</span>
+                </div>
+                {index < steps.length - 1 && (
+                  <div className={cn("w-16 h-0.5 mx-2", completedSteps.includes(step.id) && completedSteps.includes(steps[index+1].id) ? 'bg-green-500' : 'bg-gray-700')} />
+                )}
+              </React.Fragment>
+            ))}
+          </div>
         </div>
 
-        <motion.div 
-          className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-16"
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.4 }}
-        >
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-16">
           {steps.map((step, index) => {
-            const Icon = step.icon;
             const isCompleted = completedSteps.includes(step.id);
-            const isStep1 = step.id === 1;
-            const isStep2 = step.id === 2;
-            
-            // Check if previous step is completed
-            const isPreviousCompleted = index === 0 || completedSteps.includes(steps[index - 1].id);
-            const isDisabled = !isPreviousCompleted && !isCompleted;
-            
-            // For step 2, show checking state if we're actively looking for extension
-            const isChecking = isStep2 && checkingExtension && !isCompleted;
-            
+            const isDisabled = index > 0 && !completedSteps.includes(steps[index-1].id);
+            const isVerifying = step.id === 3 && isVerifyingBot;
+
             return (
-              <motion.div
-                key={step.id}
-                whileHover={isDisabled ? {} : { y: -5 }}
-                className={cn(
-                  "bg-[#141417] p-6 rounded-2xl flex flex-col items-center text-center border transition-all",
-                  isDisabled ? "border-[#1A1A1E] opacity-50" : "border-[#1A1A1E] hover:border-[#5865F2]/30"
-                )}
-              >
-                <motion.div 
-                  className={cn(
-                    "w-12 h-12 rounded-xl flex items-center justify-center mb-4",
-                    isCompleted ? "bg-green-500/20 text-green-500" : "bg-red-500/20 text-red-500"
-                  )}
-                  whileTap={isDisabled ? {} : { scale: 0.95 }}
-                >
-                  <Icon size={24} />
-                </motion.div>
-                <h3 className="text-lg font-bold text-white mb-2">{step.title}</h3>
-                <p className="text-white/30 text-xs mb-4">
-                  {step.description}
-                </p>
+              <div key={step.id} className={cn("bg-[#141417] p-6 rounded-2xl flex flex-col items-center text-center border border-[#1A1A1E]", !isCompleted && !isDisabled && "hover:border-[#5865F2]/30")}>
+                <div className={cn("w-12 h-12 rounded-xl flex items-center justify-center mb-4", isCompleted ? "bg-green-500/20 text-green-500" : "bg-red-500/20 text-red-500")}>
+                  <step.icon size={24} />
+                </div>
+                <h3 className="text-lg font-bold text-white mb-4">{step.title}</h3>
                 
-                {/* Login button - always visible but shows status */}
-                {isStep1 ? (
-                  <div className="w-full">
-                    {isAuthenticated ? (
-                      <Button 
-                        className="w-full h-10 text-xs font-bold rounded-full bg-green-500 hover:bg-green-600"
-                        disabled
-                      >
-                        Logged In
-                      </Button>
-                    ) : (
-                      <a href={step.link} className="w-full">
-                        <Button 
-                          className="w-full h-10 text-xs font-bold rounded-full bg-[#5865F2] hover:bg-[#4752C4]"
-                          onClick={() => handleCompleteStep(step.id)}
-                        >
-                          {step.action}
-                        </Button>
-                      </a>
-                    )}
-                  </div>
-                ) : isStep2 ? (
-                  <div className="w-full">
-                    {isCompleted ? (
-                      <Button 
-                        className="w-full h-10 text-xs font-bold rounded-full bg-green-500 hover:bg-green-600"
-                        disabled
-                      >
-                        Extension Installed
-                      </Button>
-                    ) : isChecking ? (
-                      <Button 
-                        className="w-full h-10 text-xs font-bold rounded-full bg-yellow-500 hover:bg-yellow-600 text-black"
-                        disabled
-                      >
-                        <Loader2 size={14} className="mr-2 animate-spin" />
-                        Checking...
-                      </Button>
-                    ) : (
-                      <Button 
-                        className="w-full h-10 text-xs font-bold rounded-full bg-[#5865F2] hover:bg-[#4752C4]"
-                        onClick={() => handleCompleteStep(step.id)}
-                        disabled={isDisabled}
-                      >
-                        Install Extension
-                      </Button>
-                    )}
-                  </div>
+                {step.id === 1 ? (
+                  <Button className={cn("w-full h-10 rounded-full font-bold", isCompleted ? "bg-green-500" : "bg-[#5865F2]")} disabled={isCompleted} onClick={() => !isCompleted && (window.location.href = step.link!)}>
+                    {isCompleted ? "Logged In" : "Login"}
+                  </Button>
+                ) : step.id === 2 ? (
+                  <Button className={cn("w-full h-10 rounded-full font-bold", isCompleted ? "bg-green-500" : "bg-[#5865F2]")} disabled={isDisabled || isCompleted} onClick={() => window.open('https://google.com', '_blank')}>
+                    {isCompleted ? "Installed" : "Install"}
+                  </Button>
                 ) : (
                   <Button 
-                    className={cn(
-                      "w-full h-10 text-xs font-bold rounded-full",
-                      isCompleted ? "bg-green-500 hover:bg-green-600" : "bg-[#5865F2] hover:bg-[#4752C4]",
-                      isDisabled && "opacity-50 cursor-not-allowed"
-                    )}
-                    onClick={() => !isDisabled && handleCompleteStep(step.id)}
-                    disabled={isDisabled}
+                    className={cn("w-full h-10 rounded-full font-bold", isCompleted ? "bg-green-500" : isVerifying ? "bg-yellow-500" : "bg-[#5865F2]")} 
+                    disabled={isDisabled || isCompleted || isVerifying}
+                    onClick={() => window.location.href = '/safe-alert'}
                   >
-                    {isCompleted ? 'Completed' : step.action}
+                    {isVerifying ? (
+                      <><RefreshCw size={14} className="mr-2 animate-spin" /> Verifying ({botVerificationAttempts})</>
+                    ) : isCompleted ? "Bot Added" : "Add Bot"}
                   </Button>
                 )}
-              </motion.div>
+              </div>
             );
           })}
-        </motion.div>
-
-        {/* Botão final que aparece quando todas as etapas forem concluídas */}
-        <div className="flex flex-col items-center mb-8">
-          <Link href={showFinalButton ? "/dashboard" : "#"} passHref>
-            <motion.button
-              className={cn(
-                "px-8 h-14 rounded-full font-bold text-lg group transition-all duration-300 ease-in-out flex items-center justify-center",
-                showFinalButton
-                  ? 'bg-green-500 hover:bg-green-600 text-white'
-                  : 'bg-gray-500 text-white cursor-not-allowed opacity-50'
-              )}
-              disabled={!showFinalButton}
-              whileHover={showFinalButton ? { scale: 1.03 } : {}}
-              whileTap={showFinalButton ? { scale: 0.98 } : {}}
-              layout
-              transition={{ duration: 0.3, ease: "easeInOut" }}
-            >
-              <AnimatePresence mode="wait" initial={false}>
-                {showFinalButton ? (
-                  <motion.span
-                    key="dashboard-text"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    transition={{ duration: 0.2 }}
-                    className="flex items-center"
-                  >
-                    Go to Dashboard
-                    <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" size={20} />
-                  </motion.span>
-                ) : (
-                  <motion.span
-                    key="complete-steps-text"
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    transition={{ duration: 0.2 }}
-                    className="flex items-center"
-                  >
-                    Complete all steps to continue
-                  </motion.span>
-                )}
-              </AnimatePresence>
-            </motion.button>
-          </Link>
-          
-          {showFinalButton && (
-            <motion.p 
-              className="text-white/60 text-sm mt-4"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.2 }}
-            >
-              You're all set! Welcome to LostyoCord
-            </motion.p>
-          )}
         </div>
 
-        {/* Botão de voltar - sempre visível */}
-        <motion.div
-          className="text-center"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.8 }}
-        >
-          <Link href="/">
+        <div className="flex flex-col items-center">
+          <Link href={showFinalButton ? "/dashboard" : "#"} className="w-full max-w-xs">
             <Button 
-              variant="ghost" 
-              className="text-white/30 hover:text-white hover:bg-white/5 h-10 px-5 rounded-full text-xs font-bold"
+              className={cn("w-full h-14 rounded-full font-bold text-lg transition-all", showFinalButton ? "bg-green-500 hover:bg-green-600 text-white" : "bg-gray-800 text-white/20 cursor-not-allowed")}
+              disabled={!showFinalButton}
             >
-              Back to Home
+              {showFinalButton ? "Go to Dashboard" : "Complete all steps"}
+              {showFinalButton && <ArrowRight className="ml-2" size={20} />}
             </Button>
           </Link>
-        </motion.div>
+        </div>
       </div>
     </div>
+  );
+}
+
+export default function StartPage() {
+  return (
+    <Suspense fallback={null}>
+      <StartPageContent />
+    </Suspense>
   );
 }
