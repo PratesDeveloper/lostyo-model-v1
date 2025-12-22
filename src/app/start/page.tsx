@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Check, Circle, Lock, Puzzle, Bot, ArrowRight } from 'lucide-react';
+import { Check, Lock, Puzzle, Bot, ArrowRight, Sparkles } from 'lucide-react';
 
 export default function StartPage() {
   const [completedSteps, setCompletedSteps] = useState<number[]>([]);
@@ -188,31 +188,39 @@ export default function StartPage() {
         <AnimatePresence>
           {showFinalButton && (
             <motion.div
-              initial={{ opacity: 0, y: 20, scale: 0.9 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.9 }}
-              transition={{ type: "spring", stiffness: 300, damping: 20 }}
-              className="flex flex-col items-center"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.5 }}
+              className="flex flex-col items-center mb-8"
             >
               <motion.div
                 className="relative"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.98 }}
+                initial={{ scale: 0.8 }}
+                animate={{ scale: 1 }}
+                transition={{ 
+                  type: "spring", 
+                  stiffness: 300, 
+                  damping: 20,
+                  delay: 0.2
+                }}
               >
                 <Link href="/dashboard">
-                  <Button className="bg-gradient-to-r from-[#5865F2] to-[#4752C4] text-white px-8 h-14 rounded-full font-bold text-lg group">
+                  <Button className="bg-green-500 hover:bg-green-600 text-white px-8 h-14 rounded-full font-bold text-lg group transition-all shadow-lg hover:shadow-green-500/20">
                     Go to Dashboard
-                    <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" size={20} />
+                    <Sparkles className="ml-2 group-hover:rotate-12 transition-transform" size={20} />
                   </Button>
                 </Link>
                 {/* Efeito de brilho */}
-                <div className="absolute inset-0 rounded-full bg-gradient-to-r from-[#5865F2] to-[#4752C4] opacity-30 blur-xl -z-10 animate-pulse"></div>
+                <div className="absolute inset-0 rounded-full bg-green-500 opacity-30 blur-xl -z-10 animate-pulse"></div>
               </motion.div>
               <motion.p 
                 className="text-white/60 text-sm mt-4"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ delay: 0.3 }}
+                transition={{ delay: 0.5 }}
               >
                 You're all set! Welcome to LostyoCord
               </motion.p>
@@ -220,23 +228,22 @@ export default function StartPage() {
           )}
         </AnimatePresence>
 
-        {!showFinalButton && (
-          <motion.div
-            className="text-center"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.8 }}
-          >
-            <Link href="/">
-              <Button 
-                variant="ghost" 
-                className="text-white/30 hover:text-white hover:bg-white/5 h-10 px-5 rounded-full text-xs font-bold"
-              >
-                Back to Home
-              </Button>
-            </Link>
-          </motion.div>
-        )}
+        {/* Botão de voltar - sempre visível */}
+        <motion.div
+          className="text-center"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.8 }}
+        >
+          <Link href="/">
+            <Button 
+              variant="ghost" 
+              className="text-white/30 hover:text-white hover:bg-white/5 h-10 px-5 rounded-full text-xs font-bold"
+            >
+              Back to Home
+            </Button>
+          </Link>
+        </motion.div>
       </div>
     </div>
   );
