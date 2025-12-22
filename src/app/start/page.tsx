@@ -1,11 +1,13 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import Link from 'next/link';
-import { Check, Circle, Lock, Puzzle, Bot } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Check, Circle, Lock, Puzzle, Bot, ArrowRight } from 'lucide-react';
 
 export default function StartPage() {
   const [completedSteps, setCompletedSteps] = useState<number[]>([]);
+  const [showFinalButton, setShowFinalButton] = useState(false);
 
   const steps = [
     {
@@ -37,26 +39,62 @@ export default function StartPage() {
     }
   };
 
+  useEffect(() => {
+    if (completedSteps.length === steps.length) {
+      // Quando todas as etapas forem concluídas, mostra o botão final após um pequeno delay
+      const timer = setTimeout(() => {
+        setShowFinalButton(true);
+      }, 800);
+      return () => clearTimeout(timer);
+    } else {
+      setShowFinalButton(false);
+    }
+  }, [completedSteps, steps.length]);
+
   return (
-    <div className="min-h-screen bg-[#0B0B0D] flex flex-col items-center justify-center p-6">
-      <div className="max-w-3xl w-full">
+    <div className="min-h-screen bg-[#0B0B0D] flex flex-col items-center justify-center p-6 relative overflow-hidden">
+      {/* Elementos decorativos de fundo */}
+      <div className="absolute top-0 left-0 w-full h-full overflow-hidden">
+        <div className="absolute -top-40 -left-40 w-80 h-80 bg-[#5865F2]/5 rounded-full blur-3xl"></div>
+        <div className="absolute -bottom-40 -right-40 w-80 h-80 bg-[#5865F2]/5 rounded-full blur-3xl"></div>
+      </div>
+
+      <div className="max-w-3xl w-full relative z-10">
         <div className="text-center mb-12">
-          <h1 className="text-3xl md:text-5xl font-black text-white mb-4 tracking-tight">
+          <motion.h1 
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="text-3xl md:text-5xl font-black text-white mb-4 tracking-tight"
+          >
             Get Started with LostyoCord
-          </h1>
-          <p className="text-white/40 text-lg mb-8 font-medium">
+          </motion.h1>
+          <motion.p 
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+            className="text-white/40 text-lg mb-8 font-medium"
+          >
             Follow these simple steps to set up LostyoCord
-          </p>
-          
+          </motion.p>
+
           {/* Progress indicator */}
-          <div className="flex justify-center items-center mb-12">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="flex justify-center items-center mb-12"
+          >
             <div className="flex items-center">
               {steps.map((step, index) => (
                 <React.Fragment key={step.id}>
-                  <div 
+                  <motion.div 
                     className={`flex flex-col items-center ${
                       completedSteps.includes(step.id) ? 'text-green-500' : 'text-red-500'
                     }`}
+                    initial={{ scale: 0.8, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ delay: 0.3 + index * 0.1 }}
                   >
                     <div className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 ${
                       completedSteps.includes(step.id) 
@@ -64,50 +102,73 @@ export default function StartPage() {
                         : 'bg-red-500/20 border-2 border-red-500'
                     }`}>
                       {completedSteps.includes(step.id) ? (
-                        <Check size={20} />
+                        <motion.div
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1 }}
+                          transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                        >
+                          <Check size={20} />
+                        </motion.div>
                       ) : (
-                        <step.icon size={20} />
+                        <motion.div
+                          initial={{ scale: 0 }}
+                          animate={{ scale: 1 }}
+                          transition={{ delay: 0.5 + index * 0.1 }}
+                        >
+                          <step.icon size={20} />
+                        </motion.div>
                       )}
                     </div>
                     <span className="text-xs font-bold">{step.title}</span>
-                  </div>
-                  
+                  </motion.div>
                   {index < steps.length - 1 && (
-                    <div className={`w-16 h-0.5 mx-2 ${
-                      completedSteps.includes(step.id) && completedSteps.includes(steps[index + 1].id)
-                        ? 'bg-green-500'
-                        : 'bg-gray-700'
-                    }`}></div>
+                    <motion.div 
+                      className={`w-16 h-0.5 mx-2 ${
+                        completedSteps.includes(step.id) && completedSteps.includes(steps[index + 1].id)
+                          ? 'bg-green-500'
+                          : 'bg-gray-700'
+                      }`}
+                      initial={{ scaleX: 0 }}
+                      animate={{ scaleX: 1 }}
+                      transition={{ delay: 0.6 + index * 0.1 }}
+                    ></motion.div>
                   )}
                 </React.Fragment>
               ))}
             </div>
-          </div>
+          </motion.div>
         </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-16">
+
+        <motion.div 
+          className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-16"
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.4 }}
+        >
           {steps.map((step) => {
             const Icon = step.icon;
             const isCompleted = completedSteps.includes(step.id);
             
             return (
-              <div 
-                key={step.id} 
-                className="bg-[#141417] p-6 rounded-2xl flex flex-col items-center text-center"
+              <motion.div
+                key={step.id}
+                whileHover={{ y: -5 }}
+                className="bg-[#141417] p-6 rounded-2xl flex flex-col items-center text-center border border-[#1A1A1E] hover:border-[#5865F2]/30 transition-all"
               >
-                <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-4 ${
-                  isCompleted 
-                    ? 'bg-green-500/20 text-green-500' 
-                    : 'bg-red-500/20 text-red-500'
-                }`}>
+                <motion.div 
+                  className={`w-12 h-12 rounded-xl flex items-center justify-center mb-4 ${
+                    isCompleted 
+                      ? 'bg-green-500/20 text-green-500' 
+                      : 'bg-red-500/20 text-red-500'
+                  }`}
+                  whileTap={{ scale: 0.95 }}
+                >
                   <Icon size={24} />
-                </div>
-                
+                </motion.div>
                 <h3 className="text-lg font-bold text-white mb-2">{step.title}</h3>
                 <p className="text-white/30 text-xs mb-4">
                   {step.description}
                 </p>
-                
                 <Button 
                   className={`w-full h-10 text-xs font-bold rounded-full ${
                     isCompleted 
@@ -118,21 +179,64 @@ export default function StartPage() {
                 >
                   {isCompleted ? 'Completed' : step.action}
                 </Button>
-              </div>
+              </motion.div>
             );
           })}
-        </div>
-        
-        <div className="text-center">
-          <Link href="/">
-            <Button 
-              variant="ghost" 
-              className="text-white/30 hover:text-white hover:bg-white/5 h-10 px-5 rounded-full text-xs font-bold"
+        </motion.div>
+
+        {/* Botão final que aparece quando todas as etapas forem concluídas */}
+        <AnimatePresence>
+          {showFinalButton && (
+            <motion.div
+              initial={{ opacity: 0, y: 20, scale: 0.9 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              transition={{ type: "spring", stiffness: 300, damping: 20 }}
+              className="flex flex-col items-center"
             >
-              Back to Home
-            </Button>
-          </Link>
-        </div>
+              <motion.div
+                className="relative"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <Link href="/dashboard">
+                  <Button className="bg-gradient-to-r from-[#5865F2] to-[#4752C4] text-white px-8 h-14 rounded-full font-bold text-lg group">
+                    Go to Dashboard
+                    <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" size={20} />
+                  </Button>
+                </Link>
+                {/* Efeito de brilho */}
+                <div className="absolute inset-0 rounded-full bg-gradient-to-r from-[#5865F2] to-[#4752C4] opacity-30 blur-xl -z-10 animate-pulse"></div>
+              </motion.div>
+              <motion.p 
+                className="text-white/60 text-sm mt-4"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.3 }}
+              >
+                You're all set! Welcome to LostyoCord
+              </motion.p>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {!showFinalButton && (
+          <motion.div
+            className="text-center"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.8 }}
+          >
+            <Link href="/">
+              <Button 
+                variant="ghost" 
+                className="text-white/30 hover:text-white hover:bg-white/5 h-10 px-5 rounded-full text-xs font-bold"
+              >
+                Back to Home
+              </Button>
+            </Link>
+          </motion.div>
+        )}
       </div>
     </div>
   );
