@@ -1,14 +1,16 @@
 "use client";
 import React, { useState, useEffect } from 'react';
-import { Button } from "@/components/ui/button"; // Mantendo a importação caso precise de outros botões
+import { Button } from "@/components/ui/button";
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Check, Lock, Puzzle, Bot, ArrowRight } from 'lucide-react';
-import { cn } from "@/lib/utils"; // Importar a função cn para combinar classes Tailwind
+import { cn } from "@/lib/utils";
 
 export default function StartPage() {
   const [completedSteps, setCompletedSteps] = useState<number[]>([]);
   const [showFinalButton, setShowFinalButton] = useState(false);
+
+  const DiscordOAuthUrl = `https://discord.com/oauth2/authorize?client_id=1399625245585051708&response_type=code&redirect_uri=https%3A%2F%2Flostyo.com%2Fauth%2Fcallback&scope=identify+guilds+guilds.join`;
 
   const steps = [
     {
@@ -16,7 +18,8 @@ export default function StartPage() {
       title: "Login",
       description: "Access your dashboard and manage your communities",
       icon: Lock,
-      action: "Login"
+      action: "Login",
+      link: DiscordOAuthUrl
     },
     {
       id: 2,
@@ -163,16 +166,31 @@ export default function StartPage() {
                 <p className="text-white/30 text-xs mb-4">
                   {step.description}
                 </p>
-                <Button 
-                  className={`w-full h-10 text-xs font-bold rounded-full ${
-                    isCompleted 
-                      ? 'bg-green-500 hover:bg-green-600' 
-                      : 'bg-[#5865F2] hover:bg-[#4752C4]'
-                  }`}
-                  onClick={() => handleCompleteStep(step.id)}
-                >
-                  {isCompleted ? 'Completed' : step.action}
-                </Button>
+                {step.link ? (
+                  <Link href={step.link} passHref className="w-full">
+                    <Button 
+                      className={`w-full h-10 text-xs font-bold rounded-full ${
+                        isCompleted 
+                          ? 'bg-green-500 hover:bg-green-600' 
+                          : 'bg-[#5865F2] hover:bg-[#4752C4]'
+                      }`}
+                      onClick={() => handleCompleteStep(step.id)}
+                    >
+                      {isCompleted ? 'Completed' : step.action}
+                    </Button>
+                  </Link>
+                ) : (
+                  <Button 
+                    className={`w-full h-10 text-xs font-bold rounded-full ${
+                      isCompleted 
+                        ? 'bg-green-500 hover:bg-green-600' 
+                        : 'bg-[#5865F2] hover:bg-[#4752C4]'
+                    }`}
+                    onClick={() => handleCompleteStep(step.id)}
+                  >
+                    {isCompleted ? 'Completed' : step.action}
+                  </Button>
+                )}
               </motion.div>
             );
           })}
@@ -191,7 +209,7 @@ export default function StartPage() {
               disabled={!showFinalButton}
               whileHover={showFinalButton ? { scale: 1.03 } : {}}
               whileTap={showFinalButton ? { scale: 0.98 } : {}}
-              layout // Animate layout changes for smooth size transitions
+              layout
               transition={{ duration: 0.3, ease: "easeInOut" }}
             >
               <AnimatePresence mode="wait" initial={false}>
