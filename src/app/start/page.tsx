@@ -41,7 +41,6 @@ export default function StartPage() {
 
   useEffect(() => {
     if (completedSteps.length === steps.length) {
-      // Quando todas as etapas forem concluídas, mostra o botão final após um pequeno delay
       const timer = setTimeout(() => {
         setShowFinalButton(true);
       }, 800);
@@ -179,45 +178,51 @@ export default function StartPage() {
         </motion.div>
 
         {/* Botão final que aparece quando todas as etapas forem concluídas */}
-        <div className="flex flex-col items-center mb-8">
-          <AnimatePresence mode="wait">
-            {showFinalButton ? (
-              <motion.div
-                key="final-button"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.3 }}
-              >
-                <motion.div
-                  whileHover={{ scale: 1.03 }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  <Link href="/dashboard">
-                    <Button className="bg-green-500 hover:bg-green-600 text-white px-8 h-14 rounded-full font-bold text-lg group transition-all">
-                      Go to Dashboard
-                      <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" size={20} />
-                    </Button>
-                  </Link>
-                </motion.div>
-              </motion.div>
-            ) : (
-              <motion.div
-                key="disabled-button"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.3 }}
-              >
-                <Button 
-                  disabled 
-                  className="bg-gray-500 text-white px-8 h-14 rounded-full font-bold text-lg cursor-not-allowed opacity-50"
-                >
-                  Complete all steps to continue
-                </Button>
-              </motion.div>
-            )}
-          </AnimatePresence>
+        <motion.div
+          className="flex flex-col items-center mb-8"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+        >
+          <Link href={showFinalButton ? "/dashboard" : "#"} passHref>
+            <motion.button
+              className={`px-8 h-14 rounded-full font-bold text-lg group transition-all duration-300 ease-in-out
+                ${showFinalButton 
+                  ? 'bg-green-500 hover:bg-green-600 text-white' 
+                  : 'bg-gray-500 text-white cursor-not-allowed opacity-50'
+                }`}
+              disabled={!showFinalButton}
+              whileHover={showFinalButton ? { scale: 1.03 } : {}}
+              whileTap={showFinalButton ? { scale: 0.98 } : {}}
+            >
+              <AnimatePresence mode="wait">
+                {showFinalButton ? (
+                  <motion.span
+                    key="dashboard-text"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.2 }}
+                    className="flex items-center"
+                  >
+                    Go to Dashboard
+                    <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" size={20} />
+                  </motion.span>
+                ) : (
+                  <motion.span
+                    key="complete-steps-text"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.2 }}
+                    className="flex items-center"
+                  >
+                    Complete all steps to continue
+                  </motion.span>
+                )}
+              </AnimatePresence>
+            </motion.button>
+          </Link>
           
           {showFinalButton && (
             <motion.p 
@@ -229,7 +234,7 @@ export default function StartPage() {
               You're all set! Welcome to LostyoCord
             </motion.p>
           )}
-        </div>
+        </motion.div>
 
         {/* Botão de voltar - sempre visível */}
         <motion.div
