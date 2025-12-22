@@ -17,41 +17,63 @@ interface Particle {
 export const Hero = () => {
   const [particles, setParticles] = React.useState<Particle[]>([]);
   const containerRef = React.useRef<HTMLDivElement>(null);
+  const particleIdCounter = React.useRef(50); // Start counter at 50 to avoid conflicts
 
-  React.useEffect(() => {
-    const handleResize = () => {
-      if (containerRef.current) {
-        const containerHeight = containerRef.current.offsetHeight;
-        const iconComponents = [
-          MessageSquare,
-          Users,
-          Settings,
-          Lock,
-          BarChart,
-          Globe
-        ];
-        
-        const newParticles: Particle[] = [];
-        for (let i = 0; i < 30; i++) { // Number of particles
-          const RandomIcon = iconComponents[Math.floor(Math.random() * iconComponents.length)];
-          
-          newParticles.push({
-            id: i,
-            y: Math.random() * containerHeight,
-            size: Math.random() * 20 + 10, // Size between 10 and 30
-            opacity: Math.random() * 0.5 + 0.2, // Opacity between 0.2 and 0.7
-            speed: Math.random() * 20 + 10, // Speed between 10 and 30 seconds
-            icon: <RandomIcon />
-          });
-        }
-        setParticles(newParticles);
-      }
+  // Function to create a new particle
+  const createParticle = (id: number): Particle => {
+    if (!containerRef.current) {
+      return {
+        id,
+        y: 0,
+        size: 20,
+        opacity: 0.5,
+        speed: 20,
+        icon: <MessageSquare />
+      };
+    }
+    
+    const containerHeight = containerRef.current.offsetHeight;
+    const iconComponents = [
+      MessageSquare,
+      Users,
+      Settings,
+      Lock,
+      BarChart,
+      Globe
+    ];
+    
+    const RandomIcon = iconComponents[Math.floor(Math.random() * iconComponents.length)];
+    
+    return {
+      id,
+      y: Math.random() * containerHeight,
+      size: Math.random() * 20 + 10, // Size between 10 and 30
+      opacity: Math.random() * 0.5 + 0.2, // Opacity between 0.2 and 0.7
+      speed: Math.random() * 20 + 10, // Speed between 10 and 30 seconds
+      icon: <RandomIcon />
     };
+  };
 
-    handleResize(); // Initial particle generation
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+  // Initialize particles
+  React.useEffect(() => {
+    const initialParticles: Particle[] = [];
+    for (let i = 0; i < 50; i++) {
+      initialParticles.push(createParticle(i));
+    }
+    setParticles(initialParticles);
   }, []);
+
+  // Handle particle replacement when they leave the screen
+  const handleAnimationComplete = (id: number) => {
+    setParticles(prev => {
+      // Remove the particle that completed its animation
+      const filtered = prev.filter(p => p.id !== id);
+      
+      // Add a new particle to maintain exactly 50
+      const newParticle = createParticle(particleIdCounter.current++);
+      return [...filtered, newParticle];
+    });
+  };
 
   const container = {
     hidden: { opacity: 0 },
@@ -91,10 +113,9 @@ export const Hero = () => {
           }}
           transition={{ 
             duration: p.speed,
-            repeat: Infinity,
-            repeatType: "loop",
             ease: "linear"
           }}
+          onAnimationComplete={() => handleAnimationComplete(p.id)}
           className="absolute"
           style={{ 
             top: `${p.y}px`,
