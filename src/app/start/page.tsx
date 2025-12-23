@@ -43,35 +43,44 @@ function StartPageContent() {
 
   useEffect(() => {
     const guildId = searchParams.get('guild_id');
+    // Só tenta checar o bot se já estiver logado (passo 1)
     if (guildId && completedSteps.includes(1) && !completedSteps.includes(3) && !checkingBot) {
       setCheckingBot(true);
       
+      let attempts = 0;
       const pollBotStatus = async () => {
+        attempts++;
         try {
-          const response = await fetch(`/api/check-bot?guild_id=${guildId}`);
+          const response = await fetch(`/api/check-bot?guild_id=${guildId}`, {
+            cache: 'no-store',
+            headers: { 'Accept': 'application/json' }
+          });
           
           if (!response.ok) {
-            console.warn(`[BotCheck] API returned status ${response.status}`);
+            console.warn(`[BotCheck] Attempt ${attempts}: Server returned ${response.status}`);
             return false;
           }
 
           const data = await response.json();
-          if (data.active === true) {
+          if (data && data.active === true) {
             setCompletedSteps(prev => prev.includes(3) ? prev : [...prev, 3]);
             setCheckingBot(false);
             return true;
           }
         } catch (err) {
-          console.error("[BotCheck] Fetch failed:", err);
+          console.error(`[BotCheck] Attempt ${attempts} failed:`, err);
         }
         return false;
       };
 
+      // Execução imediata
       pollBotStatus();
+
+      // Intervalo de verificação
       const interval = setInterval(async () => {
         const isFound = await pollBotStatus();
         if (isFound) clearInterval(interval);
-      }, 5000);
+      }, 3500);
 
       return () => clearInterval(interval);
     }
