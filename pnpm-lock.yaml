@@ -149,6 +149,9 @@ importers:
       recharts:
         specifier: ^2.15.3
         version: 2.15.3(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
+      server-only:
+        specifier: ^0.0.1
+        version: 0.0.1
       sonner:
         specifier: ^2.0.3
         version: 2.0.3(react-dom@19.2.1(react@19.2.1))(react@19.2.1)
@@ -1720,6 +1723,9 @@ packages:
     resolution: {integrity: sha512-RF0Fw+rO5AMf9MAyaRXI4AV0Ulj5lMHqVxxdSgiVbixSCXoEmmX/jk0CuJw4+3SqroYO9VoUh+HcuJivvtJemA==}
     engines: {node: '>=10'}
     hasBin: true
+
+  server-only@0.0.1:
+    resolution: {integrity: sha512-qepMx2JxAa5jjfzxG79yPPq+8BuFToHd1hm7kI+Z4zAq1ftQiP7HcxMhDDItrbtwVeLg/cY2JnKnrcFkmiswNA==}
 
   sharp@0.34.2:
     resolution: {integrity: sha512-lszvBmB9QURERtyKT2bNmsgxXK0ShJrL/fvqlonCo7e6xBF8nT8xU6pW+PMIbLsz0RxQk3rgH9kd8UmvOzlMJg==}
@@ -3378,6 +3384,8 @@ snapshots:
 
   semver@7.7.2:
     optional: true
+
+  server-only@0.0.1: {}
 
   sharp@0.34.2:
     dependencies:
