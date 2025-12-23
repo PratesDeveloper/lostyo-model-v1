@@ -47,30 +47,31 @@ function StartPageContent() {
       setCheckingBot(true);
       
       const pollBotStatus = async () => {
-        console.log(`[BotCheck] Calling internal API for guild: ${guildId}`);
         try {
-          // Chamada para a API interna do Next.js, não diretamente para o Supabase
           const response = await fetch(`/api/check-bot?guild_id=${guildId}`);
-          const data = await response.json();
           
+          if (!response.ok) {
+            console.warn(`[BotCheck] API returned status ${response.status}`);
+            return false;
+          }
+
+          const data = await response.json();
           if (data.active === true) {
-            console.log("[BotCheck] Bot confirmed via Server API.");
             setCompletedSteps(prev => prev.includes(3) ? prev : [...prev, 3]);
             setCheckingBot(false);
             return true;
           }
         } catch (err) {
-          console.error("[BotCheck] API call failed:", err);
+          console.error("[BotCheck] Fetch failed:", err);
         }
         return false;
       };
 
       pollBotStatus();
-
       const interval = setInterval(async () => {
         const isFound = await pollBotStatus();
         if (isFound) clearInterval(interval);
-      }, 4000);
+      }, 5000);
 
       return () => clearInterval(interval);
     }
@@ -99,7 +100,7 @@ function StartPageContent() {
 
   if (loading) return (
     <div className="min-h-screen bg-[#0B0B0D] flex items-center justify-center">
-      <Loader2 className="animate-spin text-[#5865F2]" />
+      <Loader2 className="animate-spin text-[#5865F2] w-12 h-12" />
     </div>
   );
 
@@ -110,29 +111,32 @@ function StartPageContent() {
           <motion.h1 initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-4xl font-black text-white mb-8 tracking-tight">Get Started</motion.h1>
           
           <div className="flex justify-center items-center mb-12">
-            {steps.map((step, index) => (
-              <React.Fragment key={step.id}>
-                <div className="flex flex-col items-center">
-                  <div className={cn(
-                    "w-12 h-12 rounded-full flex items-center justify-center transition-all duration-500 border-2",
-                    completedSteps.includes(step.id) 
-                      ? "bg-green-500/20 border-green-500 text-green-500" 
-                      : "bg-[#141417] border-[#1A1A1E] text-white/20"
-                  )}>
-                    {completedSteps.includes(step.id) ? <Check size={24} /> : <step.icon size={24} />}
+            {steps.map((step, index) => {
+              const isDone = completedSteps.includes(step.id);
+              return (
+                <React.Fragment key={step.id}>
+                  <div className="flex flex-col items-center">
+                    <div className={cn(
+                      "w-12 h-12 rounded-full flex items-center justify-center transition-all duration-500 border-2",
+                      isDone 
+                        ? "bg-green-500/20 border-green-500 text-green-500" 
+                        : "bg-[#141417] border-[#1A1A1E] text-white/20"
+                    )}>
+                      {isDone ? <Check size={24} /> : <step.icon size={24} />}
+                    </div>
+                    <span className={cn("text-xs font-bold mt-2", isDone ? "text-green-500" : "text-white/20")}>
+                      {step.title}
+                    </span>
                   </div>
-                  <span className={cn("text-xs font-bold mt-2", completedSteps.includes(step.id) ? "text-green-500" : "text-white/20")}>
-                    {step.title}
-                  </span>
-                </div>
-                {index < steps.length - 1 && (
-                  <div className={cn(
-                    "w-16 h-0.5 mx-2 transition-colors duration-500",
-                    completedSteps.includes(step.id) && completedSteps.includes(steps[index+1].id) ? "bg-green-500" : "bg-white/5"
-                  )} />
-                )}
-              </React.Fragment>
-            ))}
+                  {index < steps.length - 1 && (
+                    <div className={cn(
+                      "w-16 h-0.5 mx-2 transition-colors duration-500",
+                      isDone && completedSteps.includes(steps[index+1].id) ? "bg-green-500" : "bg-white/5"
+                    )} />
+                  )}
+                </React.Fragment>
+              );
+            })}
           </div>
         </div>
 
