@@ -98,9 +98,7 @@ function StartPageContent() {
           {/* Progress Indicator */}
           <div className="flex justify-center items-center mb-12">
             {[1, 2, 3].map((id, idx) => {
-              const icons = [Lock, Puzzle, Bot];
               const titles = ["Login", "Extension", "Add Bot"];
-              const Icon = icons[idx];
               const isDone = completedSteps.includes(id);
               const isNextDone = completedSteps.includes(id + 1);
               
@@ -108,12 +106,12 @@ function StartPageContent() {
                 <React.Fragment key={id}>
                   <div className="flex flex-col items-center relative z-10">
                     <div className={cn(
-                      "w-14 h-14 rounded-full flex items-center justify-center border-4 transition-all duration-500",
+                      "w-14 h-14 rounded-full flex items-center justify-center border-4 transition-all duration-500 font-bold text-lg",
                       isDone 
                         ? "bg-green-500 border-green-500 text-white" 
                         : "bg-[#141417] border-[#1A1A1E] text-white/40"
                     )}>
-                      {isDone ? <Check size={24} /> : <Icon size={24} />}
+                      {isDone ? <Check size={24} /> : id}
                     </div>
                     <span className={cn(
                       "text-sm font-bold mt-3 transition-colors duration-500",
