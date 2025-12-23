@@ -14,26 +14,21 @@ import {
   Zap, 
   LogOut,
   Search,
-  Bell,
   ChevronRight,
-  Plus
+  Plus,
+  Loader2
 } from 'lucide-react';
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-// Mock de servidores (Em produção isso viria da API do Discord / Supabase)
-const MOCK_GUILDS = [
-  { id: "123456789", name: "Lostyo Hub", icon: "https://cdn.discordapp.com/embed/avatars/0.png", members: 12482, premium: true },
-  { id: "987654321", name: "Dev Community", icon: "https://cdn.discordapp.com/embed/avatars/1.png", members: 5420, premium: false },
-  { id: "456789123", name: "Gamer Lounge", icon: "https://cdn.discordapp.com/embed/avatars/2.png", members: 890, premium: false },
-];
-
 export default function DashboardPage() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState("analytics");
   const [loading, setLoading] = useState(true);
+  const [fetchingGuilds, setFetchingGuilds] = useState(true);
+  const [guilds, setGuilds] = useState<any[]>([]);
   const [selectedGuild, setSelectedGuild] = useState<any>(null);
 
   useEffect(() => {
@@ -42,8 +37,24 @@ export default function DashboardPage() {
       router.push('/start');
     } else {
       setLoading(false);
+      fetchGuilds();
     }
   }, [router]);
+
+  const fetchGuilds = async () => {
+    try {
+      setFetchingGuilds(true);
+      const response = await fetch('/api/discord/guilds');
+      const data = await response.json();
+      if (Array.isArray(data)) {
+        setGuilds(data);
+      }
+    } catch (err) {
+      console.error("Failed to load guilds", err);
+    } finally {
+      setFetchingGuilds(false);
+    }
+  };
 
   if (loading) return null;
 
@@ -59,32 +70,73 @@ export default function DashboardPage() {
           </div>
 
           <div className="grid grid-cols-1 gap-3">
-            {MOCK_GUILDS.map((guild) => (
-              <button
-                key={guild.id}
-                onClick={() => setSelectedGuild(guild)}
-                className="flex items-center justify-between p-5 bg-[#141417] hover:bg-[#1A1A1E] border border-white/5 hover:border-[#5865F2]/50 rounded-[2rem] transition-all group"
-              >
-                <div className="flex items-center gap-4">
-                  <Avatar className="w-12 h-12 border border-white/10 group-hover:scale-105 transition-transform">
-                    <AvatarImage src={guild.icon} />
-                    <AvatarFallback>{guild.name[0]}</AvatarFallback>
-                  </Avatar>
-                  <div className="text-left">
-                    <h3 className="font-bold text-lg flex items-center gap-2">
-                      {guild.name}
-                      {guild.premium && <Zap size={14} className="text-[#5865F2]" />}
-                    </h3>
-                    <p className="text-xs text-white/30 font-bold uppercase tracking-widest">{guild.members.toLocaleString()} Members</p>
+            {fetchingGuilds ? (
+              <div className="flex flex-col items-center py-10">
+                <Loader2 className="animate-spin text-[#5865F2] w-10 h-10 mb-4" />
+                <p className="text-white/20 text-sm font-bold uppercase tracking-widest">Loading your servers...</p>
+              </div>
+            ) : guilds.length > 0 ? (
+              guilds.map((guild) => (
+                <button
+                  key={guild.id}
+                  onClick={() => guild.active && setSelectedGuild(guild)}
+                  className={cn(
+                    "flex items-center justify-between p-5 bg-[#141417] border rounded-[2rem] transition-all group relative overflow-hidden",
+                    guild.active 
+                      ? "hover:bg-[#1A1A1E] border-white/5 hover:border-[#5865F2]/50" 
+                      : "opacity-60 border-white/5 cursor-not-allowed grayscale"
+                  )}
+                >
+                  <div className="flex items-center gap-4 relative z-10">
+                    <Avatar className="w-12 h-12 border border-white/10 group-hover:scale-105 transition-transform">
+                      <AvatarImage src={guild.icon} />
+                      <AvatarFallback>{guild.name[0]}</AvatarFallback>
+                    </Avatar>
+                    <div className="text-left">
+                      <h3 className="font-bold text-lg flex items-center gap-2">
+                        {guild.name}
+                        {guild.active && <Zap size={14} className="text-[#5865F2]" />}
+                      </h3>
+                      <p className="text-xs text-white/30 font-bold uppercase tracking-widest">
+                        {guild.active ? "Bot Active" : "Bot not invited"}
+                      </p>
+                    </div>
                   </div>
-                </div>
-                <ChevronRight className="text-white/20 group-hover:text-white transition-colors" />
-              </button>
-            ))}
+                  
+                  {guild.active ? (
+                    <ChevronRight className="text-white/20 group-hover:text-white transition-colors relative z-10" />
+                  ) : (
+                    <Button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        router.push(`/safe-alert?guild_id=${guild.id}`);
+                      }}
+                      size="sm" 
+                      className="bg-[#5865F2] hover:bg-[#4752C4] rounded-full text-[10px] font-black uppercase tracking-wider relative z-10"
+                    >
+                      Invite Bot
+                    </Button>
+                  )}
+
+                  {guild.banner && (
+                    <div className="absolute inset-0 opacity-10 group-hover:opacity-20 transition-opacity">
+                      <img src={guild.banner} alt="" className="w-full h-full object-cover" />
+                    </div>
+                  )}
+                </button>
+              ))
+            ) : (
+              <div className="text-center py-10 bg-white/5 rounded-[2rem] border border-dashed border-white/10">
+                <p className="text-white/40">No servers found where you are an admin.</p>
+              </div>
+            )}
             
-            <button className="flex items-center justify-center gap-3 p-5 bg-white/5 hover:bg-white/10 border border-dashed border-white/10 rounded-[2rem] transition-all group mt-4">
+            <button 
+              onClick={() => router.push('/start')}
+              className="flex items-center justify-center gap-3 p-5 bg-white/5 hover:bg-white/10 border border-dashed border-white/10 rounded-[2rem] transition-all group mt-4"
+            >
               <Plus size={20} className="text-white/40" />
-              <span className="font-bold text-white/40">Add New Server</span>
+              <span className="font-bold text-white/40">Manage New Server</span>
             </button>
           </div>
         </div>
@@ -190,9 +242,9 @@ export default function DashboardPage() {
           {activeTab === "analytics" && (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {[
-                { label: "Total Members", val: selectedGuild.members.toLocaleString(), sub: "+12% this month" },
-                { label: "Active Users", val: Math.floor(selectedGuild.members * 0.25).toLocaleString(), sub: "Currently online" },
-                { label: "Messages/Day", val: "45.2k", sub: "Peak engagement" }
+                { label: "Total Members", val: "Fetching...", sub: "Real-time sync" },
+                { label: "Active Users", val: "---", sub: "Currently online" },
+                { label: "Messages/Day", val: "---", sub: "Peak engagement" }
               ].map((stat, i) => (
                 <Card key={i} className="bg-[#141417] border-white/5 rounded-3xl p-6">
                   <CardHeader className="p-0 mb-4">
