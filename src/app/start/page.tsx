@@ -99,7 +99,7 @@ function StartPageContent() {
 
   const steps = [
     { id: 1, title: "Identity", icon: Lock, label: "Login with Discord", desc: "Connect your account to sync preferences." },
-    { id: 2, title: "Enhance", icon: Puzzle, label: "Install Extension", desc: "Unlock advanced dashboard features." },
+    { id: 2, title: "Install Extension", icon: Puzzle, label: "Install Extension", desc: "Add our browser extension for enhanced features." },
     { id: 3, title: "Connect", icon: Bot, label: "Add our Bot", desc: "Bring LostyoCord to your community." }
   ];
 
