@@ -8,28 +8,28 @@ import { Check, Lock, Puzzle, Bot, Loader2 } from 'lucide-react';
 import { cn } from "@/lib/utils";
 import { useExtensionDetector } from '@/hooks/useExtensionDetector';
 import Cookies from 'js-cookie';
-import { useSupabase } from '@/context/SupabaseProvider';
-import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
 
 function StartPageContent() {
   const router = useRouter();
-  const { user, profile, updateProfile } = useSupabase();
   const [completedSteps, setCompletedSteps] = useState<number[]>([]);
   const [showFinalButton, setShowFinalButton] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [checkingExtension, setCheckingExtension] = useState(false);
   const [checkingBot, setCheckingBot] = useState(false);
   const isExtensionInstalled = useExtensionDetector();
   const searchParams = useSearchParams();
 
-  // Step 1: Authentication check (using Supabase context)
   useEffect(() => {
-    if (user) {
+    // Verifica se o usuário está logado através do cookie
+    const loggedIn = Cookies.get('lostyo_logged_in') === 'true';
+    if (loggedIn) {
+      setIsAuthenticated(true);
       setCompletedSteps(prev => prev.includes(1) ? prev : [...prev, 1]);
     }
-  }, [user]);
+    setLoading(false);
+  }, []);
 
-  // Step 2: Extension check
   useEffect(() => {
     if (isExtensionInstalled && completedSteps.includes(1) && !completedSteps.includes(2)) {
       setCompletedSteps(prev => [...prev, 2]);
@@ -37,7 +37,6 @@ function StartPageContent() {
     }
   }, [isExtensionInstalled, completedSteps]);
 
-  // Step 3: Bot check
   useEffect(() => {
     const guildId = searchParams.get('guild_id');
     if (guildId && completedSteps.includes(1) && !completedSteps.includes(3) && !checkingBot) {
@@ -68,34 +67,9 @@ function StartPageContent() {
     }
   }, [searchParams, completedSteps, checkingBot]);
 
-  // Final step: Check if all steps are complete and update profile
   useEffect(() => {
-    const allStepsComplete = completedSteps.length >= 3;
-
-    if (allStepsComplete && user && profile && !profile.onboarding_complete) {
-      setShowFinalButton(true);
-      
-      // Mark onboarding complete in DB
-      const markComplete = async () => {
-        const { error } = await supabase
-          .from('profiles')
-          .update({ onboarding_complete: true })
-          .eq('id', user.id);
-
-        if (error) {
-          console.error("Failed to mark onboarding complete:", error);
-          toast.error("Failed to save progress.");
-        } else {
-          updateProfile({ onboarding_complete: true });
-          toast.success("Setup complete! Welcome to the dashboard.");
-        }
-      };
-      markComplete();
-    } else if (profile?.onboarding_complete || allStepsComplete) {
-      // If already complete or all steps done (even if profile update failed)
-      setShowFinalButton(true);
-    }
-  }, [completedSteps, user, profile, updateProfile]);
+    if (completedSteps.length >= 3) setShowFinalButton(true);
+  }, [completedSteps]);
 
   const handleStepAction = async (id: number) => {
     if (id === 1) router.push('/login');
@@ -106,9 +80,7 @@ function StartPageContent() {
     if (id === 3) router.push('/safe-alert');
   };
 
-  const isStep1Done = completedSteps.includes(1);
-  const isStep2Done = completedSteps.includes(2);
-  const isStep3Done = completedSteps.includes(3);
+  if (loading) return <div className="min-h-screen bg-[#0B0B0D] flex items-center justify-center"><Loader2 className="animate-spin text-[#5865F2] w-12 h-12" /></div>;
 
   return (
     <div className="min-h-screen bg-[#0B0B0D] flex flex-col items-center justify-center p-6">
@@ -163,12 +135,7 @@ function StartPageContent() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-12">
           {[1, 2, 3].map((id, idx) => {
             const icons = [Lock, Puzzle, Bot];
-            const titles = ["Login to Discord", "Install Extension", "Add Bot to Server"];
-            const descriptions = [
-              "Securely connect your Discord account to manage your servers.",
-              "Install our browser extension for enhanced dashboard features.",
-              "Invite LostyoCord to your server to enable moderation and analytics."
-            ];
+            const titles = ["Login", "Extension", "Add Bot"];
             const isDone = completedSteps.includes(id);
             const isLocked = idx > 0 && !completedSteps.includes(id - 1);
             const Icon = icons[idx];
@@ -198,27 +165,26 @@ function StartPageContent() {
                 )}>
                   <Icon size={28} />
                 </div>
-                <h3 className="text-xl font-bold text-white mb-3">{titles[idx]}</h3>
-                <p className="text-white/40 text-sm mb-6 flex-grow">{descriptions[idx]}</p>
+                <h3 className="text-xl font-bold text-white mb-6">{titles[idx]}</h3>
                 <Button 
                   className={cn(
                     "w-full rounded-2xl font-bold h-12",
                     isDone 
-                      ? "bg-green-500 text-white hover:bg-green-600" 
-                      : "bg-[#5865F2] text-white hover:bg-[#4752C4]"
+                      ? "bg-green-500 text-white" 
+                      : "bg-[#5865F2] text-white"
                   )}
                   disabled={
                     isLocked || 
-                    (id === 1 && isStep1Done) || 
-                    (id === 2 && (checkingExtension || isStep2Done)) || 
-                    (id === 3 && (checkingBot || isStep3Done))
+                    (id === 1 && isAuthenticated) || 
+                    (id === 2 && (checkingExtension || isDone)) || 
+                    (id === 3 && (checkingBot || isDone))
                   }
                   onClick={() => handleStepAction(id)}
                 >
                   {isDone 
                     ? "Completed" 
                     : (id === 2 && checkingExtension) || (id === 3 && checkingBot) 
-                      ? <><Loader2 className="animate-spin mr-2 w-4 h-4" /> Checking...</>
+                      ? "Checking..." 
                       : buttonLabel}
                 </Button>
               </div>
@@ -233,8 +199,8 @@ function StartPageContent() {
               className={cn(
                 "px-12 h-14 rounded-full font-black text-lg",
                 showFinalButton 
-                  ? "bg-green-500 text-white hover:bg-green-600" 
-                  : "bg-white/5 text-white/20 cursor-not-allowed"
+                  ? "bg-green-500 text-white" 
+                  : "bg-white/5 text-white/20"
               )}
             >
               Go to Dashboard
@@ -250,7 +216,7 @@ export default function StartPage() {
   return (
     <Suspense fallback={
       <div className="min-h-screen bg-[#0B0B0D] flex items-center justify-center">
-        <Loader2 className="animate-spin text-[#5865F2] w-12 h-12" />
+        <Loader2 className="animate-spin text-[#5865F2]" />
       </div>
     }>
       <StartPageContent />
