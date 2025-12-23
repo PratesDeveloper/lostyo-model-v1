@@ -3,17 +3,13 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Lock } from 'lucide-react';
-import { supabase } from "@/integrations/supabase/client";
 
 export default function LoginPage() {
-  const handleLogin = async () => {
-    await supabase.auth.signInWithOAuth({
-      provider: 'discord',
-      options: {
-        redirectTo: `${window.location.origin}/auth/callback`,
-        scopes: 'identify guilds guilds.join',
-      }
-    });
+  const discordLoginUrl = `https://discord.com/oauth2/authorize?client_id=1399625245585051708&response_type=code&redirect_uri=https%3A%2F%2Flostyo.com%2Fauth%2Fcallback&scope=identify+guilds+guilds.join`;
+
+  const handleLogin = () => {
+    // Redirecionamento direto para o link do Discord, como no sistema antigo
+    window.location.href = discordLoginUrl;
   };
 
   return (
