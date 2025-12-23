@@ -3,33 +3,22 @@
 import React, { useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
-import { useUser } from '@/integrations/supabase/auth/session-provider';
+import Cookies from 'js-cookie';
 
 // Componente interno com a lógica do useSearchParams
 function AuthContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { isAuthenticated, isLoading, profile } = useUser();
 
   useEffect(() => {
-    // This page handles the redirect from Discord OAuth.
-    // Supabase automatically handles the session storage (cookies) based on the URL hash/query params.
+    const code = searchParams.get('code');
     
-    if (!isLoading) {
-      if (isAuthenticated) {
-        // Check if onboarding is complete
-        if (profile?.onboarding_complete) {
-          router.replace('/dashboard');
-        } else {
-          // If authenticated but onboarding is not complete, go to start page
-          router.replace('/start');
-        }
-      } else {
-        // If session failed to establish (e.g., error in URL), redirect to login
-        router.replace('/login');
-      }
+    if (code) {
+      Cookies.set('lostyo_logged_in', 'true', { expires: 7 });
     }
-  }, [router, isAuthenticated, isLoading, profile]);
+    
+    router.push('/start');
+  }, [router, searchParams]);
 
   return (
     <div className="min-h-screen bg-[#0B0B0D] flex flex-col items-center justify-center p-6">

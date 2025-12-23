@@ -7,9 +7,7 @@ import { motion } from 'framer-motion';
 import { Check, Lock, Puzzle, Bot, Loader2 } from 'lucide-react';
 import { cn } from "@/lib/utils";
 import { useExtensionDetector } from '@/hooks/useExtensionDetector';
-import { useUser } from '@/integrations/supabase/auth/session-provider';
-import { completeOnboarding } from './actions';
-import { toast } from 'sonner';
+import Cookies from 'js-cookie';
 
 // Componente de Indicador de Passo com Animação
 const StepIndicator = ({ id, isDone, title }: { id: number, isDone: boolean, title: string }) => {
@@ -21,6 +19,7 @@ const StepIndicator = ({ id, isDone, title }: { id: number, isDone: boolean, tit
         animate={isDone ? "done" : "initial"}
         variants={{
           initial: { scale: 1, rotate: 0 },
+          // Animação de 'pop' aprimorada
           done: { scale: [1, 1.2, 1], rotate: [0, 10, -10, 0] }
         }}
         transition={{ duration: 0.5, type: "spring", stiffness: 300, damping: 20 }}
@@ -46,15 +45,10 @@ const StepIndicator = ({ id, isDone, title }: { id: number, isDone: boolean, tit
 
 function StartPageContent() {
   const router = useRouter();
-  const { isAuthenticated, isLoading: isAuthLoading, profile, fetchProfile } = useUser();
-  
-  // Initialize completedSteps based on profile status if available
-  const initialSteps = [];
-  if (isAuthenticated) initialSteps.push(1);
-  if (profile?.onboarding_complete) initialSteps.push(2, 3);
-
-  const [completedSteps, setCompletedSteps] = useState<number[]>(initialSteps);
-  const [showFinalButton, setShowFinalButton] = useState(profile?.onboarding_complete || false);
+  const [completedSteps, setCompletedSteps] = useState<number[]>([]);
+  const [showFinalButton, setShowFinalButton] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [checkingExtension, setCheckingExtension] = useState(false);
   const [checkingBot, setCheckingBot] = useState(false);
   const isExtensionInstalled = useExtensionDetector();
@@ -62,26 +56,24 @@ function StartPageContent() {
   
   const titles = ["Login", "Extension", "Add Bot"];
 
-  // Function to add a step with delay
+  // Função para adicionar um passo com delay
   const completeStepWithDelay = (stepId: number) => {
     if (!completedSteps.includes(stepId)) {
       setTimeout(() => {
-        setCompletedSteps(prev => {
-          if (!prev.includes(stepId)) {
-            return [...prev, stepId].sort((a, b) => a - b);
-          }
-          return prev;
-        });
-      }, 1500); // 1.5 seconds delay
+        setCompletedSteps(prev => [...prev, stepId]);
+      }, 1500); // Atraso de 1.5 segundos
     }
   };
 
   // Efeito 1: Checagem de Autenticação (Passo 1)
   useEffect(() => {
-    if (isAuthenticated && !completedSteps.includes(1)) {
+    const loggedIn = Cookies.get('lostyo_logged_in') === 'true';
+    if (loggedIn) {
+      setIsAuthenticated(true);
       completeStepWithDelay(1);
     }
-  }, [isAuthenticated, completedSteps]);
+    setLoading(false);
+  }, []);
 
   // Efeito 2: Checagem da Extensão (Passo 2)
   useEffect(() => {
@@ -94,63 +86,41 @@ function StartPageContent() {
   // Efeito 3: Checagem do Bot (Passo 3)
   useEffect(() => {
     const guildId = searchParams.get('guild_id');
-    
-    // Only proceed if Step 2 is done and Step 3 is not done
-    if (completedSteps.includes(2) && !completedSteps.includes(3) && !checkingBot) {
-      
-      // If guildId is present, start checking bot status
-      if (guildId) {
-        setCheckingBot(true);
-        const pollBotStatus = async () => {
-          try {
-            const response = await fetch(`/api/check-bot?guild_id=${guildId}`);
-            const data = await response.json();
-            if (data.active === true) {
-              setCheckingBot(false);
-              completeStepWithDelay(3);
-              return true;
-            }
-          } catch (err) {
-            console.error("Bot check failed", err);
+    if (guildId && completedSteps.includes(2) && !completedSteps.includes(3) && !checkingBot) {
+      setCheckingBot(true);
+      const pollBotStatus = async () => {
+        try {
+          const response = await fetch(`/api/check-bot?guild_id=${guildId}`);
+          const data = await response.json();
+          if (data.active === true) {
+            setCheckingBot(false);
+            completeStepWithDelay(3);
+            return true;
           }
-          return false;
-        };
+        } catch (err) {
+          console.error("Bot check failed", err);
+        }
+        return false;
+      };
 
-        pollBotStatus();
-        const interval = setInterval(async () => {
-          const isFound = await pollBotStatus();
-          if (isFound) clearInterval(interval);
-        }, 3500);
+      pollBotStatus();
+      const interval = setInterval(async () => {
+        const isFound = await pollBotStatus();
+        if (isFound) clearInterval(interval);
+      }, 3500);
 
-        return () => clearInterval(interval);
-      } else {
-        // If Step 2 is done but no guild_id is in URL, Step 3 button is active
-      }
+      return () => clearInterval(interval);
     }
   }, [searchParams, completedSteps, checkingBot]);
 
-  // Efeito 4: Finalização e Atualização do Perfil
+  // Efeito 4: Mostrar Botão Final
   useEffect(() => {
-    if (completedSteps.includes(3) && !profile?.onboarding_complete) {
-      const finalizeSetup = async () => {
-        const result = await completeOnboarding();
-        if (result.success) {
-          toast.success("Setup complete! Redirecting to Dashboard.");
-          // Refetch profile to update local state
-          await fetchProfile(); 
-          setTimeout(() => {
-            setShowFinalButton(true);
-          }, 500); 
-        } else {
-          toast.error("Failed to finalize setup. Please try again.");
-        }
-      };
-      finalizeSetup();
-    } else if (profile?.onboarding_complete) {
-      // If profile already shows complete, ensure final button is visible
-      setShowFinalButton(true);
+    if (completedSteps.includes(3)) {
+      setTimeout(() => {
+        setShowFinalButton(true);
+      }, 1500); // Atraso para o botão final aparecer após o último passo
     }
-  }, [completedSteps, profile?.onboarding_complete, fetchProfile]);
+  }, [completedSteps]);
 
   const handleStepAction = async (id: number) => {
     if (id === 1) router.push('/login');
@@ -161,19 +131,7 @@ function StartPageContent() {
     if (id === 3) router.push('/safe-alert');
   };
 
-  if (isAuthLoading) return <div className="min-h-screen bg-[#0B0B0D] flex items-center justify-center"><Loader2 className="animate-spin text-[#5865F2] w-12 h-12" /></div>;
-
-  // If onboarding is complete, redirect to dashboard immediately
-  if (profile?.onboarding_complete) {
-    router.replace('/dashboard');
-    return null;
-  }
-  
-  // If not authenticated, redirect to login
-  if (!isAuthenticated && !isAuthLoading) {
-    router.replace('/login');
-    return null;
-  }
+  if (loading) return <div className="min-h-screen bg-[#0B0B0D] flex items-center justify-center"><Loader2 className="animate-spin text-[#5865F2] w-12 h-12" /></div>;
 
   return (
     <div className="min-h-screen bg-[#0B0B0D] flex flex-col items-center justify-center p-6">
@@ -236,7 +194,7 @@ function StartPageContent() {
                 className={cn(
                   "bg-[#141417] p-8 rounded-[2rem] border flex flex-col items-center text-center transition-all duration-500 h-full",
                   isDone 
-                    ? "border-green-500/50" 
+                    ? "border-green-500/50" // Sombra verde removida
                     : isLocked 
                       ? "opacity-50 border-[#1A1A1E] cursor-not-allowed" 
                       : "border-[#1A1A1E] hover:border-[#5865F2]/50"
@@ -291,7 +249,7 @@ function StartPageContent() {
               className={cn(
                 "px-16 h-16 rounded-full font-black text-xl transition-all duration-500",
                 showFinalButton 
-                  ? "bg-green-500 hover:bg-green-600 text-white" 
+                  ? "bg-green-500 hover:bg-green-600 text-white" // Sombra verde removida
                   : "bg-white/5 text-white/20 cursor-not-allowed"
               )}
             >

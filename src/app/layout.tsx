@@ -1,7 +1,5 @@
 import { Metadata } from 'next';
 import './globals.css';
-import { SessionProvider } from '@/integrations/supabase/auth/session-provider';
-import { Toaster } from '@/components/ui/sonner';
 
 export const metadata: Metadata = {
   title: "LostyoCord",
@@ -15,12 +13,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>
-        <SessionProvider>
-          {children}
-          <Toaster />
-        </SessionProvider>
-      </body>
+      <body>{children}</body>
     </html>
   );
 }

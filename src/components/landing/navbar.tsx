@@ -2,13 +2,8 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import Link from 'next/link';
-import { useUser } from '@/integrations/supabase/auth/session-provider';
-import { UserDropdown } from '../auth/user-dropdown';
-import { Loader2 } from 'lucide-react';
 
 export const Navbar = () => {
-  const { isAuthenticated, isLoading } = useUser();
-
   return (
     <div className="fixed top-6 left-0 right-0 z-50 flex justify-center px-4">
       <nav className="w-full max-w-4xl h-14 bg-[#1A1A1E] rounded-full flex items-center justify-between px-2 shadow-xl">
@@ -21,18 +16,12 @@ export const Navbar = () => {
           <a href="#stats" className="hover:text-white transition-colors">Stats</a>
           <a href="#preview" className="hover:text-white transition-colors">Preview</a>
         </div>
-        <div className="flex items-center gap-1 pr-2">
-          {isLoading ? (
-            <Loader2 className="animate-spin text-[#5865F2] w-6 h-6" />
-          ) : isAuthenticated ? (
-            <UserDropdown />
-          ) : (
-            <Link href="/start">
-              <Button className="bg-[#5865F2] hover:bg-[#4752C4] text-white h-10 px-6 rounded-full text-xs font-bold transition-transform active:scale-95">
-                Start
-              </Button>
-            </Link>
-          )}
+        <div className="flex items-center gap-1">
+          <Link href="/start">
+            <Button className="bg-[#5865F2] hover:bg-[#4752C4] text-white h-10 px-6 rounded-full text-xs font-bold transition-transform active:scale-95">
+              Start
+            </Button>
+          </Link>
         </div>
       </nav>
     </div>
