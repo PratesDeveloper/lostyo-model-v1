@@ -7,24 +7,28 @@ import { motion } from 'framer-motion';
 import { Check, Lock, Puzzle, Bot, Loader2 } from 'lucide-react';
 import { cn } from "@/lib/utils";
 import { useExtensionDetector } from '@/hooks/useExtensionDetector';
-import { useUser } from '@/contexts/user-context';
+import Cookies from 'js-cookie';
 
 function StartPageContent() {
   const router = useRouter();
   const [completedSteps, setCompletedSteps] = useState<number[]>([]);
   const [showFinalButton, setShowFinalButton] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [checkingExtension, setCheckingExtension] = useState(false);
   const [checkingBot, setCheckingBot] = useState(false);
   const isExtensionInstalled = useExtensionDetector();
   const searchParams = useSearchParams();
-  const { user, isAuthenticated } = useUser();
 
   useEffect(() => {
-    // Check if user is authenticated
-    if (isAuthenticated && user) {
+    // Verifica se o usuário está logado através do cookie
+    const loggedIn = Cookies.get('lostyo_logged_in') === 'true';
+    if (loggedIn) {
+      setIsAuthenticated(true);
       setCompletedSteps(prev => prev.includes(1) ? prev : [...prev, 1]);
     }
-  }, [isAuthenticated, user]);
+    setLoading(false);
+  }, []);
 
   useEffect(() => {
     if (isExtensionInstalled && completedSteps.includes(1) && !completedSteps.includes(2)) {
@@ -64,9 +68,7 @@ function StartPageContent() {
   }, [searchParams, completedSteps, checkingBot]);
 
   useEffect(() => {
-    if (completedSteps.length >= 3) {
-      setShowFinalButton(true);
-    }
+    if (completedSteps.length >= 3) setShowFinalButton(true);
   }, [completedSteps]);
 
   const handleStepAction = async (id: number) => {
@@ -78,13 +80,7 @@ function StartPageContent() {
     if (id === 3) router.push('/safe-alert');
   };
 
-  if (!isAuthenticated) {
-    return (
-      <div className="min-h-screen bg-[#0B0B0D] flex items-center justify-center">
-        <Loader2 className="animate-spin text-[#5865F2] w-12 h-12" />
-      </div>
-    );
-  }
+  if (loading) return <div className="min-h-screen bg-[#0B0B0D] flex items-center justify-center"><Loader2 className="animate-spin text-[#5865F2] w-12 h-12" /></div>;
 
   return (
     <div className="min-h-screen bg-[#0B0B0D] flex flex-col items-center justify-center p-6">
