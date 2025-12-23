@@ -6,8 +6,8 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Check, Lock, Puzzle, Bot, Loader2 } from 'lucide-react';
 import { cn } from "@/lib/utils";
-import { supabase } from '@/integrations/supabase/client';
 import { useExtensionDetector } from '@/hooks/useExtensionDetector';
+import Cookies from 'js-cookie';
 
 function StartPageContent() {
   const router = useRouter();
@@ -22,15 +22,13 @@ function StartPageContent() {
   const searchParams = useSearchParams();
 
   useEffect(() => {
-    const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        setIsAuthenticated(true);
-        setCompletedSteps(prev => prev.includes(1) ? prev : [...prev, 1]);
-      }
-      setLoading(false);
-    };
-    checkAuth();
+    // Verifica se o usuário está logado através do cookie
+    const loggedIn = Cookies.get('lostyo_logged_in') === 'true';
+    if (loggedIn) {
+      setIsAuthenticated(true);
+      setCompletedSteps(prev => prev.includes(1) ? prev : [...prev, 1]);
+    }
+    setLoading(false);
   }, []);
 
   useEffect(() => {
@@ -46,12 +44,8 @@ function StartPageContent() {
       setCheckingBot(true);
       const pollBotStatus = async () => {
         try {
-          const { data: { session } } = await supabase.auth.getSession();
-          const response = await fetch(`/api/check-bot?guild_id=${guildId}`, {
-            headers: { 
-              'Authorization': `Bearer ${session?.access_token}`
-            }
-          });
+          // Busca o status do bot na API
+          const response = await fetch(`/api/check-bot?guild_id=${guildId}`);
           const data = await response.json();
           if (data.active === true) {
             setCompletedSteps(prev => prev.includes(3) ? prev : [...prev, 3]);
@@ -80,7 +74,7 @@ function StartPageContent() {
   const handleStepAction = async (id: number) => {
     if (id === 1) router.push('/login');
     if (id === 2) {
-      window.open('https://google.com', '_blank');
+      window.open('https://google.com', '_blank'); // Link de exemplo para extensão
       setCheckingExtension(true);
     }
     if (id === 3) router.push('/safe-alert');
@@ -122,7 +116,6 @@ function StartPageContent() {
             const isLocked = idx > 0 && !completedSteps.includes(id - 1);
             const Icon = icons[idx];
             
-            // Determinar o texto do botão com base no passo
             let buttonLabel = "Action";
             if (id === 1) buttonLabel = "Login";
             if (id === 2) buttonLabel = "Install";

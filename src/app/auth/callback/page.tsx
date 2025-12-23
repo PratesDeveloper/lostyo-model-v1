@@ -2,8 +2,8 @@
 
 import React, { useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { supabase } from '@/integrations/supabase/client';
 import { Loader2 } from 'lucide-react';
+import Cookies from 'js-cookie';
 
 export default function AuthCallbackPage() {
   const router = useRouter();
@@ -12,15 +12,15 @@ export default function AuthCallbackPage() {
   useEffect(() => {
     const code = searchParams.get('code');
     
-    const handleAuth = async () => {
-      if (code) {
-        // O Supabase ainda pode trocar esse código por uma sessão se o provedor estiver configurado
-        await supabase.auth.exchangeCodeForSession(code);
-      }
-      router.push('/start');
-    };
-
-    handleAuth();
+    if (code) {
+      // Salva um marcador de login no cookie (expira em 7 dias)
+      Cookies.set('lostyo_logged_in', 'true', { expires: 7 });
+      
+      // Opcional: Você pode salvar o código ou processar em sua API aqui
+      // Para o frontend, o marcador de cookie já satisfaz o "Passo 1"
+    }
+    
+    router.push('/start');
   }, [router, searchParams]);
 
   return (
