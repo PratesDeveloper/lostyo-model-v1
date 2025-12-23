@@ -47,46 +47,41 @@ function StartPageContent() {
     if (guildId && completedSteps.includes(1) && !completedSteps.includes(3) && !checkingBot) {
       setCheckingBot(true);
       
-      const verifyBot = async () => {
-        console.log(`[BotCheck] Verifying guild: ${guildId}`);
-        
-        // Método 1: RPC Padrão
+      const pollBotStatus = async () => {
+        console.log(`[BotCheck] Direct API query for guild: ${guildId}`);
         try {
-          const { data: rpc1, error: err1 } = await supabase.rpc('is_bot_in_guild', { guild_id_input: guildId });
-          if (!err1 && rpc1 === true) return true;
-          if (err1) console.warn("[BotCheck] Method 1 (RPC) failed:", err1.message);
-        } catch (e) {}
-
-        // Método 2: Query Direta na Tabela (Fallback mais confiável)
-        try {
-          const { data: table, error: err2 } = await supabase
+          // Consulta direta na tabela via API (sem usar RPC)
+          const { data, error } = await supabase
             .from('guilds')
-            .select('state')
+            .select('guild_id')
             .eq('guild_id', guildId)
             .eq('state', true)
             .maybeSingle();
-          if (!err2 && table) return true;
-          if (err2) console.warn("[BotCheck] Method 2 (Table) failed:", err2.message);
-        } catch (e) {}
+          
+          if (error) {
+            console.error("[BotCheck] API Error:", error.message);
+            return false;
+          }
 
-        // Método 3: RPC V2 com JSON
-        try {
-          const { data: rpc2, error: err3 } = await supabase.rpc('check_bot_v2', { payload: { guild_id: guildId } });
-          if (!err3 && rpc2 === true) return true;
-          if (err3) console.warn("[BotCheck] Method 3 (RPC V2) failed:", err3.message);
-        } catch (e) {}
-
+          if (data) {
+            console.log("[BotCheck] Bot found! Success.");
+            setCompletedSteps(prev => prev.includes(3) ? prev : [...prev, 3]);
+            setCheckingBot(false);
+            return true;
+          }
+        } catch (err) {
+          console.error("[BotCheck] Critical error:", err);
+        }
         return false;
       };
 
+      // Executa imediatamente
+      pollBotStatus();
+
+      // Polling a cada 4 segundos
       const interval = setInterval(async () => {
-        const success = await verifyBot();
-        if (success) {
-          console.log("[BotCheck] Bot detected via one of the methods!");
-          setCompletedSteps(prev => prev.includes(3) ? prev : [...prev, 3]);
-          setCheckingBot(false);
-          clearInterval(interval);
-        }
+        const isFound = await pollBotStatus();
+        if (isFound) clearInterval(interval);
       }, 4000);
 
       return () => clearInterval(interval);
@@ -100,9 +95,9 @@ function StartPageContent() {
   }, [completedSteps]);
 
   const steps = [
-    { id: 1, title: "Login", icon: Lock, requiresAuth: false },
-    { id: 2, title: "Extension", icon: Puzzle, requiresAuth: true },
-    { id: 3, title: "Add Bot", icon: Bot, requiresAuth: true }
+    { id: 1, title: "Login", icon: Lock },
+    { id: 2, title: "Extension", icon: Puzzle },
+    { id: 3, title: "Add Bot", icon: Bot }
   ];
 
   const handleStepAction = (id: number) => {
@@ -160,13 +155,19 @@ function StartPageContent() {
             
             return (
               <div key={step.id} className={cn(
-                "bg-[#141417] p-6 rounded-3xl border transition-all",
-                isDone ? "border-green-500/30" : isLocked ? "opacity-40 border-transparent" : "border-[#1A1A1E]"
+                "bg-[#141417] p-8 rounded-3xl border transition-all duration-300 flex flex-col items-center text-center",
+                isDone ? "border-green-500/30 shadow-[0_0_20px_rgba(34,197,94,0.1)]" : isLocked ? "opacity-40 border-transparent" : "border-[#1A1A1E]"
               )}>
-                <h3 className="text-white font-bold mb-4">{step.title}</h3>
+                <div className={cn(
+                  "w-14 h-14 rounded-2xl flex items-center justify-center mb-6 transition-colors",
+                  isDone ? "bg-green-500/10 text-green-500" : "bg-white/5 text-white/20"
+                )}>
+                  <step.icon size={28} />
+                </div>
+                <h3 className="text-xl font-bold text-white mb-6">{step.title}</h3>
                 <Button 
                   className={cn(
-                    "w-full rounded-2xl font-bold h-12",
+                    "w-full rounded-2xl font-bold h-12 transition-all",
                     isDone ? "bg-green-500 hover:bg-green-600 text-white" : "bg-[#5865F2] hover:bg-[#4752C4] text-white"
                   )}
                   disabled={isLocked || (step.id === 1 && isAuthenticated) || (step.id === 2 && checkingExtension) || (step.id === 3 && checkingBot)}
@@ -185,7 +186,7 @@ function StartPageContent() {
               disabled={!showFinalButton}
               className={cn(
                 "px-12 h-14 rounded-full font-black text-lg transition-all",
-                showFinalButton ? "bg-green-500 hover:bg-green-600 text-white" : "bg-white/5 text-white/20"
+                showFinalButton ? "bg-green-500 hover:bg-green-600 text-white shadow-lg shadow-green-500/20" : "bg-white/5 text-white/20"
               )}
             >
               Go to Dashboard
