@@ -32,6 +32,13 @@ export default function DashboardPage() {
   const [selectedGuild, setSelectedGuild] = useState<any>(null);
 
   useEffect(() => {
+    // Verifica se está logado antes de qualquer coisa
+    const isLoggedIn = Cookies.get('lostyo_logged_in') === 'true';
+    if (!isLoggedIn) {
+      router.push('/login');
+      return;
+    }
+
     const onboardingComplete = Cookies.get('onboarding_complete') === 'true';
     if (!onboardingComplete) {
       router.push('/start');
@@ -45,6 +52,15 @@ export default function DashboardPage() {
     try {
       setFetchingGuilds(true);
       const response = await fetch('/api/discord/guilds');
+      
+      if (response.status === 401) {
+        // Sessão expirada ou inválida no servidor
+        Cookies.remove('lostyo_logged_in');
+        Cookies.remove('lostyo_user_id');
+        router.push('/login');
+        return;
+      }
+
       const data = await response.json();
       if (Array.isArray(data)) {
         setGuilds(data);
@@ -56,7 +72,11 @@ export default function DashboardPage() {
     }
   };
 
-  if (loading) return null;
+  if (loading) return (
+    <div className="min-h-screen bg-[#0B0B0D] flex items-center justify-center">
+      <Loader2 className="animate-spin text-[#5865F2] w-10 h-10" />
+    </div>
+  );
 
   // Tela de Seleção de Servidor
   if (!selectedGuild) {
@@ -193,8 +213,9 @@ export default function DashboardPage() {
           </button>
           <button 
             onClick={() => {
-              Cookies.remove('lostyo_logged_in');
-              Cookies.remove('onboarding_complete');
+              Cookies.remove('lostyo_logged_in', { path: '/' });
+              Cookies.remove('lostyo_user_id', { path: '/' });
+              Cookies.remove('onboarding_complete', { path: '/' });
               router.push('/');
             }}
             className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-bold text-destructive hover:bg-destructive/10 transition-all"
