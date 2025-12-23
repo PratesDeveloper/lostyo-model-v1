@@ -9,7 +9,6 @@ import { cn } from "@/lib/utils";
 import { useExtensionDetector } from '@/hooks/useExtensionDetector';
 import Cookies from 'js-cookie';
 
-// Componente de Indicador de Passo com Animação
 const StepIndicator = ({ id, isDone, title }: { id: number, isDone: boolean, title: string }) => {
   return (
     <div className="flex flex-col items-center relative z-10">
@@ -19,7 +18,6 @@ const StepIndicator = ({ id, isDone, title }: { id: number, isDone: boolean, tit
         animate={isDone ? "done" : "initial"}
         variants={{
           initial: { scale: 1, rotate: 0 },
-          // Animação de 'pop' aprimorada
           done: { scale: [1, 1.2, 1], rotate: [0, 10, -10, 0] }
         }}
         transition={{ duration: 0.5, type: "spring", stiffness: 300, damping: 20 }}
@@ -42,7 +40,6 @@ const StepIndicator = ({ id, isDone, title }: { id: number, isDone: boolean, tit
   );
 };
 
-
 function StartPageContent() {
   const router = useRouter();
   const [completedSteps, setCompletedSteps] = useState<number[]>([]);
@@ -56,26 +53,36 @@ function StartPageContent() {
   
   const titles = ["Login", "Extension", "Add Bot"];
 
-  // Função para adicionar um passo com delay
   const completeStepWithDelay = (stepId: number) => {
     if (!completedSteps.includes(stepId)) {
       setTimeout(() => {
-        setCompletedSteps(prev => [...prev, stepId]);
-      }, 1500); // Atraso de 1.5 segundos
+        setCompletedSteps(prev => {
+          const newSteps = [...prev, stepId];
+          if (stepId === 3) {
+            Cookies.set('onboarding_complete', 'true', { expires: 30 });
+          }
+          return newSteps;
+        });
+      }, 1500);
     }
   };
 
-  // Efeito 1: Checagem de Autenticação (Passo 1)
   useEffect(() => {
     const loggedIn = Cookies.get('lostyo_logged_in') === 'true';
     if (loggedIn) {
       setIsAuthenticated(true);
       completeStepWithDelay(1);
     }
+    
+    // Recuperar passos anteriores se existirem
+    if (Cookies.get('onboarding_complete') === 'true') {
+      setCompletedSteps([1, 2, 3]);
+      setShowFinalButton(true);
+    }
+    
     setLoading(false);
   }, []);
 
-  // Efeito 2: Checagem da Extensão (Passo 2)
   useEffect(() => {
     if (isExtensionInstalled && completedSteps.includes(1) && !completedSteps.includes(2)) {
       setCheckingExtension(false);
@@ -83,7 +90,6 @@ function StartPageContent() {
     }
   }, [isExtensionInstalled, completedSteps]);
 
-  // Efeito 3: Checagem do Bot (Passo 3)
   useEffect(() => {
     const guildId = searchParams.get('guild_id');
     if (guildId && completedSteps.includes(2) && !completedSteps.includes(3) && !checkingBot) {
@@ -113,19 +119,18 @@ function StartPageContent() {
     }
   }, [searchParams, completedSteps, checkingBot]);
 
-  // Efeito 4: Mostrar Botão Final
   useEffect(() => {
     if (completedSteps.includes(3)) {
       setTimeout(() => {
         setShowFinalButton(true);
-      }, 1500); // Atraso para o botão final aparecer após o último passo
+      }, 1500);
     }
   }, [completedSteps]);
 
   const handleStepAction = async (id: number) => {
     if (id === 1) router.push('/login');
     if (id === 2) {
-      window.open('https://google.com', '_blank'); // Link de exemplo para extensão
+      window.open('https://google.com', '_blank');
       setCheckingExtension(true);
     }
     if (id === 3) router.push('/safe-alert');
@@ -146,7 +151,6 @@ function StartPageContent() {
             Setup Your Community
           </motion.h1>
           
-          {/* Progress Indicator */}
           <div className="flex justify-center items-center mb-12">
             {[1, 2, 3].map((id, idx) => {
               const isDone = completedSteps.includes(id);
@@ -167,7 +171,6 @@ function StartPageContent() {
           </div>
         </div>
         
-        {/* Step Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
           {[1, 2, 3].map((id, idx) => {
             const icons = [Lock, Puzzle, Bot];
@@ -194,7 +197,7 @@ function StartPageContent() {
                 className={cn(
                   "bg-[#141417] p-8 rounded-[2rem] border flex flex-col items-center text-center transition-all duration-500 h-full",
                   isDone 
-                    ? "border-green-500/50" // Sombra verde removida
+                    ? "border-green-500/50" 
                     : isLocked 
                       ? "opacity-50 border-[#1A1A1E] cursor-not-allowed" 
                       : "border-[#1A1A1E] hover:border-[#5865F2]/50"
@@ -241,7 +244,6 @@ function StartPageContent() {
           })}
         </div>
         
-        {/* Final Button */}
         <div className="flex justify-center mt-16">
           <Link href={showFinalButton ? "/dashboard" : "#"}>
             <Button 
@@ -249,7 +251,7 @@ function StartPageContent() {
               className={cn(
                 "px-16 h-16 rounded-full font-black text-xl transition-all duration-500",
                 showFinalButton 
-                  ? "bg-green-500 hover:bg-green-600 text-white" // Sombra verde removida
+                  ? "bg-green-500 hover:bg-green-600 text-white" 
                   : "bg-white/5 text-white/20 cursor-not-allowed"
               )}
             >
