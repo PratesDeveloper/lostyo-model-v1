@@ -2,14 +2,15 @@
 import React, { useState, useEffect, Suspense } from 'react';
 import { Button } from "@/components/ui/button";
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Check, Lock, Puzzle, Bot, Loader2 } from 'lucide-react';
 import { cn } from "@/lib/utils";
-import Cookies from 'js-cookie';
+import { supabase } from '@/integrations/supabase/client';
 import { useExtensionDetector } from '@/hooks/useExtensionDetector';
 
 function StartPageContent() {
+  const router = useRouter();
   const [completedSteps, setCompletedSteps] = useState<number[]>([]);
   const [showFinalButton, setShowFinalButton] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -20,12 +21,10 @@ function StartPageContent() {
   const isExtensionInstalled = useExtensionDetector();
   const searchParams = useSearchParams();
 
-  const DiscordOAuthUrl = `https://discord.com/oauth2/authorize?client_id=1399625245585051708&response_type=code&redirect_uri=https%3A%2F%2Flostyo.com%2Fauth%2Fcallback&scope=identify+guilds+guilds.join`;
-
   useEffect(() => {
-    const checkAuth = () => {
-      const accessToken = Cookies.get('discord_access_token');
-      if (accessToken) {
+    const checkAuth = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
         setIsAuthenticated(true);
         setCompletedSteps(prev => prev.includes(1) ? prev : [...prev, 1]);
       }
@@ -43,106 +42,72 @@ function StartPageContent() {
 
   useEffect(() => {
     const guildId = searchParams.get('guild_id');
-    // Só tenta checar o bot se já estiver logado (passo 1)
     if (guildId && completedSteps.includes(1) && !completedSteps.includes(3) && !checkingBot) {
       setCheckingBot(true);
-      
-      let attempts = 0;
       const pollBotStatus = async () => {
-        attempts++;
         try {
+          const { data: { session } } = await supabase.auth.getSession();
           const response = await fetch(`/api/check-bot?guild_id=${guildId}`, {
-            cache: 'no-store',
-            headers: { 'Accept': 'application/json' }
+            headers: { 
+              'Authorization': `Bearer ${session?.access_token}`
+            }
           });
-          
-          if (!response.ok) {
-            console.warn(`[BotCheck] Attempt ${attempts}: Server returned ${response.status}`);
-            return false;
-          }
-
           const data = await response.json();
-          if (data && data.active === true) {
+          if (data.active === true) {
             setCompletedSteps(prev => prev.includes(3) ? prev : [...prev, 3]);
             setCheckingBot(false);
             return true;
           }
         } catch (err) {
-          console.error(`[BotCheck] Attempt ${attempts} failed:`, err);
+          console.error("Bot check failed", err);
         }
         return false;
       };
 
-      // Execução imediata
       pollBotStatus();
-
-      // Intervalo de verificação
       const interval = setInterval(async () => {
         const isFound = await pollBotStatus();
         if (isFound) clearInterval(interval);
       }, 3500);
-
       return () => clearInterval(interval);
     }
   }, [searchParams, completedSteps, checkingBot]);
 
   useEffect(() => {
-    if (completedSteps.length >= 3) {
-      setShowFinalButton(true);
-    }
+    if (completedSteps.length >= 3) setShowFinalButton(true);
   }, [completedSteps]);
 
-  const steps = [
-    { id: 1, title: "Login", icon: Lock },
-    { id: 2, title: "Extension", icon: Puzzle },
-    { id: 3, title: "Add Bot", icon: Bot }
-  ];
-
-  const handleStepAction = (id: number) => {
-    if (id === 1) window.location.href = DiscordOAuthUrl;
+  const handleStepAction = async (id: number) => {
+    if (id === 1) router.push('/login');
     if (id === 2) {
       window.open('https://google.com', '_blank');
       setCheckingExtension(true);
     }
-    if (id === 3) window.location.href = '/safe-alert';
+    if (id === 3) router.push('/safe-alert');
   };
 
-  if (loading) return (
-    <div className="min-h-screen bg-[#0B0B0D] flex items-center justify-center">
-      <Loader2 className="animate-spin text-[#5865F2] w-12 h-12" />
-    </div>
-  );
+  if (loading) return <div className="min-h-screen bg-[#0B0B0D] flex items-center justify-center"><Loader2 className="animate-spin text-[#5865F2] w-12 h-12" /></div>;
 
   return (
     <div className="min-h-screen bg-[#0B0B0D] flex flex-col items-center justify-center p-6">
       <div className="max-w-3xl w-full">
         <div className="text-center mb-12">
           <motion.h1 initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-4xl font-black text-white mb-8 tracking-tight">Get Started</motion.h1>
-          
           <div className="flex justify-center items-center mb-12">
-            {steps.map((step, index) => {
-              const isDone = completedSteps.includes(step.id);
+            {[1, 2, 3].map((id, idx) => {
+              const icons = [Lock, Puzzle, Bot];
+              const titles = ["Login", "Extension", "Add Bot"];
+              const Icon = icons[idx];
+              const isDone = completedSteps.includes(id);
               return (
-                <React.Fragment key={step.id}>
+                <React.Fragment key={id}>
                   <div className="flex flex-col items-center">
-                    <div className={cn(
-                      "w-12 h-12 rounded-full flex items-center justify-center transition-all duration-500 border-2",
-                      isDone 
-                        ? "bg-green-500/20 border-green-500 text-green-500" 
-                        : "bg-[#141417] border-[#1A1A1E] text-white/20"
-                    )}>
-                      {isDone ? <Check size={24} /> : <step.icon size={24} />}
+                    <div className={cn("w-12 h-12 rounded-full flex items-center justify-center border-2", isDone ? "bg-green-500/20 border-green-500 text-green-500" : "bg-[#141417] border-[#1A1A1E] text-white/20")}>
+                      {isDone ? <Check size={24} /> : <Icon size={24} />}
                     </div>
-                    <span className={cn("text-xs font-bold mt-2", isDone ? "text-green-500" : "text-white/20")}>
-                      {step.title}
-                    </span>
+                    <span className={cn("text-xs font-bold mt-2", isDone ? "text-green-500" : "text-white/20")}>{titles[idx]}</span>
                   </div>
-                  {index < steps.length - 1 && (
-                    <div className={cn(
-                      "w-16 h-0.5 mx-2 transition-colors duration-500",
-                      isDone && completedSteps.includes(steps[index+1].id) ? "bg-green-500" : "bg-white/5"
-                    )} />
-                  )}
+                  {idx < 2 && <div className={cn("w-16 h-0.5 mx-2", isDone && completedSteps.includes(id + 1) ? "bg-green-500" : "bg-white/5")} />}
                 </React.Fragment>
               );
             })}
@@ -150,48 +115,30 @@ function StartPageContent() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-12">
-          {steps.map((step, idx) => {
-            const isDone = completedSteps.includes(step.id);
-            const isLocked = idx > 0 && !completedSteps.includes(steps[idx-1].id);
-            
+          {[1, 2, 3].map((id, idx) => {
+            const icons = [Lock, Puzzle, Bot];
+            const titles = ["Login", "Extension", "Add Bot"];
+            const isDone = completedSteps.includes(id);
+            const isLocked = idx > 0 && !completedSteps.includes(id - 1);
+            const Icon = icons[idx];
             return (
-              <div key={step.id} className={cn(
-                "bg-[#141417] p-8 rounded-3xl border transition-all duration-300 flex flex-col items-center text-center",
-                isDone ? "border-green-500/30 shadow-[0_0_20px_rgba(34,197,94,0.1)]" : isLocked ? "opacity-40 border-transparent" : "border-[#1A1A1E]"
-              )}>
-                <div className={cn(
-                  "w-14 h-14 rounded-2xl flex items-center justify-center mb-6 transition-colors",
-                  isDone ? "bg-green-500/10 text-green-500" : "bg-white/5 text-white/20"
-                )}>
-                  <step.icon size={28} />
-                </div>
-                <h3 className="text-xl font-bold text-white mb-6">{step.title}</h3>
+              <div key={id} className={cn("bg-[#141417] p-8 rounded-3xl border flex flex-col items-center text-center", isDone ? "border-green-500/30" : isLocked ? "opacity-40" : "border-[#1A1A1E]")}>
+                <div className={cn("w-14 h-14 rounded-2xl flex items-center justify-center mb-6", isDone ? "bg-green-500/10 text-green-500" : "bg-white/5 text-white/20")}><Icon size={28} /></div>
+                <h3 className="text-xl font-bold text-white mb-6">{titles[idx]}</h3>
                 <Button 
-                  className={cn(
-                    "w-full rounded-2xl font-bold h-12 transition-all",
-                    isDone ? "bg-green-500 hover:bg-green-600 text-white" : "bg-[#5865F2] hover:bg-[#4752C4] text-white"
-                  )}
-                  disabled={isLocked || (step.id === 1 && isAuthenticated) || (step.id === 2 && checkingExtension) || (step.id === 3 && checkingBot)}
-                  onClick={() => handleStepAction(step.id)}
+                  className={cn("w-full rounded-2xl font-bold h-12", isDone ? "bg-green-500 text-white" : "bg-[#5865F2] text-white")}
+                  disabled={isLocked || (id === 1 && isAuthenticated) || (id === 2 && checkingExtension) || (id === 3 && checkingBot)}
+                  onClick={() => handleStepAction(id)}
                 >
-                  {isDone ? "Completed" : (step.id === 2 && checkingExtension) || (step.id === 3 && checkingBot) ? "Checking..." : "Action"}
+                  {isDone ? "Completed" : (id === 2 && checkingExtension) || (id === 3 && checkingBot) ? "Checking..." : "Action"}
                 </Button>
               </div>
             );
           })}
         </div>
-
         <div className="flex justify-center">
           <Link href={showFinalButton ? "/dashboard" : "#"}>
-            <Button 
-              disabled={!showFinalButton}
-              className={cn(
-                "px-12 h-14 rounded-full font-black text-lg transition-all",
-                showFinalButton ? "bg-green-500 hover:bg-green-600 text-white shadow-lg shadow-green-500/20" : "bg-white/5 text-white/20"
-              )}
-            >
-              Go to Dashboard
-            </Button>
+            <Button disabled={!showFinalButton} className={cn("px-12 h-14 rounded-full font-black text-lg", showFinalButton ? "bg-green-500 text-white" : "bg-white/5 text-white/20")}>Go to Dashboard</Button>
           </Link>
         </div>
       </div>
