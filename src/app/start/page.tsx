@@ -84,46 +84,48 @@ function StartPageContent() {
 
   return (
     <div className="min-h-screen bg-[#0B0B0D] flex flex-col items-center justify-center p-6">
-      <div className="max-w-3xl w-full">
-        <div className="text-center mb-12">
+      <div className="max-w-4xl w-full">
+        <div className="text-center mb-16">
           <motion.h1 
-            initial={{ opacity: 0 }} 
-            animate={{ opacity: 1 }} 
-            className="text-4xl font-black text-white mb-8 tracking-tight"
+            initial={{ opacity: 0, y: -20 }} 
+            animate={{ opacity: 1, y: 0 }} 
+            transition={{ duration: 0.5 }}
+            className="text-4xl md:text-5xl font-black text-white mb-12 tracking-tight"
           >
-            Get Started
+            Setup Your Community
           </motion.h1>
+          
+          {/* Progress Indicator */}
           <div className="flex justify-center items-center mb-12">
             {[1, 2, 3].map((id, idx) => {
               const icons = [Lock, Puzzle, Bot];
               const titles = ["Login", "Extension", "Add Bot"];
               const Icon = icons[idx];
               const isDone = completedSteps.includes(id);
+              const isNextDone = completedSteps.includes(id + 1);
               
               return (
                 <React.Fragment key={id}>
-                  <div className="flex flex-col items-center">
+                  <div className="flex flex-col items-center relative z-10">
                     <div className={cn(
-                      "w-12 h-12 rounded-full flex items-center justify-center border-2",
+                      "w-14 h-14 rounded-full flex items-center justify-center border-4 transition-all duration-500",
                       isDone 
-                        ? "bg-green-500/20 border-green-500 text-green-500" 
-                        : "bg-[#141417] border-[#1A1A1E] text-white/20"
+                        ? "bg-green-500 border-green-500 text-white" 
+                        : "bg-[#141417] border-[#1A1A1E] text-white/40"
                     )}>
                       {isDone ? <Check size={24} /> : <Icon size={24} />}
                     </div>
                     <span className={cn(
-                      "text-xs font-bold mt-2",
-                      isDone ? "text-green-500" : "text-white/20"
+                      "text-sm font-bold mt-3 transition-colors duration-500",
+                      isDone ? "text-white" : "text-white/40"
                     )}>
                       {titles[idx]}
                     </span>
                   </div>
                   {idx < 2 && (
                     <div className={cn(
-                      "w-16 h-0.5 mx-2",
-                      isDone && completedSteps.includes(id + 1) 
-                        ? "bg-green-500" 
-                        : "bg-white/5"
+                      "w-20 h-1 mx-2 transition-colors duration-500",
+                      isNextDone ? "bg-green-500" : "bg-[#1A1A1E]"
                     )} />
                   )}
                 </React.Fragment>
@@ -132,10 +134,16 @@ function StartPageContent() {
           </div>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-12">
+        {/* Step Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
           {[1, 2, 3].map((id, idx) => {
             const icons = [Lock, Puzzle, Bot];
-            const titles = ["Login", "Extension", "Add Bot"];
+            const titles = ["Login to Discord", "Install Extension", "Add Bot to Server"];
+            const descriptions = [
+              "Securely connect your Discord account to manage your servers.",
+              "Install our browser extension for seamless integration and features.",
+              "Invite LostyoCord to your server and grant necessary permissions."
+            ];
             const isDone = completedSteps.includes(id);
             const isLocked = idx > 0 && !completedSteps.includes(id - 1);
             const Icon = icons[idx];
@@ -146,32 +154,38 @@ function StartPageContent() {
             if (id === 3) buttonLabel = "Add Bot";
             
             return (
-              <div 
+              <motion.div 
                 key={id} 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: idx * 0.1, duration: 0.5 }}
                 className={cn(
-                  "bg-[#141417] p-8 rounded-3xl border flex flex-col items-center text-center",
+                  "bg-[#141417] p-8 rounded-[2rem] border flex flex-col items-center text-center transition-all duration-500 h-full",
                   isDone 
-                    ? "border-green-500/30" 
+                    ? "border-green-500/50 shadow-lg shadow-green-500/10" 
                     : isLocked 
-                      ? "opacity-40" 
-                      : "border-[#1A1A1E]"
+                      ? "opacity-50 border-[#1A1A1E] cursor-not-allowed" 
+                      : "border-[#1A1A1E] hover:border-[#5865F2]/50"
                 )}
               >
                 <div className={cn(
-                  "w-14 h-14 rounded-2xl flex items-center justify-center mb-6",
+                  "w-16 h-16 rounded-full flex items-center justify-center mb-6 transition-all duration-500",
                   isDone 
-                    ? "bg-green-500/10 text-green-500" 
-                    : "bg-white/5 text-white/20"
+                    ? "bg-green-500/20 text-green-400" 
+                    : "bg-white/5 text-white/40"
                 )}>
-                  <Icon size={28} />
+                  <Icon size={32} />
                 </div>
-                <h3 className="text-xl font-bold text-white mb-6">{titles[idx]}</h3>
+                <h3 className="text-xl font-bold text-white mb-3">{titles[idx]}</h3>
+                <p className="text-white/40 text-sm mb-8 flex-grow">{descriptions[idx]}</p>
+                
                 <Button 
                   className={cn(
-                    "w-full rounded-2xl font-bold h-12",
+                    "w-full rounded-full font-bold h-12 transition-all duration-300",
                     isDone 
-                      ? "bg-green-500 text-white" 
-                      : "bg-[#5865F2] text-white"
+                      ? "bg-green-600 hover:bg-green-700 text-white" 
+                      : "bg-[#5865F2] hover:bg-[#4752C4] text-white",
+                    ((id === 2 && checkingExtension) || (id === 3 && checkingBot)) && "opacity-70 cursor-not-allowed"
                   )}
                   disabled={
                     isLocked || 
@@ -181,26 +195,30 @@ function StartPageContent() {
                   }
                   onClick={() => handleStepAction(id)}
                 >
+                  {(id === 2 && checkingExtension) || (id === 3 && checkingBot) 
+                    ? <Loader2 className="animate-spin w-5 h-5 mr-2" /> 
+                    : null}
                   {isDone 
                     ? "Completed" 
                     : (id === 2 && checkingExtension) || (id === 3 && checkingBot) 
                       ? "Checking..." 
                       : buttonLabel}
                 </Button>
-              </div>
+              </motion.div>
             );
           })}
         </div>
         
-        <div className="flex justify-center">
+        {/* Final Button */}
+        <div className="flex justify-center mt-16">
           <Link href={showFinalButton ? "/dashboard" : "#"}>
             <Button 
               disabled={!showFinalButton}
               className={cn(
-                "px-12 h-14 rounded-full font-black text-lg",
+                "px-16 h-16 rounded-full font-black text-xl transition-all duration-500",
                 showFinalButton 
-                  ? "bg-green-500 text-white" 
-                  : "bg-white/5 text-white/20"
+                  ? "bg-green-500 hover:bg-green-600 text-white shadow-xl shadow-green-500/20" 
+                  : "bg-white/5 text-white/20 cursor-not-allowed"
               )}
             >
               Go to Dashboard
