@@ -11,10 +11,10 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { LogOut, User } from 'lucide-react';
+import { LogOut, User, Loader2 } from 'lucide-react';
 
 export const Navbar = () => {
-  const { user, isAuthenticated, logout } = useUser();
+  const { user, isAuthenticated, logout, isLoading } = useUser();
 
   return (
     <div className="fixed top-6 left-0 right-0 z-50 flex justify-center px-4">
@@ -29,14 +29,16 @@ export const Navbar = () => {
           <a href="#preview" className="hover:text-white transition-colors">Preview</a>
         </div>
         <div className="flex items-center gap-1">
-          {isAuthenticated && user ? (
+          {isLoading ? (
+            <Loader2 className="animate-spin text-[#5865F2] w-5 h-5" />
+          ) : isAuthenticated && user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="ghost" className="h-10 w-10 rounded-full p-0">
                   <Avatar className="h-8 w-8">
-                    <AvatarImage src={user.avatar} alt={user.name} />
+                    <AvatarImage src={user.avatar} alt={user.username} />
                     <AvatarFallback className="bg-[#5865F2] text-white">
-                      {user.name.charAt(0)}
+                      {user.username.charAt(0)}
                     </AvatarFallback>
                   </Avatar>
                 </Button>

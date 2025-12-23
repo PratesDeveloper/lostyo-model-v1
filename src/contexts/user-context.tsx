@@ -5,8 +5,9 @@ import Cookies from 'js-cookie';
 
 interface User {
   id: string;
-  name: string;
+  username: string;
   avatar: string;
+  discriminator?: string;
 }
 
 interface UserContextType {
@@ -14,28 +15,58 @@ interface UserContextType {
   setUser: (user: User | null) => void;
   isAuthenticated: boolean;
   logout: () => void;
+  isLoading: boolean;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
 export function UserProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Check if user is logged in via cookie
-    const loggedIn = Cookies.get('lostyo_logged_in') === 'true';
-    if (loggedIn) {
-      // In a real app, you would fetch user data from an API
-      // For now, we'll use mock data
-      setUser({
-        id: "1",
-        name: "User",
-        avatar: "https://cdn.lostyo.com/logo.png"
-      });
-    }
+    const fetchUser = async () => {
+      const token = Cookies.get('discord_token');
+      
+      if (token) {
+        try {
+          // Fetch user data from Discord API
+          const response = await fetch('https://discord.com/api/users/@me', {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          });
+          
+          if (response.ok) {
+            const userData = await response.json();
+            setUser({
+              id: userData.id,
+              username: userData.username,
+              avatar: userData.avatar 
+                ? `https://cdn.discordapp.com/avatars/${userData.id}/${userData.avatar}.png` 
+                : `https://cdn.discordapp.com/embed/avatars/${userData.discriminator % 5}.png`,
+              discriminator: userData.discriminator
+            });
+          } else {
+            // Token is invalid, remove it
+            Cookies.remove('discord_token');
+            Cookies.remove('lostyo_logged_in');
+          }
+        } catch (error) {
+          console.error('Failed to fetch user data:', error);
+          // Remove invalid tokens
+          Cookies.remove('discord_token');
+          Cookies.remove('lostyo_logged_in');
+        }
+      }
+      setIsLoading(false);
+    };
+
+    fetchUser();
   }, []);
 
   const logout = () => {
+    Cookies.remove('discord_token');
     Cookies.remove('lostyo_logged_in');
     setUser(null);
   };
@@ -46,7 +77,8 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
         user, 
         setUser, 
         isAuthenticated: !!user,
-        logout
+        logout,
+        isLoading
       }}
     >
       {children}
