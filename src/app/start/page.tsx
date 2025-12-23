@@ -121,6 +121,13 @@ function StartPageContent() {
             const isDone = completedSteps.includes(id);
             const isLocked = idx > 0 && !completedSteps.includes(id - 1);
             const Icon = icons[idx];
+            
+            // Determinar o texto do botão com base no passo
+            let buttonLabel = "Action";
+            if (id === 1) buttonLabel = "Login";
+            if (id === 2) buttonLabel = "Install";
+            if (id === 3) buttonLabel = "Add Bot";
+
             return (
               <div key={id} className={cn("bg-[#141417] p-8 rounded-3xl border flex flex-col items-center text-center", isDone ? "border-green-500/30" : isLocked ? "opacity-40" : "border-[#1A1A1E]")}>
                 <div className={cn("w-14 h-14 rounded-2xl flex items-center justify-center mb-6", isDone ? "bg-green-500/10 text-green-500" : "bg-white/5 text-white/20")}><Icon size={28} /></div>
@@ -130,7 +137,7 @@ function StartPageContent() {
                   disabled={isLocked || (id === 1 && isAuthenticated) || (id === 2 && checkingExtension) || (id === 3 && checkingBot)}
                   onClick={() => handleStepAction(id)}
                 >
-                  {isDone ? "Completed" : (id === 2 && checkingExtension) || (id === 3 && checkingBot) ? "Checking..." : "Action"}
+                  {isDone ? "Completed" : (id === 2 && checkingExtension) || (id === 3 && checkingBot) ? "Checking..." : buttonLabel}
                 </Button>
               </div>
             );
