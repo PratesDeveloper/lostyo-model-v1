@@ -19,6 +19,7 @@ const StepIndicator = ({ id, isDone, title }: { id: number, isDone: boolean, tit
         animate={isDone ? "done" : "initial"}
         variants={{
           initial: { scale: 1, rotate: 0 },
+          // Animação de 'pop' aprimorada
           done: { scale: [1, 1.2, 1], rotate: [0, 10, -10, 0] }
         }}
         transition={{ duration: 0.5, type: "spring", stiffness: 300, damping: 20 }}
@@ -193,7 +194,7 @@ function StartPageContent() {
                 className={cn(
                   "bg-[#141417] p-8 rounded-[2rem] border flex flex-col items-center text-center transition-all duration-500 h-full",
                   isDone 
-                    ? "border-green-500/50 shadow-lg shadow-green-500/10" 
+                    ? "border-green-500/50" // Sombra verde removida
                     : isLocked 
                       ? "opacity-50 border-[#1A1A1E] cursor-not-allowed" 
                       : "border-[#1A1A1E] hover:border-[#5865F2]/50"
@@ -248,7 +249,7 @@ function StartPageContent() {
               className={cn(
                 "px-16 h-16 rounded-full font-black text-xl transition-all duration-500",
                 showFinalButton 
-                  ? "bg-green-500 hover:bg-green-600 text-white shadow-xl shadow-green-500/20" 
+                  ? "bg-green-500 hover:bg-green-600 text-white" // Sombra verde removida
                   : "bg-white/5 text-white/20 cursor-not-allowed"
               )}
             >
