@@ -8,6 +8,7 @@ import { Check, Lock, Puzzle, Bot, Loader2 } from 'lucide-react';
 import { cn } from "@/lib/utils";
 import { useExtensionDetector } from '@/hooks/useExtensionDetector';
 import Cookies from 'js-cookie';
+import { useUser } from '@/contexts/user-context';
 
 function StartPageContent() {
   const router = useRouter();
@@ -19,6 +20,7 @@ function StartPageContent() {
   const [checkingBot, setCheckingBot] = useState(false);
   const isExtensionInstalled = useExtensionDetector();
   const searchParams = useSearchParams();
+  const { setUser } = useUser();
 
   useEffect(() => {
     // Verifica se o usuário está logado através do cookie
@@ -68,8 +70,16 @@ function StartPageContent() {
   }, [searchParams, completedSteps, checkingBot]);
 
   useEffect(() => {
-    if (completedSteps.length >= 3) setShowFinalButton(true);
-  }, [completedSteps]);
+    if (completedSteps.length >= 3) {
+      setShowFinalButton(true);
+      // Set user in context when all steps are completed
+      setUser({
+        id: "1",
+        name: "User",
+        avatar: "https://cdn.lostyo.com/logo.png"
+      });
+    }
+  }, [completedSteps, setUser]);
 
   const handleStepAction = async (id: number) => {
     if (id === 1) router.push('/login');

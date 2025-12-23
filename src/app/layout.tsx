@@ -1,5 +1,6 @@
 import { Metadata } from 'next';
 import './globals.css';
+import { UserProvider } from '@/contexts/user-context';
 
 export const metadata: Metadata = {
   title: "LostyoCord",
@@ -13,7 +14,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <UserProvider>
+          {children}
+        </UserProvider>
+      </body>
     </html>
   );
 }

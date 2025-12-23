@@ -1,14 +1,28 @@
 "use client";
-
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Lock } from 'lucide-react';
+import { useUser } from '@/contexts/user-context';
+import Cookies from 'js-cookie';
 
 export default function LoginPage() {
+  const { setUser } = useUser();
+  
   // URL de autorização direta do Discord
   const discordLoginUrl = `https://discord.com/oauth2/authorize?client_id=1399625245585051708&response_type=code&redirect_uri=https%3A%2F%2Flostyo.com%2Fauth%2Fcallback&scope=identify+guilds+guilds.join`;
 
   const handleLogin = () => {
+    // Set user in context after login
+    setUser({
+      id: "1",
+      name: "User",
+      avatar: "https://cdn.lostyo.com/logo.png"
+    });
+    
+    // Set login cookie
+    Cookies.set('lostyo_logged_in', 'true', { expires: 7 });
+    
+    // Redirect to Discord
     window.location.href = discordLoginUrl;
   };
 
@@ -20,7 +34,6 @@ export default function LoginPage() {
         <p className="text-white/40 text-lg mb-8 font-medium">
           Please log in with your Discord account to continue securely.
         </p>
-        
         <Button 
           onClick={handleLogin}
           className="w-full h-14 text-lg font-bold rounded-full bg-[#5865F2] hover:bg-[#4752C4] text-white transition-all"

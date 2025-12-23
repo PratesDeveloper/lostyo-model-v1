@@ -1,24 +1,30 @@
 "use client";
-
 import React, { useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
 import Cookies from 'js-cookie';
+import { useUser } from '@/contexts/user-context';
 
 // Componente interno com a lógica do useSearchParams
 function AuthContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { setUser } = useUser();
 
   useEffect(() => {
     const code = searchParams.get('code');
-    
     if (code) {
       Cookies.set('lostyo_logged_in', 'true', { expires: 7 });
+      
+      // Set user in context
+      setUser({
+        id: "1",
+        name: "User",
+        avatar: "https://cdn.lostyo.com/logo.png"
+      });
     }
-    
     router.push('/start');
-  }, [router, searchParams]);
+  }, [router, searchParams, setUser]);
 
   return (
     <div className="min-h-screen bg-[#0B0B0D] flex flex-col items-center justify-center p-6">
