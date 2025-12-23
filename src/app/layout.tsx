@@ -17,7 +17,6 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      {/* O Next.js injeta o <head> automaticamente aqui com base no metadata */}
       <body>{children}</body>
     </html>
   );
