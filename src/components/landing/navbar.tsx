@@ -12,15 +12,13 @@ import {
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { LayoutDashboard, LogOut, Settings, User } from 'lucide-react';
+import { LogOut, Settings, User } from 'lucide-react';
 
 export const Navbar = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [onboardingComplete, setOnboardingComplete] = useState(false);
 
   useEffect(() => {
     setIsLoggedIn(Cookies.get('lostyo_logged_in') === 'true');
-    setOnboardingComplete(Cookies.get('onboarding_complete') === 'true');
   }, []);
 
   const handleLogout = () => {
@@ -59,15 +57,6 @@ export const Navbar = () => {
                   My Account
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator className="bg-white/5" />
-                
-                {onboardingComplete && (
-                  <Link href="/dashboard">
-                    <DropdownMenuItem className="focus:bg-[#5865F2] focus:text-white rounded-xl cursor-pointer gap-2 py-2">
-                      <LayoutDashboard size={16} />
-                      Dashboard
-                    </DropdownMenuItem>
-                  </Link>
-                )}
                 
                 <DropdownMenuItem className="focus:bg-[#5865F2] focus:text-white rounded-xl cursor-pointer gap-2 py-2">
                   <User size={16} />

@@ -1,10 +1,9 @@
 "use client";
 import React, { useState, useEffect, Suspense } from 'react';
 import { Button } from "@/components/ui/button";
-import Link from 'next/link';
 import { useSearchParams, useRouter } from 'next/navigation';
-import { motion } from 'framer-motion';
-import { Check, Lock, Puzzle, Bot, Loader2 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Check, Lock, Puzzle, Bot, Loader2, Sparkles } from 'lucide-react';
 import { cn } from "@/lib/utils";
 import { useExtensionDetector } from '@/hooks/useExtensionDetector';
 import Cookies from 'js-cookie';
@@ -43,7 +42,7 @@ const StepIndicator = ({ id, isDone, title }: { id: number, isDone: boolean, tit
 function StartPageContent() {
   const router = useRouter();
   const [completedSteps, setCompletedSteps] = useState<number[]>([]);
-  const [showFinalButton, setShowFinalButton] = useState(false);
+  const [showFinalMessage, setShowFinalMessage] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
   const [checkingExtension, setCheckingExtension] = useState(false);
@@ -74,10 +73,9 @@ function StartPageContent() {
       completeStepWithDelay(1);
     }
     
-    // Recuperar passos anteriores se existirem
     if (Cookies.get('onboarding_complete') === 'true') {
       setCompletedSteps([1, 2, 3]);
-      setShowFinalButton(true);
+      setShowFinalMessage(true);
     }
     
     setLoading(false);
@@ -122,7 +120,7 @@ function StartPageContent() {
   useEffect(() => {
     if (completedSteps.includes(3)) {
       setTimeout(() => {
-        setShowFinalButton(true);
+        setShowFinalMessage(true);
       }, 1500);
     }
   }, [completedSteps]);
@@ -244,21 +242,19 @@ function StartPageContent() {
           })}
         </div>
         
-        <div className="flex justify-center mt-16">
-          <Link href={showFinalButton ? "/dashboard" : "#"}>
-            <Button 
-              disabled={!showFinalButton}
-              className={cn(
-                "px-16 h-16 rounded-full font-black text-xl transition-all duration-500",
-                showFinalButton 
-                  ? "bg-green-500 hover:bg-green-600 text-white" 
-                  : "bg-white/5 text-white/20 cursor-not-allowed"
-              )}
+        <AnimatePresence>
+          {showFinalMessage && (
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="flex flex-col items-center justify-center mt-16 p-8 bg-green-500/10 rounded-[3rem] border border-green-500/20 text-center"
             >
-              Go to Dashboard
-            </Button>
-          </Link>
-        </div>
+              <Sparkles className="text-green-500 mb-4" size={40} />
+              <h2 className="text-2xl font-black text-white mb-2">Setup Complete!</h2>
+              <p className="text-white/50 font-medium">Your community is now synchronized with LostyoCord.</p>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );
