@@ -3,7 +3,7 @@
 import React, { useState, useEffect, Suspense } from 'react';
 import { Button } from "@/components/ui/button";
 import Link from 'next/link';
-import { useSearchParams, useRouter } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Check, Lock, Puzzle, Bot, Loader2, ArrowRight, Sparkles } from 'lucide-react';
 import { cn } from "@/lib/utils";
@@ -11,41 +11,42 @@ import { useExtensionDetector } from '@/hooks/useExtensionDetector';
 import Cookies from 'js-cookie';
 
 function StartPageContent() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const isExtensionInstalled = useExtensionDetector();
   
   const [completedSteps, setCompletedSteps] = useState<number[]>([]);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [checkingExtension, setCheckingExtension] = useState(false);
   const [checkingBot, setCheckingBot] = useState(false);
   const [transitioning, setTransitioning] = useState<number | null>(null);
 
-  // Inicialização e verificação do Passo 1 (Login)
+  // URLs Diretas
+  const EXTENSION_URL = "https://chromewebstore.google.com"; // Substituir pela URL real da extensão
+  const BOT_URL = "/safe-alert";
+
+  // Verificação de Login (Passo 1)
   useEffect(() => {
     const loggedIn = Cookies.get('lostyo_logged_in') === 'true';
     if (loggedIn) {
       setIsAuthenticated(true);
-      setCompletedSteps([1]);
+      setCompletedSteps(prev => prev.includes(1) ? prev : [...prev, 1]);
     }
     setLoading(false);
   }, []);
 
-  // Verificação do Passo 2 (Extensão) com delay
+  // Verificação de Extensão (Passo 2)
   useEffect(() => {
-    if (isExtensionInstalled && completedSteps.includes(1) && !completedSteps.includes(2) && !transitioning) {
+    if (isExtensionInstalled && isAuthenticated && !completedSteps.includes(2) && !transitioning) {
       setTransitioning(2);
       const timer = setTimeout(() => {
         setCompletedSteps(prev => [...prev, 2]);
-        setCheckingExtension(false);
         setTransitioning(null);
-      }, 1500); // 1.5s de atraso para parecer mais orgânico
+      }, 1000);
       return () => clearTimeout(timer);
     }
-  }, [isExtensionInstalled, completedSteps, transitioning]);
+  }, [isExtensionInstalled, isAuthenticated, completedSteps, transitioning]);
 
-  // Verificação do Passo 3 (Bot) com delay e polling
+  // Verificação do Bot (Passo 3)
   useEffect(() => {
     const guildId = searchParams.get('guild_id');
     if (guildId && completedSteps.includes(2) && !completedSteps.includes(3) && !checkingBot && !transitioning) {
@@ -61,7 +62,7 @@ function StartPageContent() {
               setCompletedSteps(prev => [...prev, 3]);
               setCheckingBot(false);
               setTransitioning(null);
-            }, 1500);
+            }, 1000);
             return true;
           }
         } catch (err) {
@@ -79,15 +80,6 @@ function StartPageContent() {
     }
   }, [searchParams, completedSteps, checkingBot, transitioning]);
 
-  const handleStepAction = (id: number) => {
-    if (id === 1) router.push('/login');
-    if (id === 2) {
-      window.open('https://google.com', '_blank'); // Link da extensão
-      setCheckingExtension(true);
-    }
-    if (id === 3) router.push('/safe-alert');
-  };
-
   if (loading) return (
     <div className="min-h-screen bg-[#0B0B0D] flex items-center justify-center">
       <Loader2 className="animate-spin text-[#5865F2] w-10 h-10" />
@@ -95,14 +87,37 @@ function StartPageContent() {
   );
 
   const steps = [
-    { id: 1, title: "Identity", icon: Lock, label: "Login with Discord", desc: "Connect your account to sync preferences." },
-    { id: 2, title: "Enhance", icon: Puzzle, label: "Install Extension", desc: "Unlock advanced dashboard features." },
-    { id: 3, title: "Connect", icon: Bot, label: "Add our Bot", desc: "Bring LostyoCord to your community." }
+    { 
+      id: 1, 
+      title: "Identity", 
+      icon: Lock, 
+      label: "Login with Discord", 
+      desc: "Connect your account to sync preferences.",
+      href: "/login",
+      isExternal: false
+    },
+    { 
+      id: 2, 
+      title: "Enhance", 
+      icon: Puzzle, 
+      label: "Install Extension", 
+      desc: "Unlock advanced dashboard features.",
+      href: EXTENSION_URL,
+      isExternal: true
+    },
+    { 
+      id: 3, 
+      title: "Connect", 
+      icon: Bot, 
+      label: "Add our Bot", 
+      desc: "Bring LostyoCord to your community.",
+      href: BOT_URL,
+      isExternal: false
+    }
   ];
 
   return (
     <div className="min-h-screen bg-[#0B0B0D] text-white flex flex-col items-center justify-center p-6 selection:bg-[#5865F2]/30">
-      {/* Background Glow */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-[#5865F2]/5 blur-[120px] rounded-full" />
         <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-[#5865F2]/5 blur-[120px] rounded-full" />
@@ -136,14 +151,38 @@ function StartPageContent() {
           </motion.p>
         </header>
 
-        {/* Steps Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
           {steps.map((step, idx) => {
             const isDone = completedSteps.includes(step.id);
             const isCurrent = (completedSteps.length + 1 === step.id) || (step.id === 1 && !isAuthenticated);
             const isLocked = step.id > completedSteps.length + 1;
             const Icon = step.icon;
-            const isChecking = (step.id === 2 && checkingExtension) || (step.id === 3 && checkingBot) || transitioning === step.id;
+            const isChecking = (step.id === 3 && checkingBot) || transitioning === step.id;
+
+            const buttonContent = (
+              <Button 
+                disabled={isDone || isLocked || isChecking}
+                className={cn(
+                  "w-full h-12 rounded-2xl font-bold text-xs uppercase tracking-widest transition-all",
+                  isDone ? "bg-green-500/10 text-green-500 cursor-default" :
+                  isChecking ? "bg-[#1A1A1E] text-white/30" :
+                  isLocked ? "bg-[#1A1A1E] text-white/10" :
+                  "bg-[#5865F2] hover:bg-[#4752C4] text-white shadow-lg shadow-[#5865F2]/20"
+                )}
+              >
+                <AnimatePresence mode="wait">
+                  {isDone ? (
+                    <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }} key="done">Success</motion.span>
+                  ) : isChecking ? (
+                    <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }} key="check" className="flex items-center gap-2">
+                      <Loader2 className="w-3 h-3 animate-spin" /> Verifying
+                    </motion.span>
+                  ) : (
+                    <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }} key="action">{step.label}</motion.span>
+                  )}
+                </AnimatePresence>
+              </Button>
+            );
 
             return (
               <motion.div
@@ -158,7 +197,6 @@ function StartPageContent() {
                   "border-white/5 opacity-40 grayscale"
                 )}
               >
-                {/* Step Number Badge */}
                 <div className={cn(
                   "absolute top-6 right-8 text-[10px] font-black uppercase tracking-widest",
                   isDone ? "text-green-500" : "text-white/10"
@@ -179,35 +217,22 @@ function StartPageContent() {
                   {step.desc}
                 </p>
 
-                <Button 
-                  onClick={() => handleStepAction(step.id)}
-                  disabled={isDone || isLocked || isChecking}
-                  className={cn(
-                    "w-full h-12 rounded-2xl font-bold text-xs uppercase tracking-widest transition-all",
-                    isDone ? "bg-green-500/10 text-green-500 cursor-default" :
-                    isChecking ? "bg-[#1A1A1E] text-white/30" :
-                    isLocked ? "bg-[#1A1A1E] text-white/10" :
-                    "bg-[#5865F2] hover:bg-[#4752C4] text-white shadow-lg shadow-[#5865F2]/20"
-                  )}
-                >
-                  <AnimatePresence mode="wait">
-                    {isDone ? (
-                      <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }} key="done">Success</motion.span>
-                    ) : isChecking ? (
-                      <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }} key="check" className="flex items-center gap-2">
-                        <Loader2 className="w-3 h-3 animate-spin" /> Verifying
-                      </motion.span>
-                    ) : (
-                      <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }} key="action">{step.label}</motion.span>
-                    )}
-                  </AnimatePresence>
-                </Button>
+                {isDone || isLocked ? (
+                  buttonContent
+                ) : step.isExternal ? (
+                  <a href={step.href} target="_blank" rel="noopener noreferrer" className="block w-full">
+                    {buttonContent}
+                  </a>
+                ) : (
+                  <Link href={step.href} className="block w-full">
+                    {buttonContent}
+                  </Link>
+                )}
               </motion.div>
             );
           })}
         </div>
 
-        {/* Bottom CTA */}
         <motion.div 
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
