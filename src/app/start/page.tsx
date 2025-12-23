@@ -8,7 +8,6 @@ import { Check, Lock, Puzzle, Bot, Loader2 } from 'lucide-react';
 import { cn } from "@/lib/utils";
 import Cookies from 'js-cookie';
 import { useExtensionDetector } from '@/hooks/useExtensionDetector';
-import { supabase } from "@/integrations/supabase/client";
 
 function StartPageContent() {
   const [completedSteps, setCompletedSteps] = useState<number[]>([]);
@@ -48,37 +47,26 @@ function StartPageContent() {
       setCheckingBot(true);
       
       const pollBotStatus = async () => {
-        console.log(`[BotCheck] Direct API query for guild: ${guildId}`);
+        console.log(`[BotCheck] Calling internal API for guild: ${guildId}`);
         try {
-          // Consulta direta na tabela via API (sem usar RPC)
-          const { data, error } = await supabase
-            .from('guilds')
-            .select('guild_id')
-            .eq('guild_id', guildId)
-            .eq('state', true)
-            .maybeSingle();
+          // Chamada para a API interna do Next.js, não diretamente para o Supabase
+          const response = await fetch(`/api/check-bot?guild_id=${guildId}`);
+          const data = await response.json();
           
-          if (error) {
-            console.error("[BotCheck] API Error:", error.message);
-            return false;
-          }
-
-          if (data) {
-            console.log("[BotCheck] Bot found! Success.");
+          if (data.active === true) {
+            console.log("[BotCheck] Bot confirmed via Server API.");
             setCompletedSteps(prev => prev.includes(3) ? prev : [...prev, 3]);
             setCheckingBot(false);
             return true;
           }
         } catch (err) {
-          console.error("[BotCheck] Critical error:", err);
+          console.error("[BotCheck] API call failed:", err);
         }
         return false;
       };
 
-      // Executa imediatamente
       pollBotStatus();
 
-      // Polling a cada 4 segundos
       const interval = setInterval(async () => {
         const isFound = await pollBotStatus();
         if (isFound) clearInterval(interval);
