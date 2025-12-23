@@ -27,18 +27,15 @@ function StartPageContent() {
     const loggedIn = Cookies.get('lostyo_logged_in') === 'true';
     if (loggedIn) {
       setIsAuthenticated(true);
-      if (!completedSteps.includes(1)) {
-        setCompletedSteps(prev => [...prev, 1]);
-      }
+      setCompletedSteps([1]);
     }
     setLoading(false);
-  }, [completedSteps]);
+  }, []);
 
   // Verificação do Passo 2 (Extensão) com delay
   useEffect(() => {
     if (isExtensionInstalled && completedSteps.includes(1) && !completedSteps.includes(2) && !transitioning) {
       setTransitioning(2);
-      setCheckingExtension(true);
       const timer = setTimeout(() => {
         setCompletedSteps(prev => [...prev, 2]);
         setCheckingExtension(false);
@@ -53,13 +50,13 @@ function StartPageContent() {
     const guildId = searchParams.get('guild_id');
     if (guildId && completedSteps.includes(2) && !completedSteps.includes(3) && !checkingBot && !transitioning) {
       setCheckingBot(true);
-      setTransitioning(3);
       
       const pollBotStatus = async () => {
         try {
           const response = await fetch(`/api/check-bot?guild_id=${guildId}`);
           const data = await response.json();
           if (data.active === true) {
+            setTransitioning(3);
             setTimeout(() => {
               setCompletedSteps(prev => [...prev, 3]);
               setCheckingBot(false);
@@ -99,20 +96,20 @@ function StartPageContent() {
 
   const steps = [
     { id: 1, title: "Identity", icon: Lock, label: "Login with Discord", desc: "Connect your account to sync preferences." },
-    { id: 2, title: "Install Extension", icon: Puzzle, label: "Install Extension", desc: "Add our browser extension for enhanced features." },
+    { id: 2, title: "Enhance", icon: Puzzle, label: "Install Extension", desc: "Unlock advanced dashboard features." },
     { id: 3, title: "Connect", icon: Bot, label: "Add our Bot", desc: "Bring LostyoCord to your community." }
   ];
 
   return (
-    <div className="min-h-screen bg-[#0B0B0D] text-white flex flex-col items-center justify-center p-4 md:p-6 selection:bg-[#5865F2]/30">
+    <div className="min-h-screen bg-[#0B0B0D] text-white flex flex-col items-center justify-center p-6 selection:bg-[#5865F2]/30">
       {/* Background Glow */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-[#5865F2]/5 blur-[100px] rounded-full" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-[#5865F2]/5 blur-[100px] rounded-full" />
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-[#5865F2]/5 blur-[120px] rounded-full" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-[#5865F2]/5 blur-[120px] rounded-full" />
       </div>
 
-      <div className="w-full max-w-5xl relative z-10">
-        <header className="text-center mb-12 md:mb-16">
+      <div className="max-w-5xl w-full relative z-10">
+        <header className="text-center mb-16">
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -125,7 +122,7 @@ function StartPageContent() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="text-3xl md:text-5xl font-black tracking-tight mb-4"
+            className="text-4xl md:text-6xl font-black tracking-tight mb-4"
           >
             Finish your <span className="text-[#5865F2]">installation.</span>
           </motion.h1>
@@ -133,14 +130,14 @@ function StartPageContent() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.2 }}
-            className="text-white/40 font-medium text-base md:text-lg max-w-xl mx-auto px-4"
+            className="text-white/40 font-medium text-lg max-w-xl mx-auto"
           >
             Complete these three simple steps to unlock the full power of your community dashboard.
           </motion.p>
         </header>
 
         {/* Steps Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mb-12 md:mb-16">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
           {steps.map((step, idx) => {
             const isDone = completedSteps.includes(step.id);
             const isCurrent = (completedSteps.length + 1 === step.id) || (step.id === 1 && !isAuthenticated);
@@ -155,30 +152,30 @@ function StartPageContent() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 + idx * 0.1 }}
                 className={cn(
-                  "relative group bg-[#141417] p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] border transition-all duration-500",
+                  "relative group bg-[#141417] p-8 rounded-[2.5rem] border transition-all duration-500",
                   isDone ? "border-green-500/20 bg-green-500/[0.02]" : 
-                  isCurrent ? "border-[#5865F2]/30 shadow-[0_0_30px_-10px_rgba(88,101,242,0.1)]" : 
+                  isCurrent ? "border-[#5865F2]/30 shadow-[0_0_40px_-15px_rgba(88,101,242,0.1)]" : 
                   "border-white/5 opacity-40 grayscale"
                 )}
               >
                 {/* Step Number Badge */}
                 <div className={cn(
-                  "absolute top-4 right-4 md:top-6 md:right-8 text-[9px] md:text-[10px] font-black uppercase tracking-widest",
+                  "absolute top-6 right-8 text-[10px] font-black uppercase tracking-widest",
                   isDone ? "text-green-500" : "text-white/10"
                 )}>
                   Step 0{step.id}
                 </div>
 
                 <div className={cn(
-                  "w-12 h-12 md:w-14 md:h-14 rounded-2xl flex items-center justify-center mb-6 transition-transform group-hover:scale-110 duration-500",
+                  "w-14 h-14 rounded-2xl flex items-center justify-center mb-8 transition-transform group-hover:scale-110 duration-500",
                   isDone ? "bg-green-500/10 text-green-500" : 
                   isCurrent ? "bg-[#5865F2]/10 text-[#5865F2]" : "bg-white/5 text-white/20"
                 )}>
-                  {isDone ? <Check size={24} strokeWidth={3} /> : <Icon size={24} />}
+                  {isDone ? <Check size={28} strokeWidth={3} /> : <Icon size={28} />}
                 </div>
 
-                <h3 className="text-lg md:text-xl font-bold mb-2 tracking-tight">{step.title}</h3>
-                <p className="text-white/30 text-xs md:text-sm font-medium leading-relaxed mb-6">
+                <h3 className="text-xl font-bold mb-2 tracking-tight">{step.title}</h3>
+                <p className="text-white/30 text-sm font-medium leading-relaxed mb-8">
                   {step.desc}
                 </p>
 
@@ -186,7 +183,7 @@ function StartPageContent() {
                   onClick={() => handleStepAction(step.id)}
                   disabled={isDone || isLocked || isChecking}
                   className={cn(
-                    "w-full h-10 md:h-12 rounded-xl md:rounded-2xl font-bold text-[10px] md:text-xs uppercase tracking-widest transition-all",
+                    "w-full h-12 rounded-2xl font-bold text-xs uppercase tracking-widest transition-all",
                     isDone ? "bg-green-500/10 text-green-500 cursor-default" :
                     isChecking ? "bg-[#1A1A1E] text-white/30" :
                     isLocked ? "bg-[#1A1A1E] text-white/10" :
@@ -219,21 +216,21 @@ function StartPageContent() {
         >
           <div className="relative group">
             <div className={cn(
-              "absolute inset-0 bg-[#5865F2] blur-xl opacity-0 transition-opacity duration-500",
+              "absolute inset-0 bg-[#5865F2] blur-2xl opacity-0 transition-opacity duration-500",
               completedSteps.length === 3 && "group-hover:opacity-20"
             )} />
             <Link href={completedSteps.length === 3 ? "/dashboard" : "#"}>
               <Button 
                 disabled={completedSteps.length < 3}
                 className={cn(
-                  "relative px-8 md:px-16 h-14 md:h-16 rounded-full font-black text-base md:text-lg transition-all duration-500",
+                  "relative px-16 h-16 rounded-full font-black text-lg transition-all duration-500",
                   completedSteps.length === 3 
                     ? "bg-white text-black hover:scale-105 active:scale-95" 
                     : "bg-white/5 text-white/10 cursor-not-allowed"
                 )}
               >
                 Go to Dashboard
-                <ArrowRight className="ml-2 md:ml-3 w-4 h-4 md:w-5 md:h-5" />
+                <ArrowRight className="ml-3 w-5 h-5" />
               </Button>
             </Link>
           </div>
