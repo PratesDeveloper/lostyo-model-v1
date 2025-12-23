@@ -9,6 +9,39 @@ import { cn } from "@/lib/utils";
 import { useExtensionDetector } from '@/hooks/useExtensionDetector';
 import Cookies from 'js-cookie';
 
+// Componente de Indicador de Passo com Animação
+const StepIndicator = ({ id, isDone, title }: { id: number, isDone: boolean, title: string }) => {
+  return (
+    <div className="flex flex-col items-center relative z-10">
+      <motion.div
+        key={id}
+        initial={false}
+        animate={isDone ? "done" : "initial"}
+        variants={{
+          initial: { scale: 1, rotate: 0 },
+          done: { scale: [1, 1.2, 1], rotate: [0, 10, -10, 0] }
+        }}
+        transition={{ duration: 0.5, type: "spring", stiffness: 300, damping: 20 }}
+        className={cn(
+          "w-14 h-14 rounded-full flex items-center justify-center border-4 transition-all duration-500 font-bold text-lg",
+          isDone 
+            ? "bg-green-500 border-green-500 text-white" 
+            : "bg-[#141417] border-[#1A1A1E] text-white/40"
+        )}
+      >
+        {isDone ? <Check size={24} /> : id}
+      </motion.div>
+      <span className={cn(
+        "text-sm font-bold mt-3 transition-colors duration-500",
+        isDone ? "text-white" : "text-white/40"
+      )}>
+        {title}
+      </span>
+    </div>
+  );
+};
+
+
 function StartPageContent() {
   const router = useRouter();
   const [completedSteps, setCompletedSteps] = useState<number[]>([]);
@@ -19,36 +52,48 @@ function StartPageContent() {
   const [checkingBot, setCheckingBot] = useState(false);
   const isExtensionInstalled = useExtensionDetector();
   const searchParams = useSearchParams();
+  
+  const titles = ["Login", "Extension", "Add Bot"];
 
+  // Função para adicionar um passo com delay
+  const completeStepWithDelay = (stepId: number) => {
+    if (!completedSteps.includes(stepId)) {
+      setTimeout(() => {
+        setCompletedSteps(prev => [...prev, stepId]);
+      }, 1500); // Atraso de 1.5 segundos
+    }
+  };
+
+  // Efeito 1: Checagem de Autenticação (Passo 1)
   useEffect(() => {
-    // Verifica se o usuário está logado através do cookie
     const loggedIn = Cookies.get('lostyo_logged_in') === 'true';
     if (loggedIn) {
       setIsAuthenticated(true);
-      setCompletedSteps(prev => prev.includes(1) ? prev : [...prev, 1]);
+      completeStepWithDelay(1);
     }
     setLoading(false);
   }, []);
 
+  // Efeito 2: Checagem da Extensão (Passo 2)
   useEffect(() => {
     if (isExtensionInstalled && completedSteps.includes(1) && !completedSteps.includes(2)) {
-      setCompletedSteps(prev => [...prev, 2]);
       setCheckingExtension(false);
+      completeStepWithDelay(2);
     }
   }, [isExtensionInstalled, completedSteps]);
 
+  // Efeito 3: Checagem do Bot (Passo 3)
   useEffect(() => {
     const guildId = searchParams.get('guild_id');
-    if (guildId && completedSteps.includes(1) && !completedSteps.includes(3) && !checkingBot) {
+    if (guildId && completedSteps.includes(2) && !completedSteps.includes(3) && !checkingBot) {
       setCheckingBot(true);
       const pollBotStatus = async () => {
         try {
-          // Busca o status do bot na API
           const response = await fetch(`/api/check-bot?guild_id=${guildId}`);
           const data = await response.json();
           if (data.active === true) {
-            setCompletedSteps(prev => prev.includes(3) ? prev : [...prev, 3]);
             setCheckingBot(false);
+            completeStepWithDelay(3);
             return true;
           }
         } catch (err) {
@@ -67,8 +112,13 @@ function StartPageContent() {
     }
   }, [searchParams, completedSteps, checkingBot]);
 
+  // Efeito 4: Mostrar Botão Final
   useEffect(() => {
-    if (completedSteps.length >= 3) setShowFinalButton(true);
+    if (completedSteps.includes(3)) {
+      setTimeout(() => {
+        setShowFinalButton(true);
+      }, 1500); // Atraso para o botão final aparecer após o último passo
+    }
   }, [completedSteps]);
 
   const handleStepAction = async (id: number) => {
@@ -98,28 +148,12 @@ function StartPageContent() {
           {/* Progress Indicator */}
           <div className="flex justify-center items-center mb-12">
             {[1, 2, 3].map((id, idx) => {
-              const titles = ["Login", "Extension", "Add Bot"];
               const isDone = completedSteps.includes(id);
               const isNextDone = completedSteps.includes(id + 1);
               
               return (
                 <React.Fragment key={id}>
-                  <div className="flex flex-col items-center relative z-10">
-                    <div className={cn(
-                      "w-14 h-14 rounded-full flex items-center justify-center border-4 transition-all duration-500 font-bold text-lg",
-                      isDone 
-                        ? "bg-green-500 border-green-500 text-white" 
-                        : "bg-[#141417] border-[#1A1A1E] text-white/40"
-                    )}>
-                      {isDone ? <Check size={24} /> : id}
-                    </div>
-                    <span className={cn(
-                      "text-sm font-bold mt-3 transition-colors duration-500",
-                      isDone ? "text-white" : "text-white/40"
-                    )}>
-                      {titles[idx]}
-                    </span>
-                  </div>
+                  <StepIndicator id={id} isDone={isDone} title={titles[idx]} />
                   {idx < 2 && (
                     <div className={cn(
                       "w-20 h-1 mx-2 transition-colors duration-500",
@@ -136,7 +170,6 @@ function StartPageContent() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
           {[1, 2, 3].map((id, idx) => {
             const icons = [Lock, Puzzle, Bot];
-            const titles = ["Login to Discord", "Install Extension", "Add Bot to Server"];
             const descriptions = [
               "Securely connect your Discord account to manage your servers.",
               "Install our browser extension for seamless integration and features.",
