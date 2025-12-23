@@ -7,13 +7,7 @@ export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const guildId = searchParams.get('guild_id');
 
-  // Caso 1: Sem ID
-  if (!guildId) {
-    return NextResponse.json({ 
-      active: false, 
-      status_message: 'Faltou o guild_id na URL' 
-    });
-  }
+  if (!guildId) return NextResponse.json({ active: false, reason: 'missing_id' });
 
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -24,28 +18,14 @@ export async function GET(req: Request) {
     .from('guilds')
     .select('state, guild_id')
     .eq('guild_id', guildId)
-    .maybeSingle(); // maybeSingle evita erro se não encontrar nada, retorna null
+    .maybeSingle();
 
-  // Lógica de diagnósticos
-  let statusMessage = '';
-  let isActive = false;
+  console.log('Busca:', { requestedId: guildId, foundData: data, error });
 
-  if (error) {
-    statusMessage = `Erro no Supabase: ${error.message}`;
-  } else if (!data) {
-    statusMessage = 'Não achou o doc (Guild não registrada)';
-  } else if (!data.state) {
-    statusMessage = 'Achou o doc, mas não achou o state (State false/null)';
-  } else {
-    isActive = true;
-    statusMessage = 'Tá confirmado (Doc existe e State true)';
-  }
-
-  console.log(`[DEBUG] Guild: ${guildId} | Status: ${statusMessage}`);
+  const isActive = data ? Boolean(data.state) : false;
 
   return NextResponse.json({ 
     active: isActive,
-    status_message: statusMessage,
     debug_data: data 
   });
 }
