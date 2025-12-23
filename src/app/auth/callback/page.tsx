@@ -1,11 +1,12 @@
 "use client";
 
-import React, { useEffect } from 'react';
+import React, { useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
 import Cookies from 'js-cookie';
 
-export default function AuthCallbackPage() {
+// Componente interno com a lógica do useSearchParams
+function AuthContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -13,11 +14,7 @@ export default function AuthCallbackPage() {
     const code = searchParams.get('code');
     
     if (code) {
-      // Salva um marcador de login no cookie (expira em 7 dias)
       Cookies.set('lostyo_logged_in', 'true', { expires: 7 });
-      
-      // Opcional: Você pode salvar o código ou processar em sua API aqui
-      // Para o frontend, o marcador de cookie já satisfaz o "Passo 1"
     }
     
     router.push('/start');
@@ -30,5 +27,15 @@ export default function AuthCallbackPage() {
         <p className="text-white/40">Securing your session...</p>
       </div>
     </div>
+  );
+}
+
+// Componente principal exportado com o Boundary de Suspense
+export default function AuthCallbackPage() {
+  return (
+    // O fallback é renderizado enquanto os parâmetros da URL carregam
+    <Suspense fallback={<div className="min-h-screen bg-[#0B0B0D]" />}>
+      <AuthContent />
+    </Suspense>
   );
 }
