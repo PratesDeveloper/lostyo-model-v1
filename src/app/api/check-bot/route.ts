@@ -3,59 +3,59 @@ import { NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET(request: Request) {
+export async function GET(req: Request) {
+  console.log(">>> [API CHECK-BOT] Iniciando verificação...");
+  
   try {
-    const { searchParams } = new URL(request.url);
+    const { searchParams } = new URL(req.url);
     const guildId = searchParams.get('guild_id');
+    console.log(">>> [API CHECK-BOT] Guild ID recebido:", guildId);
 
     if (!guildId) {
-      return NextResponse.json({ active: false, error: 'Missing guild_id' }, { status: 400 });
+      console.log(">>> [API CHECK-BOT] Erro: guild_id ausente");
+      return NextResponse.json({ active: false, error: "guild_id_missing" }, { status: 400 });
     }
 
-    // Buscando chaves do ambiente
-    const supabaseUrl = process.env.SUPABASE_URL;
-    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    const url = process.env.SUPABASE_URL;
+    const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-    if (!supabaseUrl || !supabaseServiceKey) {
-      console.error('[CRITICAL] API CheckBot: Environment variables missing');
+    console.log(">>> [API CHECK-BOT] Checando variáveis de ambiente...");
+    if (!url || !key) {
+      console.log(">>> [API CHECK-BOT] Erro: SUPABASE_URL ou SERVICE_ROLE_KEY não configurados");
       return NextResponse.json({ 
         active: false, 
-        error: 'Server configuration error' 
+        error: "env_vars_missing",
+        details: { url: !!url, key: !!key }
       }, { status: 500 });
     }
 
-    // Inicializando cliente administrativo (Server Side Only)
-    const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
-      auth: {
-        persistSession: false,
-        autoRefreshToken: false,
-      }
-    });
+    console.log(">>> [API CHECK-BOT] Conectando ao Supabase...");
+    const supabase = createClient(url, key);
 
-    // Consulta otimizada
-    const { data, error } = await supabaseAdmin
+    console.log(">>> [API CHECK-BOT] Executando query na tabela 'guilds'...");
+    const { data, error } = await supabase
       .from('guilds')
-      .select('guild_id, state')
+      .select('state')
       .eq('guild_id', guildId)
-      .eq('state', true)
       .maybeSingle();
 
     if (error) {
-      console.error('[DB ERROR] API CheckBot:', error.message);
-      return NextResponse.json({ active: false, error: 'Database lookup failed' }, { status: 500 });
+      console.log(">>> [API CHECK-BOT] Erro do Supabase:", error.message);
+      return NextResponse.json({ active: false, error: "database_error", message: error.message }, { status: 500 });
     }
 
-    // Retorno de sucesso
-    return NextResponse.json({ 
-      active: !!data,
-      timestamp: new Date().toISOString()
-    });
+    console.log(">>> [API CHECK-BOT] Resultado da query:", data);
+    const isActive = !!(data && data.state === true);
+    
+    console.log(">>> [API CHECK-BOT] Finalizado. Ativo:", isActive);
+    return NextResponse.json({ active: isActive });
 
-  } catch (error: any) {
-    console.error('[FATAL ERROR] API CheckBot:', error.message || error);
+  } catch (e: any) {
+    console.log(">>> [API CHECK-BOT] ERRO CRÍTICO:", e.message);
     return NextResponse.json({ 
       active: false, 
-      error: 'Internal processing error' 
+      error: "internal_exception", 
+      message: e.message 
     }, { status: 500 });
   }
 }
