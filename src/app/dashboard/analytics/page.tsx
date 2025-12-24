@@ -1,6 +1,6 @@
 "use client";
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { 
   BarChart3,
@@ -23,6 +23,8 @@ import {
   Legend,
   Filler
 } from 'chart.js';
+import { getMembers, getLogs } from '@/lib/supabase';
+import { useSearchParams } from 'next/navigation';
 
 ChartJS.register(
   CategoryScale,
@@ -37,39 +39,81 @@ ChartJS.register(
 );
 
 const AnalyticsPage = () => {
-  // Dados para o gráfico de membros
-  const membersData = {
-    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-    datasets: [
-      {
-        label: 'New Members',
-        data: [120, 190, 150, 220, 180, 250, 210, 280, 230, 310, 270, 350],
-        backgroundColor: 'rgba(88, 101, 242, 0.7)',
-        borderColor: 'rgba(88, 101, 242, 1)',
-        borderWidth: 2,
-        borderRadius: 8,
-        barPercentage: 0.6,
-      },
-    ],
-  };
+  const [membersData, setMembersData] = useState<any>(null);
+  const [activityData, setActivityData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState({
+    totalMembers: 0,
+    messagesToday: 0,
+    onlineNow: 0,
+    avgResponse: "0s"
+  });
+  
+  const searchParams = useSearchParams();
+  const guildId = searchParams.get('guild');
 
-  // Dados para o gráfico de atividade
-  const activityData = {
-    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-    datasets: [
-      {
-        label: 'Messages',
-        data: [1200, 1900, 1500, 2200, 1800, 2500, 2100],
-        fill: true,
-        backgroundColor: 'rgba(88, 101, 242, 0.1)',
-        borderColor: 'rgba(88, 101, 242, 1)',
-        borderWidth: 3,
-        pointBackgroundColor: 'rgba(88, 101, 242, 1)',
-        pointRadius: 5,
-        tension: 0.4,
-      },
-    ],
-  };
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!guildId) return;
+      
+      setLoading(true);
+      
+      // Buscar dados de membros
+      const members = await getMembers(guildId);
+      
+      // Simular dados para os gráficos (em uma implementação real, buscaríamos do banco)
+      const memberLabels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      const memberValues = [120, 190, 150, 220, 180, 250, 210, 280, 230, 310, 270, 350];
+      
+      setMembersData({
+        labels: memberLabels,
+        datasets: [
+          {
+            label: 'New Members',
+            data: memberValues,
+            backgroundColor: 'rgba(88, 101, 242, 0.7)',
+            borderColor: 'rgba(88, 101, 242, 1)',
+            borderWidth: 2,
+            borderRadius: 8,
+            barPercentage: 0.6,
+          },
+        ],
+      });
+      
+      // Simular dados de atividade
+      const activityLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+      const activityValues = [1200, 1900, 1500, 2200, 1800, 2500, 2100];
+      
+      setActivityData({
+        labels: activityLabels,
+        datasets: [
+          {
+            label: 'Messages',
+            data: activityValues,
+            fill: true,
+            backgroundColor: 'rgba(88, 101, 242, 0.1)',
+            borderColor: 'rgba(88, 101, 242, 1)',
+            borderWidth: 3,
+            pointBackgroundColor: 'rgba(88, 101, 242, 1)',
+            pointRadius: 5,
+            tension: 0.4,
+          },
+        ],
+      });
+      
+      // Atualizar estatísticas
+      setStats({
+        totalMembers: members.length,
+        messagesToday: activityValues[activityValues.length - 1], // Último valor como "hoje"
+        onlineNow: 0, // Implementar contagem real
+        avgResponse: "0s" // Implementar cálculo real
+      });
+      
+      setLoading(false);
+    };
+    
+    fetchData();
+  }, [guildId]);
 
   const chartOptions = {
     responsive: true,
@@ -117,6 +161,14 @@ const AnalyticsPage = () => {
     },
   };
 
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#5865F2]"></div>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-6xl mx-auto space-y-8">
       {/* Header */}
@@ -128,10 +180,10 @@ const AnalyticsPage = () => {
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {[
-          { title: "Total Members", value: "12,402", change: "+12%", icon: Users, color: "text-[#5865F2]" },
-          { title: "Messages Today", value: "3,245", change: "+5%", icon: MessageSquare, color: "text-green-500" },
-          { title: "Online Now", value: "3,245", change: "+8%", icon: Calendar, color: "text-blue-500" },
-          { title: "Avg. Response", value: "2m 14s", change: "-12%", icon: Clock, color: "text-purple-500" }
+          { title: "Total Members", value: stats.totalMembers.toString(), change: "+0%", icon: Users, color: "text-[#5865F2]" },
+          { title: "Messages Today", value: stats.messagesToday.toString(), change: "+0%", icon: MessageSquare, color: "text-green-500" },
+          { title: "Online Now", value: stats.onlineNow.toString(), change: "+0%", icon: Calendar, color: "text-blue-500" },
+          { title: "Avg. Response", value: stats.avgResponse, change: "+0%", icon: Clock, color: "text-purple-500" }
         ].map((stat, index) => (
           <motion.div
             key={index}
@@ -170,7 +222,7 @@ const AnalyticsPage = () => {
             <BarChart3 className="w-5 h-5 text-[#5865F2]" />
           </div>
           <div className="h-80">
-            <Bar data={membersData} options={chartOptions} />
+            {membersData && <Bar data={membersData} options={chartOptions} />}
           </div>
         </motion.div>
 
@@ -186,7 +238,7 @@ const AnalyticsPage = () => {
             <TrendingUp className="w-5 h-5 text-green-500" />
           </div>
           <div className="h-80">
-            <Line data={activityData} options={chartOptions} />
+            {activityData && <Line data={activityData} options={chartOptions} />}
           </div>
         </motion.div>
       </div>
@@ -202,9 +254,9 @@ const AnalyticsPage = () => {
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {[
-            { label: "Most Active Day", value: "Saturday", desc: "Peak activity at 8 PM" },
-            { label: "Top Channel", value: "#general", desc: "42% of all messages" },
-            { label: "Most Engaged Role", value: "Members", desc: "78% participation rate" }
+            { label: "Most Active Day", value: "N/A", desc: "No data available" },
+            { label: "Top Channel", value: "N/A", desc: "No data available" },
+            { label: "Most Engaged Role", value: "N/A", desc: "No data available" }
           ].map((metric, index) => (
             <div key={index} className="p-5 rounded-2xl bg-white/5">
               <p className="text-white/40 text-xs font-bold uppercase tracking-widest mb-2">{metric.label}</p>

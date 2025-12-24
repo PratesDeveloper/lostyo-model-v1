@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { 
   Shield, 
@@ -26,24 +26,60 @@ import {
   SelectTrigger,
   SelectValue
 } from '@/components/ui/select';
+import { getInfractions } from '@/lib/supabase';
+import { useSearchParams } from 'next/navigation';
 
-const mockInfractions = [
-  { id: 1, user: "JohnDoe#1234", type: "Spam", reason: "Excessive message repetition", moderator: "Admin#0001", date: "2023-10-15 14:30" },
-  { id: 2, user: "JaneSmith#5678", type: "Harassment", reason: "Offensive language towards other users", moderator: "Mod#0002", date: "2023-10-14 09:15" },
-  { id: 3, user: "BotMaster#9999", type: "Bot Abuse", reason: "Using unauthorized bot commands", moderator: "Admin#0001", date: "2023-10-13 18:45" },
-  { id: 4, user: "NewUser#1111", type: "Advertising", reason: "Posting external server links", moderator: "Mod#0003", date: "2023-10-12 11:20" },
-];
+interface Infraction {
+  id: string;
+  user_id: string;
+  guild_id: string;
+  type: string;
+  reason: string;
+  moderator_id: string;
+  created_at: string;
+  user?: {
+    username: string;
+  };
+  moderator?: {
+    username: string;
+  };
+}
 
 const ModerationPage = () => {
+  const [infractions, setInfractions] = useState<Infraction[]>([]);
+  const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
+  const searchParams = useSearchParams();
+  const guildId = searchParams.get('guild');
 
-  const filteredInfractions = mockInfractions.filter(infraction => {
+  useEffect(() => {
+    const fetchInfractions = async () => {
+      if (!guildId) return;
+      
+      setLoading(true);
+      const data = await getInfractions(guildId);
+      setInfractions(data);
+      setLoading(false);
+    };
+    
+    fetchInfractions();
+  }, [guildId]);
+
+  const filteredInfractions = infractions.filter(infraction => {
     const matchesFilter = filter === "all" || infraction.type.toLowerCase() === filter.toLowerCase();
-    const matchesSearch = infraction.user.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    const matchesSearch = infraction.user?.username.toLowerCase().includes(searchTerm.toLowerCase()) || 
                           infraction.reason.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesFilter && matchesSearch;
   });
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#5865F2]"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-6xl mx-auto space-y-8">
@@ -89,10 +125,10 @@ const ModerationPage = () => {
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         {[
-          { title: "Total Infractions", value: "142", icon: Shield, color: "text-[#5865F2]" },
-          { title: "Active Bans", value: "7", icon: UserX, color: "text-red-500" },
-          { title: "Pending Reports", value: "3", icon: AlertTriangle, color: "text-yellow-500" },
-          { title: "Avg. Response Time", value: "2m 14s", icon: Clock, color: "text-green-500" }
+          { title: "Total Infractions", value: infractions.length.toString(), icon: Shield, color: "text-[#5865F2]" },
+          { title: "Active Bans", value: "0", icon: UserX, color: "text-red-500" }, // Implementar contagem real
+          { title: "Pending Reports", value: "0", icon: AlertTriangle, color: "text-yellow-500" }, // Implementar contagem real
+          { title: "Avg. Response Time", value: "0s", icon: Clock, color: "text-green-500" } // Implementar cálculo real
         ].map((stat, index) => (
           <motion.div
             key={index}
@@ -140,7 +176,7 @@ const ModerationPage = () => {
                   className="border-b border-white/5 last:border-0 hover:bg-white/5 transition-colors"
                 >
                   <td className="p-6">
-                    <div className="font-bold text-white">{infraction.user}</div>
+                    <div className="font-bold text-white">{infraction.user?.username || 'Unknown User'}</div>
                   </td>
                   <td className="p-6">
                     <span className="px-3 py-1 rounded-full bg-[#5865F2]/10 text-[#5865F2] text-xs font-bold">
@@ -148,8 +184,8 @@ const ModerationPage = () => {
                     </span>
                   </td>
                   <td className="p-6 text-white/60 max-w-xs truncate">{infraction.reason}</td>
-                  <td className="p-6 text-white/60">{infraction.moderator}</td>
-                  <td className="p-6 text-white/40 text-sm">{infraction.date}</td>
+                  <td className="p-6 text-white/60">{infraction.moderator?.username || 'Unknown Moderator'}</td>
+                  <td className="p-6 text-white/40 text-sm">{new Date(infraction.created_at).toLocaleString()}</td>
                   <td className="p-6">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>

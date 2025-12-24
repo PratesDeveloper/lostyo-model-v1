@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { 
   Settings,
@@ -24,28 +24,83 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { getProfile, updateProfile } from '@/lib/supabase';
+import { useSearchParams } from 'next/navigation';
+import { supabase } from '@/integrations/supabase/client';
+
+interface Profile {
+  id: string;
+  username: string;
+  avatar_url: string | null;
+  updated_at: string;
+  onboarding_complete: boolean;
+}
 
 const SettingsPage = () => {
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [notifications, setNotifications] = useState(true);
   const [moderation, setModeration] = useState(true);
   const [language, setLanguage] = useState("en");
   const [theme, setTheme] = useState("dark");
-  const [username, setUsername] = useState("AdminUser");
-  const [bio, setBio] = useState("Community manager and bot enthusiast.");
+  const [username, setUsername] = useState("");
+  const [bio, setBio] = useState("");
+  const searchParams = useSearchParams();
+  const guildId = searchParams.get('guild');
 
-  const handleSave = () => {
-    // Simular salvamento
-    console.log("Settings saved");
+  useEffect(() => {
+    const fetchProfile = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+      
+      const data = await getProfile(session.user.id);
+      if (data) {
+        setProfile(data);
+        setUsername(data.username || "");
+        // Bio não está no perfil, mas poderia ser adicionado
+        setBio("");
+      }
+      setLoading(false);
+    };
+    
+    fetchProfile();
+  }, []);
+
+  const handleSave = async () => {
+    if (!profile) return;
+    
+    setSaving(true);
+    const success = await updateProfile(profile.id, {
+      username: username
+    });
+    
+    if (success) {
+      // Atualizar o perfil localmente
+      setProfile({ ...profile, username: username });
+    }
+    
+    setSaving(false);
   };
 
   const handleReset = () => {
+    if (profile) {
+      setUsername(profile.username || "");
+      setBio("");
+    }
     setNotifications(true);
     setModeration(true);
     setLanguage("en");
     setTheme("dark");
-    setUsername("AdminUser");
-    setBio("Community manager and bot enthusiast.");
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#5865F2]"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-4xl mx-auto space-y-8">
@@ -172,10 +227,17 @@ const SettingsPage = () => {
           <div className="flex flex-wrap gap-4">
             <Button 
               onClick={handleSave}
+              disabled={saving}
               className="h-12 px-8 rounded-full bg-[#5865F2] hover:bg-[#4752C4] text-white font-bold"
             >
-              <Save size={18} className="mr-2" />
-              Save Changes
+              {saving ? (
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+              ) : (
+                <>
+                  <Save size={18} className="mr-2" />
+                  Save Changes
+                </>
+              )}
             </Button>
             
             <Button 

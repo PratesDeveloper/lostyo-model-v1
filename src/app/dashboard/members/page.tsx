@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { 
   Users, 
@@ -25,25 +25,52 @@ import {
   SelectTrigger,
   SelectValue
 } from '@/components/ui/select';
+import { getMembers } from '@/lib/supabase';
+import { useSearchParams } from 'next/navigation';
 
-const mockMembers = [
-  { id: 1, name: "Alex Johnson", role: "Owner", joinDate: "2022-01-15", messages: 12450, avatar: "AJ" },
-  { id: 2, name: "Sam Wilson", role: "Admin", joinDate: "2022-03-22", messages: 8760, avatar: "SW" },
-  { id: 3, name: "Taylor Reed", role: "Moderator", joinDate: "2022-05-30", messages: 5420, avatar: "TR" },
-  { id: 4, name: "Jordan Lee", role: "Member", joinDate: "2022-08-14", messages: 3210, avatar: "JL" },
-  { id: 5, name: "Casey Smith", role: "Member", joinDate: "2022-11-05", messages: 2890, avatar: "CS" },
-  { id: 6, name: "Riley Brown", role: "Member", joinDate: "2023-01-19", messages: 1560, avatar: "RB" },
-];
+interface Member {
+  id: string;
+  username: string;
+  avatar_url: string | null;
+  role: string;
+  join_date: string;
+  message_count: number;
+}
 
 const MembersPage = () => {
+  const [members, setMembers] = useState<Member[]>([]);
+  const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
+  const searchParams = useSearchParams();
+  const guildId = searchParams.get('guild');
 
-  const filteredMembers = mockMembers.filter(member => {
+  useEffect(() => {
+    const fetchMembers = async () => {
+      if (!guildId) return;
+      
+      setLoading(true);
+      const data = await getMembers(guildId);
+      setMembers(data);
+      setLoading(false);
+    };
+    
+    fetchMembers();
+  }, [guildId]);
+
+  const filteredMembers = members.filter(member => {
     const matchesFilter = filter === "all" || member.role.toLowerCase() === filter.toLowerCase();
-    const matchesSearch = member.name.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = member.username.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesFilter && matchesSearch;
   });
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#5865F2]"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-6xl mx-auto space-y-8">
@@ -89,10 +116,10 @@ const MembersPage = () => {
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         {[
-          { title: "Total Members", value: "12,402", icon: Users, color: "text-[#5865F2]" },
-          { title: "Online Now", value: "3,245", icon: Calendar, color: "text-green-500" },
-          { title: "Admins", value: "5", icon: Crown, color: "text-yellow-500" },
-          { title: "Moderators", value: "12", icon: Shield, color: "text-blue-500" }
+          { title: "Total Members", value: members.length.toString(), icon: Users, color: "text-[#5865F2]" },
+          { title: "Online Now", value: "0", icon: Calendar, color: "text-green-500" }, // Implementar contagem real
+          { title: "Admins", value: members.filter(m => m.role === 'admin').length.toString(), icon: Crown, color: "text-yellow-500" },
+          { title: "Moderators", value: members.filter(m => m.role === 'moderator').length.toString(), icon: Shield, color: "text-blue-500" }
         ].map((stat, index) => (
           <motion.div
             key={index}
@@ -141,23 +168,23 @@ const MembersPage = () => {
                   <td className="p-6">
                     <div className="flex items-center gap-4">
                       <div className="w-10 h-10 rounded-full bg-[#5865F2] flex items-center justify-center text-white font-bold text-sm">
-                        {member.avatar}
+                        {member.username.charAt(0)}
                       </div>
-                      <div className="font-bold text-white">{member.name}</div>
+                      <div className="font-bold text-white">{member.username}</div>
                     </div>
                   </td>
                   <td className="p-6">
                     <span className={`px-3 py-1 rounded-full text-xs font-bold ${
-                      member.role === "Owner" ? "bg-yellow-500/10 text-yellow-500" :
-                      member.role === "Admin" ? "bg-red-500/10 text-red-500" :
-                      member.role === "Moderator" ? "bg-blue-500/10 text-blue-500" :
+                      member.role === "owner" ? "bg-yellow-500/10 text-yellow-500" :
+                      member.role === "admin" ? "bg-red-500/10 text-red-500" :
+                      member.role === "moderator" ? "bg-blue-500/10 text-blue-500" :
                       "bg-gray-500/10 text-gray-500"
                     }`}>
                       {member.role}
                     </span>
                   </td>
-                  <td className="p-6 text-white/60">{member.joinDate}</td>
-                  <td className="p-6 text-white/60">{member.messages.toLocaleString()}</td>
+                  <td className="p-6 text-white/60">{new Date(member.join_date).toLocaleDateString()}</td>
+                  <td className="p-6 text-white/60">{member.message_count.toLocaleString()}</td>
                   <td className="p-6">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>

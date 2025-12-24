@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { 
   ScrollText,
@@ -21,25 +21,46 @@ import {
   SelectTrigger,
   SelectValue
 } from '@/components/ui/select';
+import { getLogs } from '@/lib/supabase';
+import { useSearchParams } from 'next/navigation';
 
-const mockLogs = [
-  { id: 1, user: "AdminUser", action: "Updated server settings", resource: "General Configuration", time: "2 minutes ago", type: "settings" },
-  { id: 2, user: "ModBot", action: "Deleted spam message", resource: "#general channel", time: "5 minutes ago", type: "moderation" },
-  { id: 3, user: "NewMember", action: "Joined server", resource: "Community Server", time: "12 minutes ago", type: "user" },
-  { id: 4, user: "AdminUser", action: "Created new role", resource: "Moderator", time: "24 minutes ago", type: "settings" },
-  { id: 5, user: "ModBot", action: "Warned user", resource: "Spammer#1234", time: "36 minutes ago", type: "moderation" },
-  { id: 6, user: "Member123", action: "Posted message", resource: "#announcements", time: "1 hour ago", type: "message" },
-  { id: 7, user: "AdminUser", action: "Banned user", resource: "Troll#9999", time: "2 hours ago", type: "moderation" },
-  { id: 8, user: "ServerBot", action: "Scheduled maintenance", resource: "Weekly backup", time: "3 hours ago", type: "system" },
-];
+interface Log {
+  id: string;
+  user_id: string;
+  guild_id: string;
+  action: string;
+  resource: string;
+  created_at: string;
+  type: string;
+  user?: {
+    username: string;
+  };
+}
 
 const LogsPage = () => {
+  const [logs, setLogs] = useState<Log[]>([]);
+  const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
+  const searchParams = useSearchParams();
+  const guildId = searchParams.get('guild');
 
-  const filteredLogs = mockLogs.filter(log => {
+  useEffect(() => {
+    const fetchLogs = async () => {
+      if (!guildId) return;
+      
+      setLoading(true);
+      const data = await getLogs(guildId);
+      setLogs(data);
+      setLoading(false);
+    };
+    
+    fetchLogs();
+  }, [guildId]);
+
+  const filteredLogs = logs.filter(log => {
     const matchesFilter = filter === "all" || log.type === filter;
-    const matchesSearch = log.user.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    const matchesSearch = log.user?.username.toLowerCase().includes(searchTerm.toLowerCase()) || 
                           log.action.toLowerCase().includes(searchTerm.toLowerCase()) ||
                           log.resource.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesFilter && matchesSearch;
@@ -66,6 +87,14 @@ const LogsPage = () => {
       default: return "text-white";
     }
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#5865F2]"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-6xl mx-auto space-y-8">
@@ -112,10 +141,10 @@ const LogsPage = () => {
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         {[
-          { title: "Total Actions", value: "1,245", icon: ScrollText, color: "text-[#5865F2]" },
-          { title: "Moderation", value: "87", icon: Shield, color: "text-red-500" },
-          { title: "User Actions", value: "423", icon: User, color: "text-blue-500" },
-          { title: "Settings", value: "32", icon: Settings, color: "text-yellow-500" }
+          { title: "Total Actions", value: logs.length.toString(), icon: ScrollText, color: "text-[#5865F2]" },
+          { title: "Moderation", value: logs.filter(l => l.type === 'moderation').length.toString(), icon: Shield, color: "text-red-500" },
+          { title: "User Actions", value: logs.filter(l => l.type === 'user').length.toString(), icon: User, color: "text-blue-500" },
+          { title: "Settings", value: logs.filter(l => l.type === 'settings').length.toString(), icon: Settings, color: "text-yellow-500" }
         ].map((stat, index) => (
           <motion.div
             key={index}
@@ -160,7 +189,7 @@ const LogsPage = () => {
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex flex-wrap items-center gap-2 mb-2">
-                      <span className="font-bold text-white">{log.user}</span>
+                      <span className="font-bold text-white">{log.user?.username || 'Unknown User'}</span>
                       <span className="text-white/60">•</span>
                       <span className="text-white/60">{log.action}</span>
                       <span className="text-white/60">•</span>
@@ -169,7 +198,7 @@ const LogsPage = () => {
                     <div className="flex flex-wrap items-center gap-3 text-sm">
                       <span className="text-white/40 flex items-center gap-1">
                         <Calendar size={14} />
-                        {log.time}
+                        {new Date(log.created_at).toLocaleString()}
                       </span>
                       <span className={`px-2 py-1 rounded-full text-xs font-bold ${color.replace('text-', 'bg-')}/10`}>
                         {log.type.charAt(0).toUpperCase() + log.type.slice(1)}
