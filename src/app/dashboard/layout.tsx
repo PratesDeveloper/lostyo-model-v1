@@ -13,7 +13,8 @@ import {
   ChevronRight,
   Bell,
   Search,
-  LogOut
+  LogOut,
+  ScrollText
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useRouter } from 'next/navigation';
@@ -49,7 +50,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const navItems = [
     { icon: LayoutDashboard, label: "Overview", href: "/dashboard" },
     { icon: Shield, label: "Moderation", href: "/dashboard/moderation" },
-    { icon: MessageSquare, label: "Logs", href: "/dashboard/logs" },
+    { icon: ScrollText, label: "Logs", href: "/dashboard/logs" },
     { icon: Users, label: "Members", href: "/dashboard/members" },
     { icon: BarChart3, label: "Analytics", href: "/dashboard/analytics" },
     { icon: Settings, label: "Settings", href: "/dashboard/settings" },
