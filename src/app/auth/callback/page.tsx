@@ -15,10 +15,13 @@ function AuthContent() {
       const state = searchParams.get('state');
       const savedState = localStorage.getItem('discord_oauth_state');
 
-      // Validação básica de CSRF manual
-      if (state !== savedState) {
-        console.error('CSRF State mismatch');
-        router.push('/login');
+      // Limpa o estado CSRF imediatamente
+      localStorage.removeItem('discord_oauth_state');
+
+      // 1. Validação básica de CSRF manual
+      if (!state || state !== savedState) {
+        console.error('CSRF State mismatch or missing state');
+        router.replace('/login'); // Usando replace para evitar histórico
         return;
       }
 
@@ -31,16 +34,22 @@ function AuthContent() {
           });
           
           if (response.ok) {
+            // 2. Sucesso: Seta cookie e redireciona
             Cookies.set('lostyo_logged_in', 'true', { expires: 7 });
-            router.push('/start');
+            router.replace('/start');
           } else {
-            router.push('/login');
+            // 3. Falha na troca de token
+            console.error('Token exchange failed:', await response.json());
+            router.replace('/login');
           }
         } catch (err) {
-          router.push('/login');
+          // 4. Erro de rede/API
+          console.error('Network error during auth:', err);
+          router.replace('/login');
         }
       } else {
-        router.push('/login');
+        // 5. Código ausente
+        router.replace('/login');
       }
     };
 
