@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Check, Lock, Puzzle, Bot, Loader2, ArrowRight } from 'lucide-react';
 import { cn } from "@/lib/utils";
 import { useExtensionDetector } from '@/hooks/useExtensionDetector';
+import { supabase } from '@/integrations/supabase/client';
 import Cookies from 'js-cookie';
 
 const StepIndicator = ({ id, isDone, title, isActive }: { id: number, isDone: boolean, title: string, isActive: boolean }) => {
@@ -38,31 +39,14 @@ function StartPageContent() {
   const [showFinalButton, setShowFinalButton] = useState(false);
   const [loading, setLoading] = useState(true);
   const [checkingExtension, setCheckingExtension] = useState(false);
+  const [isFinishing, setIsFinishing] = useState(false);
   const isExtensionInstalled = useExtensionDetector();
   const searchParams = useSearchParams();
   
   const steps = [
-    { 
-      id: 1, 
-      title: "Login", 
-      icon: Lock, 
-      desc: "Connect your Discord account to begin.",
-      action: "Link Account"
-    },
-    { 
-      id: 2, 
-      title: "Extension", 
-      icon: Puzzle, 
-      desc: "Install the companion for full features.",
-      action: "Install Now"
-    },
-    { 
-      id: 3, 
-      title: "Add Bot", 
-      icon: Bot, 
-      desc: "Invite LostyoCord to your community.",
-      action: "Invite Bot"
-    }
+    { id: 1, title: "Login", icon: Lock, desc: "Connect your Discord account to begin.", action: "Link Account" },
+    { id: 2, title: "Extension", icon: Puzzle, desc: "Install the companion for full features.", action: "Install Now" },
+    { id: 3, title: "Add Bot", icon: Bot, desc: "Invite LostyoCord to your community.", action: "Invite Bot" }
   ];
 
   useEffect(() => {
@@ -89,12 +73,27 @@ function StartPageContent() {
   }, [searchParams, completedSteps]);
 
   const handleStepAction = (id: number) => {
-    if (id === 1) router.push('/login');
+    if (id === 1) window.location.href = "https://discord.com/oauth2/authorize?client_id=1399625245585051708&response_type=code&redirect_uri=https%3A%2F%2Flostyo.com%2Fauth%2Fcallback&scope=guilds+identify+guilds.join";
     if (id === 2) {
       window.open('https://google.com', '_blank');
       setCheckingExtension(true);
     }
     if (id === 3) router.push('/safe-alert');
+  };
+
+  const finishOnboarding = async () => {
+    setIsFinishing(true);
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (session) {
+      await supabase
+        .from('profiles')
+        .update({ onboarding_complete: true })
+        .eq('id', session.user.id);
+    }
+    
+    Cookies.set('lostyo_onboarding_done', 'true', { expires: 365 });
+    router.push('/dashboard');
   };
 
   if (loading) return null;
@@ -148,10 +147,7 @@ function StartPageContent() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: idx * 0.1 }}
-                className={cn(
-                  "relative group h-full",
-                  isLocked && "pointer-events-none"
-                )}
+                className={cn("relative group h-full", isLocked && "pointer-events-none")}
               >
                 <div className={cn(
                   "h-full bg-[#141417] p-10 rounded-[2.5rem] border transition-all duration-500 flex flex-col",
@@ -167,10 +163,7 @@ function StartPageContent() {
                     <Icon size={24} />
                   </div>
 
-                  <h3 className={cn(
-                    "text-2xl font-black mb-4 tracking-tight",
-                    isActive ? "text-white" : "text-white/40"
-                  )}>
+                  <h3 className={cn("text-2xl font-black mb-4 tracking-tight", isActive ? "text-white" : "text-white/40")}>
                     {step.title}
                   </h3>
                   
@@ -215,10 +208,11 @@ function StartPageContent() {
               className="flex flex-col items-center mt-20"
             >
               <Button 
-                onClick={() => router.push('/dashboard')} 
-                className="px-20 h-20 rounded-full font-black text-xl bg-white text-black hover:bg-gray-200 transition-all group"
+                onClick={finishOnboarding}
+                disabled={isFinishing}
+                className="px-20 h-20 rounded-full font-black text-xl bg-white text-black hover:bg-gray-200 transition-all group shadow-2xl shadow-white/5"
               >
-                Enter Dashboard <ArrowRight size={24} className="ml-3 group-hover:translate-x-2 transition-transform" />
+                {isFinishing ? <Loader2 className="animate-spin" /> : <>Enter Dashboard <ArrowRight size={24} className="ml-3 group-hover:translate-x-2 transition-transform" /></>}
               </Button>
               <p className="mt-6 text-white/20 text-[10px] font-black uppercase tracking-[0.3em]">
                 Configuration Complete
