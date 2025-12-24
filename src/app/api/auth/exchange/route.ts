@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { discordLib } from '@/lib/discord';
+import { discordLib } from '@/lib/discord/index'; // Corrigido o caminho de importação
 import { createClient } from '@supabase/supabase-js';
 
 export async function POST(req: Request) {
