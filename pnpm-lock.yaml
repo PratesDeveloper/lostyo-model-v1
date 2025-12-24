@@ -104,6 +104,9 @@ importers:
       '@types/react-chartjs-2':
         specifier: ^2.5.7
         version: 2.5.7(chart.js@4.5.1)(react@19.2.1)
+      chart.js:
+        specifier: ^4.5.1
+        version: 4.5.1
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -140,6 +143,9 @@ importers:
       react:
         specifier: ^19.2.1
         version: 19.2.1
+      react-chartjs-2:
+        specifier: ^5.3.1
+        version: 5.3.1(chart.js@4.5.1)(react@19.2.1)
       react-day-picker:
         specifier: ^8.10.1
         version: 8.10.1(date-fns@3.6.0)(react@19.2.1)
