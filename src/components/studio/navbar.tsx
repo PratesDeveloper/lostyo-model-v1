@@ -18,12 +18,14 @@ export const Navbar = () => {
         <div className="hidden md:flex items-center gap-10 text-[11px] font-bold uppercase tracking-[0.2em] text-white/40">
           <Link href="#games" className="hover:text-white transition-colors">Experiences</Link>
           <Link href="#services" className="hover:text-white transition-colors">Services</Link>
-          <Link href="#about" className="hover:text-white transition-colors">Studio</Link>
+          <Link href="/login" className="hover:text-white transition-colors">Sign In</Link>
         </div>
 
-        <button className="px-6 py-2 bg-white text-black rounded-full text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-transform active:scale-95 shadow-xl shadow-white/5">
-          Work with us
-        </button>
+        <Link href="/register">
+          <button className="px-6 py-2 bg-white text-black rounded-full text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-transform active:scale-95 shadow-xl shadow-white/5">
+            Work with us
+          </button>
+        </Link>
       </div>
     </nav>
   );
