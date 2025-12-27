@@ -10,7 +10,7 @@ export const Navbar = () => {
           <img 
             src="https://cdn.lostyo.com/logo.png" 
             alt="Lostyo Studios" 
-            className="w-8 h-8 object-contain group-hover:scale-110 transition-transform duration-500" 
+            className="w-6 h-6 object-contain group-hover:scale-110 transition-transform duration-500" 
           />
           <span className="font-black tracking-tighter text-xl text-white">Lostyo Studios</span>
         </Link>
