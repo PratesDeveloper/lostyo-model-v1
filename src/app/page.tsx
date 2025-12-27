@@ -2,6 +2,7 @@
 import React from 'react';
 import { Navbar } from '@/components/studio/navbar';
 import { Hero } from '@/components/studio/hero';
+import { Stats } from '@/components/studio/stats';
 import { GameShowcase } from '@/components/studio/game-showcase';
 import { Services } from '@/components/studio/services';
 import { motion } from 'framer-motion';
@@ -14,6 +15,8 @@ export default function Home() {
       
       <main>
         <Hero />
+        
+        <Stats />
         
         <motion.div
           initial={{ opacity: 0 }}

@@ -5,7 +5,7 @@ import { MoveRight } from 'lucide-react';
 
 export const Hero = () => {
   return (
-    <section className="relative min-h-[90vh] md:min-h-screen flex flex-col items-center justify-center pt-32 pb-20 px-6 overflow-hidden">
+    <section className="relative min-h-[85vh] md:min-h-screen flex flex-col items-center justify-center pt-32 pb-10 px-6 overflow-hidden">
       {/* Background Gradient */}
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-full max-w-[800px] h-[400px] bg-blue-600/5 blur-[100px] -z-10" />
       
@@ -30,23 +30,14 @@ export const Hero = () => {
         </p>
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-          <button className="w-full sm:w-auto h-14 md:h-16 px-8 md:px-10 glass glass-hover rounded-full text-[10px] font-black uppercase tracking-[0.2em] flex items-center justify-center gap-3">
+          <button className="w-full sm:w-auto h-14 md:h-16 px-10 bg-white text-black rounded-full text-[11px] font-black uppercase tracking-[0.2em] flex items-center justify-center gap-3 hover:scale-105 transition-transform">
             Our Experiences <MoveRight size={18} />
           </button>
-          <button className="text-white/30 hover:text-white text-[10px] font-black uppercase tracking-[0.2em] transition-colors py-4">
+          <button className="w-full sm:w-auto h-14 md:h-16 px-10 glass glass-hover rounded-full text-[11px] font-black uppercase tracking-[0.2em] flex items-center justify-center hover:scale-105 transition-transform">
             Inquire Project
           </button>
         </div>
       </motion.div>
-
-      {/* Stats Overlay - Apenas Desktop */}
-      <div className="absolute bottom-12 w-full max-w-5xl justify-between items-center px-8 text-white/10 font-black text-[10px] tracking-[0.4em] uppercase hidden lg:flex">
-        <span>GLOBAL SCALE</span>
-        <span>•</span>
-        <span>BOUTIQUE QUALITY</span>
-        <span>•</span>
-        <span>EST. 2025</span>
-      </div>
     </section>
   );
 };
