@@ -54,3 +54,32 @@
 ::-webkit-scrollbar {
   display: none;
 }
+
+/* Estilos de Impressão */
+@media print {
+  @page {
+    margin: 2cm;
+  }
+  
+  body {
+    background: white !important;
+    color: black !important;
+  }
+  
+  .noise, .fixed, .absolute, button, .print\:hidden {
+    display: none !important;
+  }
+  
+  .glass {
+    background: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+  }
+  
+  h1, h2, h3, h4, p, li, span {
+    color: black !important;
+    background: none !important;
+    -webkit-text-fill-color: black !important;
+  }
+}
