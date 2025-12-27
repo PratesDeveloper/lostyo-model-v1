@@ -8,7 +8,8 @@ import { TransactionHistory } from '@/components/market/transaction-history';
 import { 
   TrendingUp, TrendingDown, Wallet, Trophy, 
   Sparkles, X, Activity, ArrowRight, 
-  Search, ChevronRight, User, Filter, SortAsc
+  Search, ChevronRight, User, Filter, SortAsc,
+  Crown, Gem, Zap, Star, ShieldCheck, Award
 } from 'lucide-react';
 import { toast, Toaster } from 'sonner';
 
@@ -42,10 +43,15 @@ export default function MarketGUIPage() {
     s.n.toLowerCase().includes(search.toLowerCase())
   );
 
-  const inventoryItems = [
-    { t: 'LYO', n: 'Lostyo Studios', q: 150, v: '675k', p: '+12%', isPositive: true },
-    { t: 'ATHR', n: 'Aetheria', q: 45, v: '684k', p: '+45%', isPositive: true },
-    { t: 'DRFT', n: 'Neon Drift', q: 500, v: '600k', p: '-5%', isPositive: false },
+  const leaderboardPlayers = [
+    { n: 'Lostyo_Admin', w: '12,500,000', r: 1, p: 'Whale', badge: Crown, color: 'from-yellow-400 to-orange-500' },
+    { n: 'Robloxian_44', w: '8,120,000', r: 2, p: 'Elite', badge: Gem, color: 'from-slate-300 to-slate-500' },
+    { n: 'DevKing_99', w: '6,450,000', r: 3, p: 'Pro', badge: Award, color: 'from-amber-600 to-amber-800' },
+    { n: 'ShadowTraders', w: '4,100,000', r: 4, p: 'Master', badge: Zap },
+    { n: 'MetaWolf', w: '3,950,000', r: 5, p: 'Expert', badge: Star },
+    { n: 'Aether_Soul', w: '2,800,000', r: 6, p: 'Trader', badge: Activity },
+    { n: 'Neon_Drifter', w: '1,500,000', r: 7, p: 'Active', badge: ShieldCheck },
+    { n: 'Blox_Master', w: '980,000', r: 8, p: 'Rookie', badge: User },
   ];
 
   const handleTrade = (type: 'buy' | 'sell', ticker: string) => {
@@ -127,7 +133,7 @@ export default function MarketGUIPage() {
                 <AnimatePresence mode="wait">
                   {activeTab === 'Market' && (
                     <motion.div key="market" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-10">
-                      {/* Top Row: Performance Chart */}
+                      {/* Market Content (Keep existing Market code) */}
                       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
                         <div className="xl:col-span-2 bg-white/[0.03] border border-white/5 rounded-[2.5rem] p-8">
                           <div className="flex justify-between items-center mb-4">
@@ -150,12 +156,6 @@ export default function MarketGUIPage() {
                                 <p className="text-white/60 text-xs font-medium leading-relaxed mb-6">
                                     New communities are listing every hour. Don't miss the next pump.
                                 </p>
-                                <div className="flex -space-x-3 mb-6">
-                                    {[1,2,3,4].map(i => (
-                                        <div key={i} className="w-8 h-8 rounded-full border-2 border-blue-600 bg-white/10" />
-                                    ))}
-                                    <div className="w-8 h-8 rounded-full border-2 border-blue-600 bg-blue-500 flex items-center justify-center text-[10px] font-black text-white">+12</div>
-                                </div>
                             </div>
                             <button className="h-12 w-full bg-white text-black rounded-full font-black uppercase tracking-widest text-[9px] hover:scale-105 transition-all">
                                 Open IPO Portal
@@ -212,18 +212,8 @@ export default function MarketGUIPage() {
                                   <div className="text-[9px] font-bold uppercase tracking-widest opacity-40">Dynamic</div>
                                 </div>
                                 <div className="flex gap-2">
-                                  <button 
-                                    onClick={() => handleTrade('buy', stock.t)} 
-                                    className="h-10 px-5 bg-emerald-500/10 text-emerald-400 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-emerald-500 hover:text-white transition-all active:scale-95"
-                                  >
-                                    Buy
-                                  </button>
-                                  <button 
-                                    onClick={() => handleTrade('sell', stock.t)} 
-                                    className="h-10 px-5 bg-red-500/10 text-red-400 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all active:scale-95"
-                                  >
-                                    Sell
-                                  </button>
+                                  <button onClick={() => handleTrade('buy', stock.t)} className="h-10 px-5 bg-emerald-500/10 text-emerald-400 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-emerald-500 hover:text-white transition-all active:scale-95">Buy</button>
+                                  <button onClick={() => handleTrade('sell', stock.t)} className="h-10 px-5 bg-red-500/10 text-red-400 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all active:scale-95">Sell</button>
                                 </div>
                               </div>
                             </motion.div>
@@ -233,98 +223,141 @@ export default function MarketGUIPage() {
                     </motion.div>
                   )}
 
-                  {activeTab === 'Inventory' && (
-                    <motion.div key="inv" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-8">
-                        {/* Summary Stats */}
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            {[
-                                { label: "Net Assets", value: "2.4M", icon: Wallet, color: "text-blue-500" },
-                                { label: "Est. Dividend", value: "+45k", icon: TrendingUp, color: "text-emerald-500" },
-                                { label: "Total Shares", value: "1,502", icon: Activity, color: "text-purple-500" },
-                            ].map((stat, i) => (
-                                <div key={i} className="bg-white/[0.03] p-8 rounded-[2.5rem] border border-white/5">
-                                    <stat.icon className={`${stat.color} mb-4`} size={20} />
-                                    <div className="text-[10px] font-black text-white/20 uppercase tracking-widest">{stat.label}</div>
-                                    <div className="text-3xl font-black text-white">{stat.value} <span className="text-blue-500 text-sm">BITS</span></div>
-                                </div>
-                            ))}
-                        </div>
-                        
-                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-                            {/* Portfolio List */}
-                            <div className="lg:col-span-2 bg-white/[0.02] border border-white/5 rounded-[3.5rem] p-10">
-                                <div className="flex justify-between items-center mb-10">
-                                    <h3 className="text-xs font-black uppercase tracking-widest text-white/40">Portfolio Details</h3>
-                                    <SortAsc size={16} className="text-white/20" />
-                                </div>
-                                <div className="space-y-4">
-                                    {inventoryItems.map((item, i) => (
-                                        <div key={i} className="flex justify-between items-center p-5 bg-white/[0.02] rounded-3xl border border-white/5 group hover:bg-white/[0.05] transition-all">
-                                            <div className="flex gap-5 items-center">
-                                                <div className="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center font-black text-white">{item.t}</div>
-                                                <div>
-                                                    <div className="text-sm font-black text-white">{item.n}</div>
-                                                    <div className="text-[10px] font-bold text-white/20 uppercase tracking-widest">{item.q} Shares Held</div>
-                                                </div>
-                                            </div>
-                                            <div className="flex items-center gap-8">
-                                                <div className="text-right">
-                                                    <div className="text-xs font-black text-white">{item.v} BITS</div>
-                                                    <div className={`text-[10px] font-bold ${item.isPositive ? 'text-emerald-400' : 'text-red-400'}`}>{item.p} ROI</div>
-                                                </div>
-                                                <button onClick={() => toast.error('Initiated sale protocol')} className="h-10 px-4 bg-white/5 text-white/40 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-white hover:text-black transition-all">Manage</button>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-
-                            {/* Activity Right */}
-                            <div>
-                                <TransactionHistory />
-                            </div>
-                        </div>
-                    </motion.div>
-                  )}
-
                   {activeTab === 'Leaderboard' && (
-                    <motion.div key="lead" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="max-w-3xl mx-auto space-y-6">
+                    <motion.div key="lead" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-12">
                       <div className="text-center mb-16">
                         <Trophy size={64} className="text-yellow-500 mx-auto mb-6 drop-shadow-[0_0_30px_rgba(234,179,8,0.3)]" />
-                        <h2 className="text-4xl font-black text-white tracking-tighter uppercase mb-2">Global Wealth</h2>
-                        <p className="text-white/20 text-[10px] font-bold uppercase tracking-[0.3em]">Season 1: Early Access Phase</p>
+                        <h2 className="text-4xl font-black text-white tracking-tighter uppercase mb-2">Wealth Rankings</h2>
+                        <p className="text-white/20 text-[10px] font-bold uppercase tracking-[0.3em]">Top Investors of the Metaverse</p>
                       </div>
                       
-                      {[
-                        { n: 'Lostyo_Admin', w: '12,500,000', r: 1, p: '100%' },
-                        { n: 'Robloxian_44', w: '8,120,000', r: 2, p: '85%' },
-                        { n: 'DevKing', w: '4,500,000', r: 3, p: '60%' },
-                        { n: 'ShadowTraders', w: '2,100,000', r: 4, p: '32%' },
-                        { n: 'MetaWolf', w: '1,950,000', r: 5, p: '28%' },
-                      ].map((player, i) => (
+                      {/* Podium Section */}
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-end">
+                        {/* Rank 2 */}
                         <motion.div 
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.2 }}
+                          className="bg-white/[0.03] border border-white/5 rounded-[3rem] p-10 text-center relative order-2 md:order-1 h-[320px] flex flex-col justify-center"
+                        >
+                          <div className="w-16 h-16 rounded-full bg-slate-500/10 border border-slate-500/20 flex items-center justify-center text-slate-400 mx-auto mb-6">
+                            <Gem size={32} />
+                          </div>
+                          <div className="text-2xl font-black text-white mb-1">{leaderboardPlayers[1].n}</div>
+                          <div className="text-sm font-bold text-blue-500 mb-6">{leaderboardPlayers[1].w} BITS</div>
+                          <div className="inline-block px-4 py-1 rounded-full bg-slate-500/20 text-slate-400 text-[10px] font-black uppercase tracking-widest">Rank #2</div>
+                        </motion.div>
+
+                        {/* Rank 1 */}
+                        <motion.div 
+                          initial={{ opacity: 0, y: 20, scale: 0.95 }}
+                          animate={{ opacity: 1, y: 0, scale: 1 }}
+                          transition={{ delay: 0.1 }}
+                          className="bg-gradient-to-b from-yellow-400/10 to-transparent border border-yellow-400/20 rounded-[4rem] p-12 text-center relative order-1 md:order-2 h-[400px] flex flex-col justify-center shadow-2xl shadow-yellow-500/10"
+                        >
+                          <div className="absolute -top-6 left-1/2 -translate-x-1/2 w-12 h-12 bg-yellow-400 rounded-full flex items-center justify-center shadow-xl shadow-yellow-400/30">
+                            <Crown className="text-black" size={24} />
+                          </div>
+                          <div className="w-24 h-24 rounded-full bg-yellow-400/20 border border-yellow-400/40 flex items-center justify-center text-yellow-400 mx-auto mb-8 animate-pulse">
+                            <User size={48} />
+                          </div>
+                          <div className="text-3xl font-black text-white mb-2 tracking-tighter">{leaderboardPlayers[0].n}</div>
+                          <div className="text-lg font-black text-yellow-400 mb-8">{leaderboardPlayers[0].w} BITS</div>
+                          <div className="inline-block px-6 py-2 rounded-full bg-yellow-400 text-black text-[12px] font-black uppercase tracking-widest shadow-xl shadow-yellow-400/20">The Whale</div>
+                        </motion.div>
+
+                        {/* Rank 3 */}
+                        <motion.div 
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.3 }}
+                          className="bg-white/[0.03] border border-white/5 rounded-[3rem] p-10 text-center relative order-3 md:order-3 h-[280px] flex flex-col justify-center"
+                        >
+                          <div className="w-14 h-14 rounded-full bg-amber-700/10 border border-amber-700/20 flex items-center justify-center text-amber-600 mx-auto mb-6">
+                            <Award size={28} />
+                          </div>
+                          <div className="text-xl font-black text-white mb-1">{leaderboardPlayers[2].n}</div>
+                          <div className="text-sm font-bold text-blue-500 mb-6">{leaderboardPlayers[2].w} BITS</div>
+                          <div className="inline-block px-4 py-1 rounded-full bg-amber-700/20 text-amber-600 text-[10px] font-black uppercase tracking-widest">Rank #3</div>
+                        </motion.div>
+                      </div>
+
+                      {/* Remaining List */}
+                      <div className="max-w-4xl mx-auto space-y-4 pt-10">
+                        <div className="px-10 flex justify-between text-[10px] font-black uppercase tracking-[0.3em] text-white/20 mb-4">
+                          <span>Player Identity</span>
+                          <span>Portfolio Value</span>
+                        </div>
+                        {leaderboardPlayers.slice(3).map((player, i) => (
+                          <motion.div 
                             key={i} 
                             initial={{ opacity: 0, x: -20 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ delay: i * 0.1 }}
-                            className={`flex items-center justify-between p-8 rounded-[2.5rem] border transition-all ${i === 0 ? 'bg-blue-600 border-blue-400 shadow-2xl shadow-blue-600/20' : 'bg-white/[0.02] border-white/5'}`}
-                        >
-                          <div className="flex items-center gap-8">
-                            <div className={`text-2xl font-black ${i === 0 ? 'text-white' : 'text-white/10'}`}>#{player.r}</div>
-                            <div className={`w-14 h-14 rounded-full flex items-center justify-center ${i === 0 ? 'bg-white/20' : 'bg-white/5 text-white/40'}`}>
-                              <User size={24} />
+                            className="group flex items-center justify-between p-6 bg-white/[0.02] border border-white/5 rounded-[2rem] hover:bg-white/[0.05] hover:border-white/10 transition-all cursor-pointer"
+                          >
+                            <div className="flex items-center gap-8">
+                              <div className="text-xl font-black text-white/10 w-8">#{player.r}</div>
+                              <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center text-white/40 group-hover:bg-blue-600 group-hover:text-white transition-all">
+                                <player.badge size={24} />
+                              </div>
+                              <div>
+                                <div className="text-base font-black text-white/80 group-hover:text-white transition-colors">{player.n}</div>
+                                <div className="text-[10px] font-bold uppercase tracking-widest text-white/20 group-hover:text-blue-400 transition-colors">{player.p} Trader</div>
+                              </div>
                             </div>
-                            <div>
-                                <div className={`text-base font-black ${i === 0 ? 'text-white' : 'text-white/80'}`}>{player.n}</div>
-                                <div className={`text-[10px] font-bold uppercase tracking-widest ${i === 0 ? 'text-white/60' : 'text-white/20'}`}>Top {player.p} Tier</div>
+                            <div className="text-right">
+                              <div className="text-lg font-black text-white tracking-tighter">{player.w} <span className="text-blue-500 text-xs">BITS</span></div>
+                              <div className="text-[9px] font-bold uppercase tracking-widest text-white/10">Synchronized Ledger</div>
                             </div>
+                          </motion.div>
+                        ))}
+                      </div>
+                    </motion.div>
+                  )}
+
+                  {/* Other Tabs (Keep existing code) */}
+                  {activeTab === 'Inventory' && (
+                    <motion.div key="inv" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-8">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        {[
+                          { label: "Net Assets", value: "2.4M", icon: Wallet, color: "text-blue-500" },
+                          { label: "Est. Dividend", value: "+45k", icon: TrendingUp, color: "text-emerald-500" },
+                          { label: "Total Shares", value: "1,502", icon: Activity, color: "text-purple-500" },
+                        ].map((stat, i) => (
+                          <div key={i} className="bg-white/[0.03] p-8 rounded-[2.5rem] border border-white/5">
+                            <stat.icon className={`${stat.color} mb-4`} size={20} />
+                            <div className="text-[10px] font-black text-white/20 uppercase tracking-widest">{stat.label}</div>
+                            <div className="text-3xl font-black text-white">{stat.value} <span className="text-blue-500 text-sm">BITS</span></div>
                           </div>
-                          <div className="text-right">
-                            <div className={`text-lg font-black ${i === 0 ? 'text-white' : 'text-white'}`}>{player.w} <span className={i === 0 ? 'text-white/60 text-xs' : 'text-blue-500 text-xs'}>BITS</span></div>
-                            <div className={`text-[10px] font-bold uppercase tracking-widest ${i === 0 ? 'text-white/40' : 'text-white/10'}`}>Total Portfolio</div>
+                        ))}
+                      </div>
+                      <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+                        <div className="lg:col-span-2 bg-white/[0.02] border border-white/5 rounded-[3.5rem] p-10">
+                          <h3 className="text-xs font-black uppercase tracking-widest text-white/40 mb-10">Portfolio Details</h3>
+                          <div className="space-y-4">
+                            {inventoryItems.map((item, i) => (
+                              <div key={i} className="flex justify-between items-center p-5 bg-white/[0.02] rounded-3xl border border-white/5 group hover:bg-white/[0.05] transition-all">
+                                <div className="flex gap-5 items-center">
+                                  <div className="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center font-black text-white">{item.t}</div>
+                                  <div>
+                                    <div className="text-sm font-black text-white">{item.n}</div>
+                                    <div className="text-[10px] font-bold text-white/20 uppercase tracking-widest">{item.q} Shares Held</div>
+                                  </div>
+                                </div>
+                                <div className="flex items-center gap-8">
+                                  <div className="text-right">
+                                    <div className="text-xs font-black text-white">{item.v} BITS</div>
+                                    <div className={`text-[10px] font-bold ${item.isPositive ? 'text-emerald-400' : 'text-red-400'}`}>{item.p} ROI</div>
+                                  </div>
+                                  <button onClick={() => toast.error('Initiated sale protocol')} className="h-10 px-4 bg-white/5 text-white/40 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-white hover:text-black transition-all">Manage</button>
+                                </div>
+                              </div>
+                            ))}
                           </div>
-                        </motion.div>
-                      ))}
+                        </div>
+                        <div><TransactionHistory /></div>
+                      </div>
                     </motion.div>
                   )}
 
@@ -338,22 +371,6 @@ export default function MarketGUIPage() {
                         <p className="text-white/40 text-base font-medium leading-relaxed mb-12">
                           Transform your community into a tradable asset. Tokenize your server, reward members with shares, and build a sustainable virtual economy.
                         </p>
-                        
-                        <div className="bg-white/[0.03] border border-white/5 p-10 rounded-[3rem] mb-12 text-left space-y-6">
-                            <div className="flex justify-between items-center">
-                                <span className="text-xs font-bold text-white/40">Listing Fee</span>
-                                <span className="text-xs font-black text-white">990 Robux</span>
-                            </div>
-                            <div className="flex justify-between items-center">
-                                <span className="text-xs font-bold text-white/40">Initial Shares</span>
-                                <span className="text-xs font-black text-white">1,000,000</span>
-                            </div>
-                            <div className="flex justify-between items-center">
-                                <span className="text-xs font-bold text-white/40">Ticker Status</span>
-                                <span className="text-[10px] font-black uppercase bg-emerald-500/10 text-emerald-400 px-3 py-1 rounded-full">Available</span>
-                            </div>
-                        </div>
-
                         <button className="w-full h-20 bg-[#00A2FF] text-white rounded-full font-black uppercase tracking-[0.2em] text-xs flex items-center justify-center gap-4 hover:scale-105 active:scale-95 transition-all shadow-2xl shadow-blue-500/30 group">
                           <img src="/roblox-logo.png" className="w-7 h-7 object-contain" alt="R$" />
                           Process IPO Protocol
