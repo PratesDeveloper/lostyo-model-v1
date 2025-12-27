@@ -19,8 +19,11 @@ const GameCard = ({ title, category, img }: any) => (
 
 export const GameShowcase = () => {
   return (
-    <section id="games" className="py-32 bg-[#030303]">
-      <div className="container mx-auto px-6">
+    <section id="games" className="py-32 bg-[#030303] relative overflow-hidden">
+      {/* Luz ambiente sutil no fundo */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-[radial-gradient(circle_at_50%_50%,rgba(29,78,216,0.03),transparent_70%)] pointer-events-none" />
+      
+      <div className="container mx-auto px-6 relative z-10">
         <div className="flex justify-between items-end mb-20">
           <div className="max-w-xl">
             <h2 className="text-4xl md:text-6xl font-black text-white tracking-tighter mb-6">Our Creations.</h2>
