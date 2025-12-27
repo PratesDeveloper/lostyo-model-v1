@@ -7,13 +7,20 @@ import {
   Database, Zap, Key, UserCheck, Search, FileShield 
 } from 'lucide-react';
 
-// O componente SecuritySection agora recebe o Icon diretamente como prop 'icon'
-const SecuritySection = ({ title, desc, items, icon: Icon }: { 
-  title: string, 
-  desc: string, 
-  items: { icon: React.ElementType, title: string, content: string }[], 
-  icon: React.ElementType 
-}) => (
+interface SecurityItem {
+  icon: React.ElementType;
+  title: string;
+  content: string;
+}
+
+interface SecuritySectionProps {
+  title: string;
+  desc: string;
+  items: SecurityItem[];
+  icon: React.ElementType;
+}
+
+const SecuritySection: React.FC<SecuritySectionProps> = ({ title, desc, items, icon: Icon }) => (
   <div className="mb-24">
     <div className="flex items-center gap-6 mb-10">
       <div className="w-14 h-14 rounded-2xl bg-blue-600/10 flex items-center justify-center text-blue-500 shadow-2xl shadow-blue-500/20">
@@ -27,7 +34,7 @@ const SecuritySection = ({ title, desc, items, icon: Icon }: {
     
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {items.map((item, i) => {
-        const ItemIcon = item.icon; // Desestruturando o ícone do item
+        const ItemIcon = item.icon;
         return (
           <motion.div
             key={i}
