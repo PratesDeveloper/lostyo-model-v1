@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { Navbar } from '@/components/studio/navbar';
 import { 
   Lock, Eye, Server, ShieldCheck, Cpu, Globe, 
-  Database, Zap, Key, UserCheck, Search, FileShield 
+  Database, Zap, Key, UserCheck, Search, FileText 
 } from 'lucide-react';
 
 const SecuritySection = ({ title, desc, items, icon: Icon }: any) => (
@@ -98,7 +98,7 @@ export default function SecurityPage() {
                 <h2 className="text-4xl font-black text-white tracking-tighter mb-8">Zero Trust <br /> Architecture.</h2>
                 <div className="space-y-8">
                   <div className="flex gap-6">
-                    <div className="text-blue-500 flex-shrink-0"><FileShield size={24} /></div>
+                    <div className="text-blue-500 flex-shrink-0"><FileText size={24} /></div>
                     <p className="text-white/40 text-sm font-medium leading-relaxed">
                       We treat every request as potentially hostile. Multi-factor verification is required for all administrative changes to production environments.
                     </p>
