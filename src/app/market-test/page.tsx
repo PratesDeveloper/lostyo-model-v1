@@ -6,7 +6,7 @@ import { MarketStepChart } from '@/components/market/market-step-chart';
 import { 
   TrendingUp, TrendingDown, Wallet, Trophy, 
   Sparkles, X, Activity, ArrowRight, 
-  CreditCard, Search, ChevronRight, User
+  CreditCard, Search, ChevronRight, User, LayoutGrid
 } from 'lucide-react';
 import { toast, Toaster } from 'sonner';
 
@@ -32,6 +32,14 @@ export default function MarketGUIPage() {
     { t: 'CORE', n: 'CoreSys', p: 3100, c: -15.1 },
     { t: 'NOVA', n: 'Nova Games', p: 1800, c: 22.3 },
     { t: 'GRID', n: 'GridRunner', p: 950, c: 1.2 },
+  ];
+  
+  const inventoryItems = [
+    { t: 'LYO', n: 'Lostyo Studios', q: 150, v: '675k', p: '+12%', isPositive: true },
+    { t: 'ATHR', n: 'Aetheria', q: 45, v: '684k', p: '+45%', isPositive: true },
+    { t: 'DRFT', n: 'Neon Drift', q: 500, v: '600k', p: '-5%', isPositive: false },
+    { t: 'VRTX', n: 'Vertex Systems', q: 20, v: '144k', p: '+8.4%', isPositive: true },
+    { t: 'CORE', n: 'CoreSys', q: 10, v: '31k', p: '-15.1%', isPositive: false },
   ];
 
   return (
@@ -133,7 +141,7 @@ export default function MarketGUIPage() {
                       </div>
                     </div>
 
-                    {/* Lista das 10 Ações */}
+                    {/* Lista das 10 Ações (Comprar/Vender) */}
                     <div>
                       <h3 className="text-xs font-black uppercase tracking-[0.3em] text-white/20 mb-6 ml-4">Stock Listings (10)</h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -157,8 +165,8 @@ export default function MarketGUIPage() {
                                 <div className="text-[9px] font-bold uppercase tracking-widest opacity-40">Change</div>
                               </div>
                               <div className="flex gap-2">
-                                <button onClick={() => toast.success(`Bought ${stock.t}`)} className="h-10 px-4 bg-emerald-500/10 text-emerald-400 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-emerald-500 hover:text-white transition-all">Buy</button>
-                                <button onClick={() => toast.error(`Sold ${stock.t}`)} className="h-10 px-4 bg-red-500/10 text-red-400 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all">Sell</button>
+                                <button onClick={() => toast.success(`Bought 1 share of ${stock.t}`)} className="h-10 px-4 bg-emerald-500/10 text-emerald-400 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-emerald-500 hover:text-white transition-all">Buy</button>
+                                <button onClick={() => toast.error(`Sold 1 share of ${stock.t}`)} className="h-10 px-4 bg-red-500/10 text-red-400 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all">Sell</button>
                               </div>
                             </div>
                           </div>
@@ -190,23 +198,27 @@ export default function MarketGUIPage() {
 
                     <div className="bg-white/[0.02] border border-white/5 rounded-[2.5rem] overflow-hidden">
                       <div className="px-8 py-6 border-b border-white/5 bg-white/[0.01]">
-                        <h3 className="text-xs font-black uppercase tracking-widest">Your Portfolio</h3>
+                        <h3 className="text-xs font-black uppercase tracking-widest">Your Portfolio ({inventoryItems.length} Assets)</h3>
                       </div>
                       <div className="p-8 space-y-4">
-                        {[
-                          { t: 'LYO', q: 150, v: '675k', p: '+12%' },
-                          { t: 'ATHR', q: 45, v: '684k', p: '+45%' },
-                          { t: 'DRFT', q: 500, v: '600k', p: '-5%' },
-                        ].map((item, i) => (
+                        {inventoryItems.map((item, i) => (
                           <div key={i} className="flex justify-between items-center p-4 bg-white/[0.02] rounded-2xl">
                             <div className="flex gap-4 items-center">
-                              <div className="w-12 h-12 bg-white/5 rounded-xl flex items-center justify-center font-black">{item.t}</div>
+                              <div className="w-12 h-12 bg-white/5 rounded-xl flex items-center justify-center font-black text-white">{item.t}</div>
                               <div>
                                 <div className="text-sm font-black text-white">{item.q} Shares</div>
-                                <div className="text-[10px] font-bold text-white/20">Market Value: {item.v}</div>
+                                <div className="text-[10px] font-bold text-white/20">Value: {item.v} BITS</div>
                               </div>
                             </div>
-                            <div className={`text-sm font-black ${item.p.includes('+') ? 'text-emerald-400' : 'text-red-400'}`}>{item.p}</div>
+                            <div className="flex items-center gap-4">
+                                <div className={`text-sm font-black ${item.isPositive ? 'text-emerald-400' : 'text-red-400'}`}>{item.p}</div>
+                                <button 
+                                    onClick={() => toast.error(`Sold ${item.q} shares of ${item.t}`)}
+                                    className="h-10 px-4 bg-red-500/10 text-red-400 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-red-500 hover:text-white transition-all"
+                                >
+                                    SELL
+                                </button>
+                            </div>
                           </div>
                         ))}
                       </div>
