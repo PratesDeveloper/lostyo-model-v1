@@ -30,17 +30,15 @@ export default function Home() {
         </section>
       </main>
 
-      <footer className="py-20 border-t border-white/5">
-        <div className="container mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-10">
+      <footer className="py-12 border-t border-white/5">
+        <div className="container mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-8">
           <div className="flex items-center gap-3">
-             <div className="w-6 h-6 bg-white/10 rounded flex items-center justify-center font-black text-[10px]">L</div>
-             <span className="font-black tracking-tighter text-sm">LOSTYO STUDIOS</span>
+             <img src="https://cdn.lostyo.com/logo.png" alt="Lostyo Studios" className="w-5 h-5 opacity-50" />
+             <span className="font-black tracking-tighter text-xs text-white/50 uppercase">Lostyo Studios</span>
           </div>
           
-          <div className="flex gap-12 text-[10px] font-black uppercase tracking-widest text-white/20">
-            <a href="#" className="hover:text-white transition-colors">X (Twitter)</a>
-            <a href="#" className="hover:text-white transition-colors">Discord</a>
-            <a href="#" className="hover:text-white transition-colors">Roblox</a>
+          <div className="flex gap-8 text-[10px] font-black uppercase tracking-widest text-white/20">
+            <a href="#" className="hover:text-[#5865F2] transition-colors">Discord</a>
           </div>
 
           <p className="text-[10px] font-bold text-white/10 uppercase tracking-widest">
