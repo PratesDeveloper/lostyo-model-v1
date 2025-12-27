@@ -5,13 +5,13 @@ import { Hero } from '@/components/studio/hero';
 import { Stats } from '@/components/studio/stats';
 import { GameShowcase } from '@/components/studio/game-showcase';
 import { Services } from '@/components/studio/services';
+import { Philosophy } from '@/components/studio/philosophy';
 import { motion, useSpring, useMotionValue } from 'framer-motion';
 
 export default function Home() {
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
 
-  // Suaviza o movimento do brilho
   const springX = useSpring(mouseX, { damping: 50, stiffness: 400 });
   const springY = useSpring(mouseY, { damping: 50, stiffness: 400 });
 
@@ -39,6 +39,14 @@ export default function Home() {
       />
       
       <div className="noise" />
+      
+      {/* Status Marquee Sutil */}
+      <div className="bg-[#5865F2] h-1 flex items-center overflow-hidden whitespace-nowrap opacity-50">
+        <div className="animate-marquee inline-block text-[8px] font-black uppercase tracking-[0.5em] text-white">
+          STAGING PHASE: OPEN FOR INQUIRIES • NEXT GENERATION EXPERIENCES • HIGH-FIDELITY ROBLOX DEVELOPMENT • 
+        </div>
+      </div>
+
       <Navbar />
       
       <main className="relative z-10">
@@ -46,6 +54,8 @@ export default function Home() {
         
         <Stats />
         
+        <Philosophy />
+
         <motion.div
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
