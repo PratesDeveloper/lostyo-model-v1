@@ -1,19 +1,47 @@
 "use client";
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Navbar } from '@/components/studio/navbar';
 import { Hero } from '@/components/studio/hero';
 import { Stats } from '@/components/studio/stats';
 import { GameShowcase } from '@/components/studio/game-showcase';
 import { Services } from '@/components/studio/services';
-import { motion } from 'framer-motion';
+import { motion, useSpring, useMotionValue } from 'framer-motion';
 
 export default function Home() {
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+
+  // Suaviza o movimento do brilho
+  const springX = useSpring(mouseX, { damping: 50, stiffness: 400 });
+  const springY = useSpring(mouseY, { damping: 50, stiffness: 400 });
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      mouseX.set(e.clientX);
+      mouseY.set(e.clientY);
+    };
+
+    window.addEventListener("mousemove", handleMouseMove);
+    return () => window.removeEventListener("mousemove", handleMouseMove);
+  }, [mouseX, mouseY]);
+
   return (
-    <div className="relative min-h-screen bg-[#030303]">
+    <div className="relative min-h-screen bg-[#030303] selection:bg-[#5865F2]/30">
+      {/* Brilho que segue o mouse */}
+      <motion.div 
+        className="fixed top-0 left-0 w-[600px] h-[600px] bg-blue-600/5 rounded-full blur-[120px] pointer-events-none z-0"
+        style={{
+          x: springX,
+          y: springY,
+          translateX: "-50%",
+          translateY: "-50%",
+        }}
+      />
+      
       <div className="noise" />
       <Navbar />
       
-      <main>
+      <main className="relative z-10">
         <Hero />
         
         <Stats />
@@ -31,8 +59,6 @@ export default function Home() {
         
         {/* Contact CTA */}
         <section className="py-24 md:py-40 px-6 relative overflow-hidden">
-          <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1/4 h-full bg-blue-600/5 blur-[120px] pointer-events-none" />
-          
           <motion.div 
             initial={{ opacity: 0, scale: 0.98 }}
             whileInView={{ opacity: 1, scale: 1 }}
@@ -40,7 +66,7 @@ export default function Home() {
             viewport={{ once: true }}
             className="max-w-5xl mx-auto glass rounded-[2.5rem] md:rounded-[4rem] p-10 md:p-32 text-center relative overflow-hidden group"
           >
-            <div className="absolute -top-24 -right-24 w-96 h-96 bg-blue-600/[0.05] blur-[100px]" />
+            <div className="absolute -top-24 -right-24 w-96 h-96 bg-blue-600/[0.03] blur-[100px]" />
             
             <h2 className="text-4xl md:text-7xl font-black text-white tracking-tighter mb-8 leading-tight">
               HAVE A <br className="hidden md:block" /> PROJECT?
@@ -48,7 +74,7 @@ export default function Home() {
             <p className="text-white/40 text-base md:text-xl font-medium mb-10 max-w-xl mx-auto">
               Partner with a studio that understands the future of immersive play.
             </p>
-            <button className="h-16 md:h-20 px-10 md:px-16 bg-white text-black rounded-full font-black uppercase tracking-widest text-[11px] hover:scale-105 transition-all">
+            <button className="h-16 md:h-20 px-10 md:px-16 bg-white text-black rounded-full font-black uppercase tracking-widest text-[11px] hover:scale-105 transition-all shadow-2xl shadow-white/5">
               Send an Inquiry
             </button>
           </motion.div>

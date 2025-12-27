@@ -20,8 +20,8 @@ export const Hero = () => {
           The Gold Standard of Roblox Development
         </div>
 
-        <h1 className="text-5xl md:text-8xl lg:text-[9rem] font-black leading-[1.1] md:leading-[0.9] tracking-tighter text-white mb-8">
-          SHAPING <br className="hidden md:block" /> <span className="text-white/20">THE METAVERSE.</span>
+        <h1 className="text-5xl md:text-8xl lg:text-[9rem] font-black leading-[1.1] md:leading-[0.9] tracking-tighter mb-8 text-mask">
+          SHAPING <br className="hidden md:block" /> THE METAVERSE.
         </h1>
 
         <p className="text-white/40 text-base md:text-xl font-medium max-w-2xl mx-auto mb-10 leading-relaxed px-4">
