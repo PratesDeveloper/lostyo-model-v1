@@ -12,7 +12,7 @@ export const Stats = () => {
   return (
     <section className="py-20 border-y border-white/5 bg-white/[0.01]">
       <div className="container mx-auto px-6">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-8 justify-items-center">
           {items.map((item, index) => (
             <motion.div 
               key={index}
@@ -20,7 +20,7 @@ export const Stats = () => {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
               viewport={{ once: true }}
-              className="flex flex-col items-center md:items-start text-center md:text-left"
+              className="flex flex-col items-center text-center"
             >
               <span className="text-[10px] font-black uppercase tracking-[0.4em] text-white/20 mb-3">
                 {item.label}
