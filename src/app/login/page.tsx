@@ -1,7 +1,7 @@
 "use client";
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Mail, Lock, ArrowRight, Github } from 'lucide-react';
+import { Mail, Lock, ArrowRight } from 'lucide-react';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Link from 'next/link';
@@ -58,18 +58,14 @@ export default function LoginPage() {
 
           <div className="flex items-center gap-4 mb-6">
             <div className="h-[1px] flex-grow bg-white/5" />
-            <span className="text-[9px] font-bold text-white/10 uppercase tracking-[0.3em]">Or connect with</span>
+            <span className="text-[9px] font-bold text-white/10 uppercase tracking-[0.3em]">Or quick access</span>
             <div className="h-[1px] flex-grow bg-white/5" />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <Button variant="outline" className="h-14 rounded-2xl bg-white/[0.02] border-white/5 hover:bg-white/5 text-white/60 gap-3">
-              <Github size={18} />
-              <span className="text-[10px] font-bold uppercase tracking-widest">Github</span>
-            </Button>
-            <Button variant="outline" className="h-14 rounded-2xl bg-[#00A2FF]/10 border-[#00A2FF]/20 hover:bg-[#00A2FF]/20 text-[#00A2FF] gap-3">
-              <img src="https://cdn.lostyo.com/roblox-white.png" className="w-4 h-4" alt="R" />
-              <span className="text-[10px] font-bold uppercase tracking-widest">Roblox</span>
+          <div className="grid grid-cols-1">
+            <Button variant="outline" className="h-16 rounded-2xl bg-[#00A2FF]/5 border-[#00A2FF]/20 hover:bg-[#00A2FF]/10 text-[#00A2FF] gap-4 transition-all">
+              <img src="https://cdn.lostyo.com/roblox-white.png" className="w-5 h-5 opacity-80" alt="Roblox" />
+              <span className="text-[11px] font-black uppercase tracking-[0.2em]">Sign in with Roblox</span>
             </Button>
           </div>
 
