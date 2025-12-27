@@ -18,21 +18,37 @@
     @apply border-white/10 outline-none;
   }
   body {
-    @apply bg-[#030303] text-foreground antialiased selection:bg-blue-500/30;
+    @apply bg-[#030303] text-foreground antialiased selection:bg-blue-500/30 overflow-x-hidden;
     font-family: 'Inter', sans-serif;
   }
 }
 
-/* Efeito de Vidro Suavizado */
+/* Textura de Ruído Premium */
+.noise {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  content: "";
+  opacity: 0.03;
+  z-index: 9999;
+  pointer-events: none;
+  background-image: url("https://grainy-gradients.vercel.app/noise.svg");
+}
+
 .glass {
   @apply bg-white/[0.02] backdrop-blur-xl border border-white/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.4)];
 }
 
 .glass-hover {
-  @apply hover:bg-white/[0.04] hover:border-white/20 transition-all duration-500;
+  @apply hover:bg-white/[0.04] hover:border-white/20 transition-all duration-700;
 }
 
-/* Esconder scrollbar */
 ::-webkit-scrollbar {
   display: none;
+}
+
+.text-gradient {
+  @apply bg-clip-text text-transparent bg-gradient-to-b from-white to-white/40;
 }

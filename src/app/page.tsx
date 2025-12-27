@@ -3,22 +3,42 @@ import React from 'react';
 import { Navbar } from '@/components/studio/navbar';
 import { Hero } from '@/components/studio/hero';
 import { GameShowcase } from '@/components/studio/game-showcase';
+import { Services } from '@/components/studio/services';
+import { motion } from 'framer-motion';
 
 export default function Home() {
   return (
     <div className="relative min-h-screen bg-[#030303]">
+      {/* Textura de ruído global */}
+      <div className="noise" />
+      
       <Navbar />
       
       <main>
         <Hero />
-        <GameShowcase />
         
-        {/* Contact CTA com gradiente dinâmico */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          transition={{ duration: 1 }}
+          viewport={{ once: true }}
+        >
+          <GameShowcase />
+        </motion.div>
+
+        <Services />
+        
+        {/* Contact CTA */}
         <section className="py-40 px-6 relative overflow-hidden">
-          {/* Brilho lateral sutil */}
           <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1/4 h-full bg-blue-600/5 blur-[120px] pointer-events-none" />
           
-          <div className="max-w-5xl mx-auto glass rounded-[4rem] p-16 md:p-32 text-center relative overflow-hidden group">
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.8 }}
+            viewport={{ once: true }}
+            className="max-w-5xl mx-auto glass rounded-[4rem] p-16 md:p-32 text-center relative overflow-hidden group"
+          >
             <div className="absolute -top-24 -right-24 w-96 h-96 bg-blue-600/[0.07] blur-[100px] group-hover:bg-blue-600/[0.1] transition-colors duration-1000" />
             
             <h2 className="text-5xl md:text-8xl font-black text-white tracking-tighter mb-10">
@@ -30,7 +50,7 @@ export default function Home() {
             <button className="h-20 px-16 bg-white text-black rounded-full font-black uppercase tracking-widest text-sm hover:scale-105 hover:shadow-[0_0_40px_rgba(255,255,255,0.1)] transition-all">
               Send an Inquiry
             </button>
-          </div>
+          </motion.div>
         </section>
       </main>
 
