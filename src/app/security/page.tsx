@@ -7,7 +7,13 @@ import {
   Database, Zap, Key, UserCheck, Search, FileShield 
 } from 'lucide-react';
 
-const SecuritySection = ({ title, desc, items, icon: Icon }: any) => (
+// O componente SecuritySection agora recebe o Icon diretamente como prop 'icon'
+const SecuritySection = ({ title, desc, items, icon: Icon }: { 
+  title: string, 
+  desc: string, 
+  items: { icon: React.ElementType, title: string, content: string }[], 
+  icon: React.ElementType 
+}) => (
   <div className="mb-24">
     <div className="flex items-center gap-6 mb-10">
       <div className="w-14 h-14 rounded-2xl bg-blue-600/10 flex items-center justify-center text-blue-500 shadow-2xl shadow-blue-500/20">
@@ -20,22 +26,25 @@ const SecuritySection = ({ title, desc, items, icon: Icon }: any) => (
     </div>
     
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      {items.map((item: any, i: number) => (
-        <motion.div
-          key={i}
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ delay: i * 0.1 }}
-          viewport={{ once: true }}
-          className="glass p-8 rounded-[2.5rem] border border-white/5 hover:border-white/10 transition-all group"
-        >
-          <div className="text-blue-400 mb-4 group-hover:scale-110 transition-transform duration-500">
-            <item.icon size={20} />
-          </div>
-          <h4 className="text-white font-bold mb-3 uppercase tracking-widest text-[11px]">{item.title}</h4>
-          <p className="text-white/40 text-xs leading-relaxed font-medium">{item.content}</p>
-        </motion.div>
-      ))}
+      {items.map((item, i) => {
+        const ItemIcon = item.icon; // Desestruturando o ícone do item
+        return (
+          <motion.div
+            key={i}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ delay: i * 0.1 }}
+            viewport={{ once: true }}
+            className="glass p-8 rounded-[2.5rem] border border-white/5 hover:border-white/10 transition-all group"
+          >
+            <div className="text-blue-400 mb-4 group-hover:scale-110 transition-transform duration-500">
+              <ItemIcon size={20} />
+            </div>
+            <h4 className="text-white font-bold mb-3 uppercase tracking-widest text-[11px]">{item.title}</h4>
+            <p className="text-white/40 text-xs leading-relaxed font-medium">{item.content}</p>
+          </motion.div>
+        );
+      })}
     </div>
   </div>
 );
