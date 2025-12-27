@@ -6,12 +6,12 @@ import { Stats } from '@/components/studio/stats';
 import { GameShowcase } from '@/components/studio/game-showcase';
 import { Services } from '@/components/studio/services';
 import { motion, useSpring, useMotionValue } from 'framer-motion';
+import Link from 'next/link';
 
 export default function Home() {
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
 
-  // Suaviza o movimento do brilho
   const springX = useSpring(mouseX, { damping: 50, stiffness: 400 });
   const springY = useSpring(mouseY, { damping: 50, stiffness: 400 });
 
@@ -27,7 +27,6 @@ export default function Home() {
 
   return (
     <div className="relative min-h-screen bg-[#030303] selection:bg-[#5865F2]/30">
-      {/* Brilho que segue o mouse */}
       <motion.div 
         className="fixed top-0 left-0 w-[600px] h-[600px] bg-blue-600/5 rounded-full blur-[120px] pointer-events-none z-0"
         style={{
@@ -43,7 +42,6 @@ export default function Home() {
       
       <main className="relative z-10">
         <Hero />
-        
         <Stats />
         
         <motion.div
@@ -57,7 +55,6 @@ export default function Home() {
 
         <Services />
         
-        {/* Contact CTA */}
         <section className="py-24 md:py-40 px-6 relative overflow-hidden">
           <motion.div 
             initial={{ opacity: 0, scale: 0.98 }}
@@ -98,15 +95,15 @@ export default function Home() {
               <h4 className="text-white text-[10px] font-black uppercase tracking-widest mb-6">Explore</h4>
               <ul className="space-y-3 text-white/30 text-[11px] font-bold uppercase tracking-widest">
                 <li><a href="#" className="hover:text-white transition-colors">Support</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Discord</a></li>
+                <li><a href="https://discord.gg/lostyo" target="_blank" className="hover:text-white transition-colors">Discord</a></li>
               </ul>
             </div>
 
             <div>
               <h4 className="text-white text-[10px] font-black uppercase tracking-widest mb-6">Legal</h4>
               <ul className="space-y-3 text-white/30 text-[11px] font-bold uppercase tracking-widest">
-                <li><a href="#" className="hover:text-white transition-colors">Terms</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">Privacy</a></li>
+                <li><Link href="/terms" className="hover:text-white transition-colors">Terms</Link></li>
+                <li><Link href="/security" className="hover:text-white transition-colors">Security</Link></li>
               </ul>
             </div>
           </div>
@@ -116,7 +113,7 @@ export default function Home() {
               © 2025 Lostyo Studios. All rights reserved.
             </p>
             <div className="flex gap-6">
-              <a href="#" className="text-[10px] font-black uppercase tracking-widest text-white/20 hover:text-[#5865F2] transition-colors">
+              <a href="https://discord.gg/lostyo" target="_blank" className="text-[10px] font-black uppercase tracking-widest text-white/20 hover:text-[#5865F2] transition-colors">
                 Discord Community
               </a>
             </div>
