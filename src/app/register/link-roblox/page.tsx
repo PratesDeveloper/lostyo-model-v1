@@ -48,7 +48,7 @@ export default function LinkRobloxPage() {
 
           <Link href="/dashboard">
             <Button className="w-full h-20 bg-[#00A2FF] hover:bg-[#0084D1] text-white rounded-full font-black uppercase tracking-[0.2em] text-xs shadow-2xl shadow-[#00A2FF]/20 flex items-center justify-center gap-4 transition-transform active:scale-95 group">
-              <img src="https://cdn.lostyo.com/roblox-white.png" className="w-6 h-6 opacity-80" alt="Roblox" />
+              <img src="/roblox-logo.png" className="w-6 h-6 object-contain" alt="Roblox" />
               Sign with Roblox
               <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
             </Button>

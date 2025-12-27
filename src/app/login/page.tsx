@@ -64,7 +64,7 @@ export default function LoginPage() {
 
           <div className="grid grid-cols-1">
             <Button variant="outline" className="h-16 rounded-2xl bg-[#00A2FF]/5 border-[#00A2FF]/20 hover:bg-[#00A2FF]/10 text-[#00A2FF] gap-4 transition-all">
-              <img src="https://cdn.lostyo.com/roblox-white.png" className="w-5 h-5 opacity-80" alt="Roblox" />
+              <img src="/roblox-logo.png" className="w-5 h-5 object-contain" alt="Roblox" />
               <span className="text-[11px] font-black uppercase tracking-[0.2em]">Sign in with Roblox</span>
             </Button>
           </div>
