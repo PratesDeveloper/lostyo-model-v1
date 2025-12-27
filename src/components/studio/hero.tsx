@@ -6,8 +6,8 @@ import { MoveRight } from 'lucide-react';
 export const Hero = () => {
   return (
     <section className="relative min-h-screen flex flex-col items-center justify-center pt-20 px-6 overflow-hidden">
-      {/* Background Gradients */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-blue-600/10 blur-[150px] -z-10" />
+      {/* Background Gradients - Blur reduzido para mais nitidez */}
+      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-blue-600/10 blur-[100px] -z-10" />
       
       <motion.div
         initial={{ opacity: 0, y: 30 }}
