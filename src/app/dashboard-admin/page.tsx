@@ -15,7 +15,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { getProfileByRobloxId, getProjectSettings, updateProjectSettings } from '@/app/actions/profile';
 import { toast, Toaster } from 'sonner';
-import { CreateKeyForm } from '@/components/admin/create-key-form';
+import { CreateDatastoreModal } from '@/components/admin/create-datastore-modal';
 
 export default function DashboardAdminPage() {
   const [profile, setProfile] = useState<any>(null);
@@ -40,7 +40,7 @@ export default function DashboardAdminPage() {
   const [activeTab, setActiveTab] = useState<'overview' | 'datastores' | 'schemas'>('overview');
   const [gameDetails, setGameDetails] = useState<any>(null);
   const [isSavingSettings, setIsSavingSettings] = useState(false);
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isCreateDSModalOpen, setIsCreateDSModalOpen] = useState(false);
 
   const router = useRouter();
 
@@ -110,10 +110,10 @@ export default function DashboardAdminPage() {
     if (result?.datastores) setDatastores(result.datastores);
   };
 
-  const handleKeyCreated = (keyName: string) => {
-    // Atualiza a lista de chaves e carrega a nova chave
-    fetchKeys(selectedDS);
-    loadEntry(keyName);
+  const handleDatastoreCreated = (dsName: string) => {
+    fetchDatastores(); // Recarrega a lista de DataStores
+    setSelectedDS(dsName);
+    fetchKeys(dsName); // Carrega as chaves do novo DS
   };
 
   const fetchKeys = async (dsName: string) => {
@@ -159,6 +159,33 @@ export default function DashboardAdminPage() {
     }
   };
 
+  const clearDatastore = async () => {
+    if (!selectedDS) return toast.error("Please select a DataStore first.");
+    if (!confirm(`WARNING: This will delete ALL ${dsKeys.length} keys in '${selectedDS}'. Are you absolutely sure?`)) return;
+
+    setIsSyncing(true);
+    let successCount = 0;
+    let errorCount = 0;
+
+    for (const key of dsKeys) {
+      const result = await callRobloxAPI('deleteEntry', { datastoreName: selectedDS, entryKey: key.key });
+      if (result) {
+        successCount++;
+      } else {
+        errorCount++;
+      }
+    }
+    setIsSyncing(false);
+
+    if (errorCount === 0) {
+      toast.success(`Successfully cleared all ${successCount} keys from ${selectedDS}.`);
+    } else {
+      toast.warning(`Cleared ${successCount} keys, but failed to delete ${errorCount} keys.`);
+    }
+    
+    fetchKeys(selectedDS);
+  };
+
   const handleUpdateSettings = async (updates: any) => {
     setIsSavingSettings(true);
     try {
@@ -184,13 +211,14 @@ export default function DashboardAdminPage() {
     <div className="min-h-screen bg-[#0a0a0a] text-slate-200 flex flex-col lg:flex-row">
       <Toaster theme="dark" position="top-right" />
 
-      {/* Modal de Criação de Key */}
-      <CreateKeyForm 
-        datastoreName={selectedDS}
-        onKeyCreated={handleKeyCreated}
+      {/* Modal de Criação de DataStore */}
+      <CreateDatastoreModal
+        isOpen={isCreateDSModalOpen}
+        setIsOpen={setIsCreateDSModalOpen}
+        onDatastoreCreated={handleDatastoreCreated}
         callRobloxAPI={callRobloxAPI}
-        isOpen={isCreateModalOpen}
-        setIsOpen={setIsCreateModalOpen}
+        updateSettings={handleUpdateSettings}
+        currentSettings={settings}
       />
 
       {/* Sidebar Navigation */}
@@ -316,7 +344,7 @@ export default function DashboardAdminPage() {
                     <div className="bg-[#111] border border-white/5 rounded-lg p-6">
                       <h3 className="text-sm font-bold text-white mb-4">Quick Actions</h3>
                       <div className="space-y-2">
-                        <button onClick={() => selectedDS ? setIsCreateModalOpen(true) : toast.error("Please select a DataStore first.")} className="w-full py-3 bg-white text-black rounded-md text-xs font-bold hover:bg-slate-200 transition-colors flex items-center justify-center gap-2"><Plus size={14} /> New Entry</button>
+                        <button onClick={() => setIsCreateDSModalOpen(true)} className="w-full py-3 bg-blue-600 text-white rounded-md text-xs font-bold hover:bg-blue-500 transition-colors flex items-center justify-center gap-2"><Database size={14} /> New DataStore</button>
                         <button onClick={fetchGameDetails} className="w-full py-3 bg-white/5 border border-white/10 text-white rounded-md text-xs font-bold hover:bg-white/10 transition-colors">Force Sync API</button>
                       </div>
                     </div>
@@ -336,7 +364,14 @@ export default function DashboardAdminPage() {
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="h-full flex flex-col space-y-6">
                 <div className="flex items-center justify-between mb-2">
                   <h2 className="text-2xl font-bold text-white">Cloud Data Explorer</h2>
-                  <button onClick={() => selectedDS ? setIsCreateModalOpen(true) : toast.error("Please select a DataStore first.")} className="px-4 py-2 bg-blue-600 text-white rounded-md text-xs font-bold flex items-center gap-2 hover:bg-blue-500 transition-colors"><Plus size={14} /> Create Key</button>
+                  <div className="flex gap-3">
+                    <button onClick={clearDatastore} disabled={!selectedDS || dsKeys.length === 0} className="px-4 py-2 bg-red-600/10 text-red-400 rounded-md text-xs font-bold flex items-center gap-2 hover:bg-red-600/20 transition-colors disabled:opacity-50">
+                      <Trash2 size={14} /> Clear All Keys
+                    </button>
+                    <button onClick={() => selectedDS ? setIsCreateDSModalOpen(true) : toast.error("Please select a DataStore first.")} className="px-4 py-2 bg-blue-600 text-white rounded-md text-xs font-bold flex items-center gap-2 hover:bg-blue-500 transition-colors">
+                      <Plus size={14} /> New Key
+                    </button>
+                  </div>
                 </div>
                 
                 <div className="flex flex-col lg:flex-row gap-6 h-full min-h-[600px]">
