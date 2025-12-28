@@ -1,12 +1,27 @@
 "use client";
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Mail, Lock, ArrowRight } from 'lucide-react';
+import { Mail, Lock, ArrowRight, Loader2 } from 'lucide-react';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Link from 'next/link';
+import { toast } from 'sonner';
 
 export default function LoginPage() {
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleRobloxLogin = () => {
+    setIsLoading(true);
+    toast.info("Connecting to Roblox OAuth...", {
+      description: "Redirecting to secure authorization server."
+    });
+    
+    // Simulação de delay para feedback visual
+    setTimeout(() => {
+      window.location.href = "/dashboard";
+    }, 1500);
+  };
+
   return (
     <div className="min-h-screen bg-[#030303] flex items-center justify-center p-6 relative overflow-hidden">
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-4xl h-[500px] bg-blue-600/5 blur-[120px] pointer-events-none" />
@@ -63,9 +78,20 @@ export default function LoginPage() {
           </div>
 
           <div className="grid grid-cols-1">
-            <Button variant="outline" className="h-16 rounded-2xl bg-[#00A2FF]/5 border-[#00A2FF]/20 hover:bg-[#00A2FF]/10 text-[#00A2FF] gap-4 transition-all">
-              <img src="/roblox-logo.png" className="w-5 h-5 object-contain" alt="Roblox" />
-              <span className="text-[11px] font-black uppercase tracking-[0.2em]">Sign in with Roblox</span>
+            <Button 
+              onClick={handleRobloxLogin}
+              disabled={isLoading}
+              variant="outline" 
+              className="h-16 rounded-2xl bg-[#00A2FF]/5 border-[#00A2FF]/20 hover:bg-[#00A2FF]/10 text-[#00A2FF] gap-4 transition-all disabled:opacity-50"
+            >
+              {isLoading ? (
+                <Loader2 className="animate-spin" size={20} />
+              ) : (
+                <img src="/roblox-logo.png" className="w-5 h-5 object-contain" alt="Roblox" />
+              )}
+              <span className="text-[11px] font-black uppercase tracking-[0.2em]">
+                {isLoading ? 'Connecting...' : 'Sign in with Roblox'}
+              </span>
             </Button>
           </div>
 

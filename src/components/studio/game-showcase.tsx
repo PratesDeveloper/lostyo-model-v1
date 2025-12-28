@@ -68,8 +68,7 @@ export const GameShowcase = () => {
       title: "CapToken", 
       category: "Strategy", 
       link: "https://www.roblox.com/pt/games/94278394125668/CapToken",
-      // Usando uma URL de thumbnail mais estável (Place ID)
-      image: "https://www.roblox.com/asset-thumbnail/image?assetId=94278394125668&width=420&height=420&format=png"
+      image: "https://tr.rbxcdn.com/180DAY-e75c09bfe9457c2384a4d43b6ca7f1bb/352/352/Image/Png/noFilter"
     }
   ];
 
