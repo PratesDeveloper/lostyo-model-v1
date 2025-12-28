@@ -11,7 +11,8 @@ import {
   Settings,
   Bell,
   Search,
-  MoreVertical
+  ExternalLink,
+  ShieldCheck
 } from 'lucide-react';
 import { 
   AreaChart, 
@@ -118,79 +119,103 @@ export default function DashboardPage() {
           </div>
         </header>
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-          <StatCard icon={Users} label="Total Players" value="1.2M" trend="+12.5%" index={0} />
-          <StatCard icon={Activity} label="Active Now" value="42,109" trend="+3.2%" index={1} />
-          <StatCard icon={CircleDollarSign} label="Revenue (R$)" value="850k" trend="+8.1%" index={2} />
-          <StatCard icon={Gamepad2} label="Average Playtime" value="24m" trend="-1.5%" index={3} />
-        </div>
-
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
-          {/* Main Chart */}
-          <div className="lg:col-span-2 glass rounded-[3rem] p-10 border border-white/5">
-            <div className="flex justify-between items-center mb-10">
-              <h3 className="text-xl font-black tracking-tighter">Engagement Growth</h3>
-              <select className="bg-white/5 border-none text-[10px] font-black uppercase px-4 py-2 rounded-full outline-none">
-                <option>Last 7 Days</option>
-                <option>Last 30 Days</option>
-              </select>
+          {/* Main Chart Column */}
+          <div className="lg:col-span-2 space-y-8">
+            <div className="glass rounded-[3rem] p-10 border border-white/5">
+              <div className="flex justify-between items-center mb-10">
+                <h3 className="text-xl font-black tracking-tighter">Engagement Growth</h3>
+                <select className="bg-white/5 border-none text-[10px] font-black uppercase px-4 py-2 rounded-full outline-none">
+                  <option>Last 7 Days</option>
+                  <option>Last 30 Days</option>
+                </select>
+              </div>
+              <div className="h-[300px] w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={data}>
+                    <defs>
+                      <linearGradient id="colorPlayers" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
+                        <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
+                    <XAxis 
+                      dataKey="name" 
+                      axisLine={false} 
+                      tickLine={false} 
+                      tick={{ fill: 'rgba(255,255,255,0.2)', fontSize: 10, fontWeight: 700 }} 
+                    />
+                    <YAxis hide />
+                    <Tooltip 
+                      contentStyle={{ backgroundColor: '#111', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '1rem' }}
+                      itemStyle={{ color: '#fff', fontSize: '10px', fontWeight: 900, textTransform: 'uppercase' }}
+                    />
+                    <Area type="monotone" dataKey="players" stroke="#3b82f6" strokeWidth={3} fillOpacity={1} fill="url(#colorPlayers)" />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
             </div>
-            <div className="h-[300px] w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={data}>
-                  <defs>
-                    <linearGradient id="colorPlayers" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
-                      <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
-                  <XAxis 
-                    dataKey="name" 
-                    axisLine={false} 
-                    tickLine={false} 
-                    tick={{ fill: 'rgba(255,255,255,0.2)', fontSize: 10, fontWeight: 700 }} 
-                  />
-                  <YAxis hide />
-                  <Tooltip 
-                    contentStyle={{ backgroundColor: '#111', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '1rem' }}
-                    itemStyle={{ color: '#fff', fontSize: '10px', fontWeight: 900, textTransform: 'uppercase' }}
-                  />
-                  <Area type="monotone" dataKey="players" stroke="#3b82f6" strokeWidth={3} fillOpacity={1} fill="url(#colorPlayers)" />
-                </AreaChart>
-              </ResponsiveContainer>
+
+            {/* Stats Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <StatCard icon={Users} label="Total Players" value="1.2M" trend="+12.5%" index={0} />
+              <StatCard icon={Activity} label="Active Now" value="42,109" trend="+3.2%" index={1} />
             </div>
           </div>
 
-          {/* Project List */}
-          <div className="glass rounded-[3rem] p-10 border border-white/5">
-            <h3 className="text-xl font-black tracking-tighter mb-8">Active Projects</h3>
-            <div className="space-y-6">
-              {[
-                { name: "Neon Drift", status: "Stable", players: "12k" },
-                { name: "Shadow Protocol", status: "Testing", players: "4.5k" },
-                { name: "Aetheria", status: "Dev", players: "0" },
-              ].map((project, i) => (
-                <div key={i} className="flex items-center justify-between group cursor-pointer">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center text-white/20 group-hover:bg-blue-600/10 group-hover:text-blue-500 transition-all">
-                      <Gamepad2 size={20} />
+          {/* Right Column: Group & Projects */}
+          <div className="space-y-8">
+            {/* Group Status Card */}
+            <div className="bg-gradient-to-br from-blue-600/20 to-indigo-900/20 rounded-[3rem] p-10 border border-blue-500/20 relative overflow-hidden group">
+               <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:scale-110 transition-transform">
+                  <ShieldCheck size={120} />
+               </div>
+               <div className="relative z-10">
+                  <div className="flex items-center gap-3 mb-6">
+                     <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center">
+                        <Users size={20} className="text-white" />
+                     </div>
+                     <h3 className="text-xs font-black uppercase tracking-widest text-white">Lostyo Group</h3>
+                  </div>
+                  <h4 className="text-xl font-black tracking-tighter mb-2">Join our Community</h4>
+                  <p className="text-white/40 text-xs font-medium mb-8 leading-relaxed">
+                     Get exclusive developer access and early testing for new metaverse assets.
+                  </p>
+                  <button 
+                    onClick={() => window.open('https://www.roblox.com/share/g/122525496', '_blank')}
+                    className="w-full h-14 bg-white text-black rounded-2xl text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-[0.98] transition-all"
+                  >
+                    Enter Group <ExternalLink size={14} />
+                  </button>
+               </div>
+            </div>
+
+            {/* Project List */}
+            <div className="glass rounded-[3rem] p-10 border border-white/5">
+              <h3 className="text-xl font-black tracking-tighter mb-8">Active Projects</h3>
+              <div className="space-y-6">
+                {[
+                  { name: "Neon Drift", status: "Stable", players: "12k" },
+                  { name: "Shadow Protocol", status: "Testing", players: "4.5k" },
+                ].map((project, i) => (
+                  <div key={i} className="flex items-center justify-between group cursor-pointer">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center text-white/20 group-hover:bg-blue-600/10 group-hover:text-blue-500 transition-all">
+                        <Gamepad2 size={20} />
+                      </div>
+                      <div>
+                        <div className="text-xs font-black uppercase tracking-widest mb-1">{project.name}</div>
+                        <div className="text-[9px] font-bold text-white/20 uppercase tracking-widest">{project.status}</div>
+                      </div>
                     </div>
-                    <div>
-                      <div className="text-xs font-black uppercase tracking-widest mb-1">{project.name}</div>
-                      <div className="text-[9px] font-bold text-white/20 uppercase tracking-widest">{project.status}</div>
+                    <div className="text-right">
+                      <div className="text-[10px] font-black">{project.players}</div>
+                      <div className="text-[8px] font-bold text-emerald-400">Live</div>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <div className="text-[10px] font-black">{project.players}</div>
-                    <div className="text-[8px] font-bold text-emerald-400">Live</div>
-                  </div>
-                </div>
-              ))}
-              <button className="w-full py-4 mt-4 border border-white/5 rounded-2xl text-[10px] font-black uppercase tracking-widest text-white/20 hover:text-white hover:bg-white/5 transition-all">
-                View All Experiences
-              </button>
+                ))}
+              </div>
             </div>
           </div>
         </div>
