@@ -4,15 +4,15 @@ import { cookies } from 'next/headers';
 
 /**
  * API Bridge
- * Valida a autorização do administrador e executa a ação solicitada.
+ * Valida a autorização do administrador e executa a ação solicitada na API do Roblox.
  */
 export async function POST(req: Request) {
   try {
     const cookieStore = await cookies();
     const isLogged = cookieStore.get('lostyo_roblox_logged')?.value === 'true';
+    const robloxId = cookieStore.get('lostyo_roblox_id')?.value;
     
-    // Verificação de segurança primária
-    if (!isLogged) {
+    if (!isLogged || !robloxId) {
       return NextResponse.json({ error: "Unauthorized Access" }, { status: 401 });
     }
 
@@ -24,6 +24,9 @@ export async function POST(req: Request) {
     let result;
 
     switch (action) {
+      case 'listUserUniverses':
+        result = await robloxService.listUserUniverses(robloxId);
+        break;
       case 'getMetrics':
         result = await robloxService.getUniverseMetrics(universeId);
         break;
@@ -38,9 +41,6 @@ export async function POST(req: Request) {
         break;
       case 'setEntry':
         result = await robloxService.setEntry(universeId, datastoreName, entryKey, value);
-        break;
-      case 'deleteEntry':
-        result = await robloxService.deleteEntry(universeId, datastoreName, entryKey);
         break;
       default:
         return NextResponse.json({ error: "Invalid action" }, { status: 400 });

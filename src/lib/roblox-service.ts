@@ -1,17 +1,11 @@
 import "server-only";
 
 const ROBLOX_BASE_URL = "https://apis.roblox.com";
-
-interface RobloxOptions {
-  universeId?: string;
-  datastoreName?: string;
-  key?: string;
-  value?: any;
-}
+const ROBLOX_GAMES_API = "https://games.roblox.com";
 
 /**
  * robloxService
- * Camada de abstração para operações seguras no servidor usando Roblox Open Cloud.
+ * Camada de abstração para operações seguras no servidor usando Roblox Open Cloud e Web APIs.
  */
 export const robloxService = {
   async fetchCloud(endpoint: string, method: string = "GET", body?: any) {
@@ -27,7 +21,7 @@ export const robloxService = {
         method,
         headers,
         body: body ? JSON.stringify(body) : undefined,
-        next: { revalidate: 0 } // Bypass cache para dados em tempo real
+        next: { revalidate: 0 }
       });
 
       if (!response.ok) {
@@ -47,10 +41,37 @@ export const robloxService = {
   },
 
   /**
-   * Universes
+   * Busca todas as experiências públicas de um usuário específico.
+   */
+  async listUserUniverses(userId: string) {
+    const url = `${ROBLOX_GAMES_API}/v2/users/${userId}/games?accessFilter=Public&limit=50&sortOrder=Desc`;
+    
+    try {
+      const response = await fetch(url, { next: { revalidate: 60 } });
+      if (!response.ok) throw new Error(`Games API Error: ${response.status}`);
+      
+      const data = await response.json();
+      // Mapeia para o formato esperado pelo nosso frontend
+      const universes = data.data.map((game: any) => ({
+        id: game.id.toString(),
+        name: game.name,
+        category: "Experience",
+        players_count: 0, // A API v2 não retorna players em tempo real aqui
+        status: "Live",
+        roblox_place_id: game.rootPlaceId.toString()
+      }));
+
+      return { data: { universes }, success: true };
+    } catch (err: any) {
+      console.error("[robloxService] listUserUniverses Error", err.message);
+      return { error: "Failed to fetch games from Roblox", details: err.message };
+    }
+  },
+
+  /**
+   * Universes Metrics (Open Cloud)
    */
   async getUniverseMetrics(universeId: string) {
-    // Busca informações básicas do universo
     return this.fetchCloud(`/universes/v1/universes/${universeId}`);
   },
 
@@ -58,37 +79,26 @@ export const robloxService = {
    * DataStores
    */
   async listDataStores(universeId: string) {
-    const result = await this.fetchCloud(`/datastores/v1/universes/${universeId}/standard-datastores`);
-    return result;
+    return this.fetchCloud(`/datastores/v1/universes/${universeId}/standard-datastores`);
   },
 
   async listDataStoreKeys(universeId: string, datastoreName: string) {
-    const result = await this.fetchCloud(
+    return this.fetchCloud(
       `/datastores/v1/universes/${universeId}/standard-datastores/datastore/entries?datastoreName=${datastoreName}`
     );
-    return result;
   },
 
   async getEntry(universeId: string, datastoreName: string, entryKey: string) {
-    const result = await this.fetchCloud(
+    return this.fetchCloud(
       `/datastores/v1/universes/${universeId}/standard-datastores/datastore/entries/entry?datastoreName=${datastoreName}&entryKey=${entryKey}`
     );
-    return result;
   },
 
   async setEntry(universeId: string, datastoreName: string, entryKey: string, value: any) {
-    // Nota: O valor no Roblox DataStore Open Cloud deve ser passado no corpo da requisição
     return this.fetchCloud(
       `/datastores/v1/universes/${universeId}/standard-datastores/datastore/entries/entry?datastoreName=${datastoreName}&entryKey=${entryKey}`,
       "POST",
       value
-    );
-  },
-
-  async deleteEntry(universeId: string, datastoreName: string, entryKey: string) {
-    return this.fetchCloud(
-      `/datastores/v1/universes/${universeId}/standard-datastores/datastore/entries/entry?datastoreName=${datastoreName}&entryKey=${entryKey}`,
-      "DELETE"
     );
   }
 };
