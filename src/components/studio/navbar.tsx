@@ -22,34 +22,43 @@ export const Navbar = () => {
       const loggedCookie = Cookies.get('lostyo_roblox_logged');
       const robloxId = Cookies.get('lostyo_roblox_id');
 
+      console.log("[Navbar] Logged Cookie:", loggedCookie);
+      console.log("[Navbar] Roblox ID from Cookie:", robloxId);
+
       if (loggedCookie === 'true' && robloxId) {
         setIsLogged(true);
         
         // Buscar o perfil usando o roblox_id salvo no cookie
-        const { data } = await supabase
+        const { data, error } = await supabase
           .from('profiles')
           .select('*')
           .eq('roblox_id', robloxId)
           .single();
         
+        if (error && error.code !== 'PGRST116') { // PGRST116 = No rows found
+          console.error("[Navbar] Supabase Error:", error);
+        }
+
         if (data) {
+          console.log("[Navbar] Profile Loaded:", data);
           setProfile(data);
         } else {
-          // Se o perfil não for encontrado, limpar cookies
+          console.log("[Navbar] Profile not found in DB, clearing cookies.");
           Cookies.remove('lostyo_roblox_logged');
           Cookies.remove('lostyo_roblox_id');
           setIsLogged(false);
         }
       } else {
         setIsLogged(false);
+        setProfile(null);
       }
     };
     checkLogin();
-  }, []);
+  }, []); // Executa apenas na montagem
 
   const handleLogout = () => {
     Cookies.remove('lostyo_roblox_logged');
-    Cookies.remove('lostyo_roblox_id'); // Remover o ID também
+    Cookies.remove('lostyo_roblox_id');
     window.location.href = '/';
   };
   
