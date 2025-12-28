@@ -32,6 +32,7 @@ export default function DashboardAdminPage() {
 
   const router = useRouter();
 
+  // Função centralizada para chamadas via Bridge/Proxy
   const callRobloxAPI = async (action: string, params: any = {}) => {
     setIsSyncing(true);
     try {
@@ -76,10 +77,21 @@ export default function DashboardAdminPage() {
 
   useEffect(() => { loadBaseData(); }, []);
 
+  // AGORA USANDO O PROXY INTERNO PARA EVITAR CORS
   const fetchGameDetails = async () => {
-    if (!selectedProject) return;
-    const details = await callRobloxAPI('getDetails', { universeId: selectedProject.id });
-    if (details) setGameDetails(details);
+    if (!selectedProject?.id) return;
+    setIsSyncing(true);
+    try {
+      const response = await fetch(`/api/proxy/games?ids=${selectedProject.id}`);
+      const data = await response.json();
+      if (data.data && data.data.length > 0) {
+        setGameDetails(data.data[0]);
+      }
+    } catch (err) {
+      console.error("[Dashboard] Error fetching game details via proxy", err);
+    } finally {
+      setIsSyncing(false);
+    }
   };
 
   const fetchDatastores = async () => {
