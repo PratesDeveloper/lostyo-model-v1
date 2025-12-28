@@ -3,7 +3,8 @@ import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   LayoutDashboard, Users, Activity, Code, 
-  ShieldOff, Loader2, Gamepad2, Database, Zap, Lock, Power
+  ShieldCheck, Loader2, Gamepad2, Database, 
+  Zap, Lock, Power, RefreshCcw, LayoutGrid
 } from 'lucide-react';
 import Cookies from 'js-cookie';
 import Link from 'next/link';
@@ -17,130 +18,157 @@ export default function DashboardAdminPage() {
   const [projects, setProjects] = useState<any[]>([]);
   const [selectedProject, setSelectedProject] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isSyncing, setIsSyncing] = useState(false);
   const router = useRouter();
 
+  const loadData = async () => {
+    const robloxId = Cookies.get('lostyo_roblox_id');
+    const logged = Cookies.get('lostyo_roblox_logged');
+
+    if (!robloxId || logged !== 'true') {
+      router.replace('/login');
+      return;
+    }
+
+    const profileData = await getProfileByRobloxId(robloxId);
+    
+    if (profileData && profileData.is_developer) {
+      setProfile(profileData);
+      const projectsData = await getAllProjects();
+      setProjects(projectsData);
+      if (projectsData.length > 0 && !selectedProject) {
+        setSelectedProject(projectsData[0]);
+      }
+    } else {
+      router.replace('/');
+    }
+    setIsLoading(false);
+  };
+
   useEffect(() => {
-    const checkAccess = async () => {
-      const robloxId = Cookies.get('lostyo_roblox_id');
-      const logged = Cookies.get('lostyo_roblox_logged');
+    loadData();
+  }, []);
 
-      if (!robloxId || logged !== 'true') {
-        router.replace('/login');
-        return;
-      }
-
-      const profileData = await getProfileByRobloxId(robloxId);
-      
-      if (profileData && profileData.is_developer) {
-        setProfile(profileData);
-        const projectsData = await getAllProjects();
-        setProjects(projectsData);
-        if (projectsData.length > 0) setSelectedProject(projectsData[0]);
-      } else {
-        router.replace('/');
-      }
-      setIsLoading(false);
-    };
-
-    checkAccess();
-  }, [router]);
+  const handleSync = async () => {
+    setIsSyncing(true);
+    await loadData();
+    setTimeout(() => setIsSyncing(false), 1000);
+  };
 
   if (isLoading) {
     return (
       <div className="min-h-screen bg-[#030303] flex items-center justify-center">
-        <Loader2 className="animate-spin text-blue-500" size={48} />
+        <div className="relative">
+          <Loader2 className="animate-spin text-blue-500 w-12 h-12" />
+          <div className="absolute inset-0 blur-xl bg-blue-500/20 animate-pulse" />
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-[#030303] text-white flex overflow-hidden">
-      <div className="noise opacity-[0.02]" />
+    <div className="min-h-screen bg-[#050505] text-white flex font-sans selection:bg-blue-500/30">
+      <div className="noise opacity-[0.02] pointer-events-none" />
       
-      {/* Sidebar - Tema Blue Studio */}
-      <aside className="w-72 border-r border-white/5 flex flex-col p-8 hidden md:flex bg-[#050505] relative z-20">
-        <Link href="/" className="flex items-center gap-3 mb-16 px-2 group">
-          <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-600/20 group-hover:rotate-12 transition-all">
-             <img src="https://cdn.lostyo.com/logo.png" className="w-5 h-5" alt="Logo" />
-          </div>
-          <span className="font-black tracking-tighter text-xl uppercase">Studio</span>
-        </Link>
-
-        <nav className="space-y-2 flex-grow">
-          {[
-            { icon: LayoutDashboard, label: "Command Center", active: true },
-            { icon: Database, label: "Cloud Engine" },
-            { icon: Activity, label: "Performance" },
-            { icon: Users, label: "Access Control" },
-          ].map((item, i) => (
-            <button key={i} className={`w-full flex items-center gap-4 p-4 rounded-2xl transition-all group ${item.active ? 'bg-blue-600 text-white shadow-2xl shadow-blue-600/20' : 'text-white/20 hover:text-white hover:bg-white/5'}`}>
-              <item.icon size={18} className={item.active ? '' : 'group-hover:text-blue-400'} />
-              <span className="text-[10px] font-black uppercase tracking-widest">{item.label}</span>
-            </button>
-          ))}
-        </nav>
-
-        <div className="pt-8 border-t border-white/5 space-y-4">
-          <div className="flex items-center gap-3 p-3 bg-white/5 rounded-2xl border border-white/5">
-            <div className="w-10 h-10 rounded-xl border border-white/10 overflow-hidden bg-blue-600/10 p-0.5">
-              <img src={profile?.avatar_url} className="w-full h-full rounded-lg object-cover" />
+      {/* Sidebar de Operações */}
+      <aside className="w-80 border-r border-white/5 flex flex-col hidden xl:flex bg-[#080808] relative z-20">
+        <div className="p-10">
+          <Link href="/" className="flex items-center gap-3 mb-12 group">
+            <div className="w-10 h-10 rounded-2xl bg-blue-600 flex items-center justify-center shadow-[0_0_20px_rgba(37,99,235,0.3)] group-hover:rotate-6 transition-transform">
+              <img src="https://cdn.lostyo.com/logo.png" className="w-6 h-6" alt="Logo" />
             </div>
-            <div className="overflow-hidden">
-              <div className="text-[10px] font-black uppercase truncate">{profile?.roblox_display_name}</div>
-              <div className="text-[8px] font-bold text-blue-500 uppercase tracking-widest">Root Authority</div>
+            <div className="flex flex-col">
+              <span className="font-black tracking-tighter text-lg uppercase leading-none">Studio</span>
+              <span className="text-[8px] font-bold text-white/20 uppercase tracking-[0.4em]">Internal Systems</span>
+            </div>
+          </Link>
+
+          <nav className="space-y-1">
+            {[
+              { icon: LayoutGrid, label: "Universes", active: true },
+              { icon: Database, label: "Cloud Storage" },
+              { icon: Activity, label: "Network Health" },
+              { icon: Users, label: "Access Rights" },
+            ].map((item, i) => (
+              <button key={i} className={`w-full flex items-center gap-4 p-4 rounded-2xl transition-all group ${item.active ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/10' : 'text-white/20 hover:text-white hover:bg-white/5'}`}>
+                <item.icon size={18} />
+                <span className="text-[10px] font-black uppercase tracking-widest">{item.label}</span>
+              </button>
+            ))}
+          </nav>
+        </div>
+
+        <div className="mt-auto p-8 border-t border-white/5 bg-black/20">
+          <div className="flex items-center gap-4 mb-6">
+            <div className="w-12 h-12 rounded-2xl border border-white/10 overflow-hidden bg-blue-600/10 p-0.5">
+              <img src={profile?.avatar_url} className="w-full h-full rounded-xl object-cover" alt="Profile" />
+            </div>
+            <div className="flex flex-col overflow-hidden">
+              <span className="text-[11px] font-black uppercase truncate">{profile?.roblox_display_name}</span>
+              <span className="text-[8px] font-bold text-blue-500 uppercase tracking-widest">Root Authority</span>
             </div>
           </div>
           <button 
             onClick={() => { Cookies.remove('lostyo_roblox_logged'); Cookies.remove('lostyo_roblox_id'); window.location.href = '/'; }} 
-            className="w-full flex items-center justify-center gap-3 p-4 rounded-2xl bg-white/5 text-white/40 hover:bg-red-500/10 hover:text-red-500 transition-all border border-white/5"
+            className="w-full h-12 flex items-center justify-center gap-3 rounded-2xl bg-white/5 text-white/40 hover:bg-red-500/10 hover:text-red-500 transition-all border border-white/5 group"
           >
-            <Power size={16} />
-            <span className="text-[9px] font-black uppercase tracking-widest">Disconnect</span>
+            <Power size={16} className="group-hover:scale-110 transition-transform" />
+            <span className="text-[9px] font-black uppercase tracking-widest">Terminate Terminal</span>
           </button>
         </div>
       </aside>
 
-      {/* Main Content Area */}
-      <main className="flex-grow p-10 lg:p-14 overflow-y-auto relative z-10 custom-scrollbar">
-        <header className="flex flex-col sm:flex-row justify-between items-start sm:items-end mb-16 pb-8 border-b border-white/5 gap-6">
-          <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-600/10 border border-blue-600/20 text-[9px] font-black text-blue-500 uppercase tracking-[0.2em] mb-4">
-               <Lock size={10} /> SECURE PROTOCOL V2.1
-            </div>
-            <h1 className="text-6xl font-black tracking-tighter text-white uppercase leading-none">Command Center</h1>
+      {/* Workspace Area */}
+      <main className="flex-grow flex flex-col h-screen overflow-hidden relative z-10">
+        <header className="h-24 border-b border-white/5 flex items-center justify-between px-10 bg-[#080808]/50 backdrop-blur-xl">
+          <div className="flex items-center gap-4">
+            <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            <h1 className="text-xs font-black uppercase tracking-[0.4em] text-white/40">Command Center // v2.1.0</h1>
           </div>
           
-          <div className="flex gap-4">
-            <div className="px-6 h-12 glass rounded-full flex items-center gap-3 border-white/5">
-              <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="text-[9px] font-black uppercase tracking-widest text-white/40">Cloud Connection: Stable</span>
+          <div className="flex items-center gap-3">
+            <div className="px-4 py-2 bg-blue-600/10 border border-blue-500/20 rounded-full flex items-center gap-2">
+              <ShieldCheck size={14} className="text-blue-500" />
+              <span className="text-[9px] font-black uppercase text-blue-400">Secure Environment</span>
             </div>
+            <button 
+              onClick={handleSync}
+              disabled={isSyncing}
+              className="w-10 h-10 rounded-xl bg-white/5 border border-white/5 flex items-center justify-center text-white/40 hover:text-white transition-all disabled:opacity-50"
+            >
+              <RefreshCcw size={18} className={isSyncing ? "animate-spin" : ""} />
+            </button>
           </div>
         </header>
 
-        <div className="grid grid-cols-1 xl:grid-cols-4 gap-12">
-          <div className="xl:col-span-1">
-            <ProjectSelector projects={projects} onSelectProject={setSelectedProject} selectedProject={selectedProject} />
+        <div className="flex-grow flex overflow-hidden">
+          {/* Sub-Sidebar: Seleção de Jogo */}
+          <div className="w-96 border-r border-white/5 overflow-y-auto p-8 custom-scrollbar">
+            <ProjectSelector 
+              projects={projects} 
+              onSelectProject={setSelectedProject} 
+              selectedProject={selectedProject} 
+            />
           </div>
-          
-          <div className="xl:col-span-3">
+
+          {/* Área de Visualização Técnica */}
+          <div className="flex-grow overflow-y-auto p-10 custom-scrollbar bg-[#060606]">
             <AnimatePresence mode="wait">
               {selectedProject ? (
                 <motion.div
                   key={selectedProject.id}
-                  initial={{ opacity: 0, x: 20 }}
+                  initial={{ opacity: 0, x: 10 }}
                   animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                  className="glass rounded-[4rem] p-10 md:p-14 border-white/5 relative overflow-hidden"
+                  exit={{ opacity: 0, x: -10 }}
+                  className="max-w-6xl mx-auto"
                 >
-                  <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-600/[0.02] blur-[120px] -z-10" />
                   <ProjectDetails project={selectedProject} />
                 </motion.div>
               ) : (
-                <div className="h-[60vh] flex flex-col items-center justify-center text-center glass rounded-[4rem] border-white/5 border-dashed border-2">
-                  <Zap size={64} className="text-blue-500/20 mb-6 animate-bounce" />
-                  <h3 className="text-2xl font-black text-white/20 uppercase tracking-widest">Interface Standby</h3>
-                  <p className="text-white/10 text-sm font-medium mt-2">Link a universe cluster to initialize remote management.</p>
+                <div className="h-full flex flex-col items-center justify-center text-center opacity-20">
+                  <Gamepad2 size={80} strokeWidth={1} className="mb-6" />
+                  <h3 className="text-xl font-black uppercase tracking-[0.5em]">Standby</h3>
+                  <p className="text-xs mt-2 uppercase tracking-widest font-bold">Waiting for Universe selection</p>
                 </div>
               )}
             </AnimatePresence>
@@ -149,9 +177,9 @@ export default function DashboardAdminPage() {
       </main>
 
       <style jsx global>{`
-        .custom-scrollbar::-webkit-scrollbar { width: 5px; }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(59,130,246,0.1); border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.05); border-radius: 10px; }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(59,130,246,0.2); }
       `}</style>
     </div>
