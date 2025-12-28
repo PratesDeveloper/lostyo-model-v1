@@ -32,17 +32,28 @@ export default function DashboardAdminPage() {
   // Roblox API Bridge Interaction
   const callRobloxAPI = async (action: string, params: any = {}) => {
     setIsSyncing(true);
+    console.log(`[DashboardAdmin] Calling API: ${action}`, params);
+    
     try {
       const response = await fetch('/api/admin/roblox', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action, universeId: selectedProject?.id, ...params })
       });
+      
       const data = await response.json();
-      if (!response.ok) throw new Error(data.error || "API Failure");
+      
+      if (!response.ok) {
+        console.error(`[DashboardAdmin] API Error (${response.status}):`, data);
+        toast.error(data.error || "API Failure");
+        return null;
+      }
+      
+      console.log(`[DashboardAdmin] API Success (${action}):`, data);
       return data;
     } catch (err: any) {
-      toast.error(err.message);
+      console.error(`[DashboardAdmin] Network/Internal Error:`, err);
+      toast.error("Network request failed");
       return null;
     } finally {
       setIsSyncing(false);
@@ -53,7 +64,10 @@ export default function DashboardAdminPage() {
     const robloxId = Cookies.get('lostyo_roblox_id');
     const logged = Cookies.get('lostyo_roblox_logged');
 
+    console.log("[DashboardAdmin] Checking auth cookies", { robloxId, logged });
+
     if (!robloxId || logged !== 'true') {
+      console.warn("[DashboardAdmin] User not authenticated, redirecting...");
       router.replace('/login');
       return;
     }
@@ -61,8 +75,8 @@ export default function DashboardAdminPage() {
     const profileData = await getProfileByRobloxId(robloxId);
     if (profileData && profileData.is_developer) {
       setProfile(profileData);
+      console.log("[DashboardAdmin] Profile authorized as developer");
       
-      // BUSCA EXPERIÊNCIAS REAIS VIA API DO ROBLOX
       const robloxData = await callRobloxAPI('listUserUniverses');
       if (robloxData && robloxData.universes) {
         setProjects(robloxData.universes);
@@ -71,6 +85,7 @@ export default function DashboardAdminPage() {
         }
       }
     } else {
+      console.warn("[DashboardAdmin] Profile not authorized or not developer");
       router.replace('/');
     }
     setIsLoading(false);

@@ -11,6 +11,8 @@ export const robloxService = {
   async fetchCloud(endpoint: string, method: string = "GET", body?: any) {
     const url = `${ROBLOX_BASE_URL}${endpoint}`;
     
+    console.log(`[robloxService] Fetching Cloud: ${method} ${url}`, body ? { body } : "");
+
     const headers: Record<string, string> = {
       "x-api-key": process.env.API_KEY_ROBLOX || "",
       "Content-Type": "application/json",
@@ -26,17 +28,18 @@ export const robloxService = {
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error("[robloxService] API Error", { url, status: response.status, errorText });
-        return { error: `Roblox API Error: ${response.status}`, details: errorText };
+        console.error(`[robloxService] API Error Response: ${response.status}`, { url, errorText });
+        return { error: `Roblox API Error: ${response.status}`, details: errorText, success: false };
       }
 
       if (method === "DELETE") return { success: true };
       
       const data = await response.json();
+      console.log(`[robloxService] Success Response: ${response.status}`);
       return { data, success: true };
     } catch (err: any) {
-      console.error("[robloxService] Fetch Exception", { message: err.message });
-      return { error: "Network or Internal Error", details: err.message };
+      console.error(`[robloxService] Fetch Exception: ${err.message}`, { stack: err.stack });
+      return { error: "Network or Internal Error", details: err.message, success: false };
     }
   },
 
@@ -45,39 +48,39 @@ export const robloxService = {
    */
   async listUserUniverses(userId: string) {
     const url = `${ROBLOX_GAMES_API}/v2/users/${userId}/games?accessFilter=Public&limit=50&sortOrder=Desc`;
+    console.log(`[robloxService] Listing Universes for User: ${userId}`);
     
     try {
       const response = await fetch(url, { next: { revalidate: 60 } });
-      if (!response.ok) throw new Error(`Games API Error: ${response.status}`);
+      if (!response.ok) {
+        const errorBody = await response.text();
+        console.error(`[robloxService] Games API Error: ${response.status}`, { errorBody });
+        throw new Error(`Games API Error: ${response.status}`);
+      }
       
       const data = await response.json();
-      // Mapeia para o formato esperado pelo nosso frontend
+      console.log(`[robloxService] Found ${data.data?.length || 0} universes`);
+
       const universes = data.data.map((game: any) => ({
         id: game.id.toString(),
         name: game.name,
         category: "Experience",
-        players_count: 0, // A API v2 não retorna players em tempo real aqui
+        players_count: 0,
         status: "Live",
         roblox_place_id: game.rootPlaceId.toString()
       }));
 
       return { data: { universes }, success: true };
     } catch (err: any) {
-      console.error("[robloxService] listUserUniverses Error", err.message);
-      return { error: "Failed to fetch games from Roblox", details: err.message };
+      console.error(`[robloxService] listUserUniverses Exception: ${err.message}`);
+      return { error: "Failed to fetch games from Roblox", details: err.message, success: false };
     }
   },
 
-  /**
-   * Universes Metrics (Open Cloud)
-   */
   async getUniverseMetrics(universeId: string) {
     return this.fetchCloud(`/universes/v1/universes/${universeId}`);
   },
 
-  /**
-   * DataStores
-   */
   async listDataStores(universeId: string) {
     return this.fetchCloud(`/datastores/v1/universes/${universeId}/standard-datastores`);
   },
