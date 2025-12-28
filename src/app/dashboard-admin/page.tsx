@@ -22,14 +22,17 @@ export default function DashboardAdminPage() {
   const [selectedProject, setSelectedProject] = useState<any>(null);
   const [settings, setSettings] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false); // <-- Adicionado aqui
   
   // DataStore State
   const [datastores, setDatastores] = useState<any[]>([]);
   const [selectedDS, setSelectedDS] = useState<string>("");
   const [dsKeys, setDsKeys] = useState<any[]>([]);
   const [searchKeyFilter, setSearchKeyFilter] = useState("");
+  
   const [activeEntryKey, setActiveEntryKey] = useState<string>("");
   const [activeEntryData, setActiveEntryData] = useState<any>(null);
+  const [entryError, setEntryError] = useState<string | null>(null);
   
   // UI State
   const [isSyncing, setIsSyncing] = useState(false);
@@ -48,7 +51,10 @@ export default function DashboardAdminPage() {
         body: JSON.stringify({ action, universeId: selectedProject?.id, ...params })
       });
       const data = await response.json();
-      if (!response.ok) throw new Error(data.error || "Request failed");
+      if (!response.ok) {
+        // Captura o erro da API Bridge
+        throw new Error(data.error || "Request failed");
+      }
       return data;
     } catch (err: any) {
       toast.error(err.message);
@@ -107,14 +113,24 @@ export default function DashboardAdminPage() {
     setSelectedDS(dsName);
     setActiveEntryData(null);
     setActiveEntryKey("");
+    setEntryError(null);
     const result = await callRobloxAPI('listKeys', { datastoreName: dsName });
     setDsKeys(result?.keys || []);
   };
 
   const loadEntry = async (key: string) => {
     setActiveEntryKey(key);
+    setActiveEntryData(null);
+    setEntryError(null);
+    
     const result = await callRobloxAPI('getEntry', { datastoreName: selectedDS, entryKey: key });
-    if (result) setActiveEntryData(result);
+    
+    if (result) {
+      setActiveEntryData(result);
+      toast.success(`Key '${key}' loaded.`);
+    } else {
+      setEntryError(`Key '${key}' not found or access denied.`);
+    }
   };
 
   const saveEntry = async () => {
@@ -125,12 +141,13 @@ export default function DashboardAdminPage() {
 
   const deleteEntry = async () => {
     if (!activeEntryKey || !selectedDS) return;
-    if (!confirm("Are you sure you want to delete this key?")) return;
+    if (!confirm("Confirm permanent deletion of this key?")) return;
     const result = await callRobloxAPI('deleteEntry', { datastoreName: selectedDS, entryKey: activeEntryKey });
     if (result) {
       toast.success("Entry deleted");
       setActiveEntryKey("");
       setActiveEntryData(null);
+      setEntryError(null);
       fetchKeys(selectedDS);
     }
   };
@@ -138,11 +155,17 @@ export default function DashboardAdminPage() {
   const createNewKey = async () => {
     const keyName = prompt("Enter new Key name:");
     if (!keyName || !selectedDS) return;
+    
+    if (dsKeys.some(k => k.key === keyName)) {
+      return toast.error("Key already exists in this DataStore.");
+    }
+    
     const initialData = settings?.schemas?.[selectedDS] || {};
     const result = await callRobloxAPI('setEntry', { datastoreName: selectedDS, entryKey: keyName, value: initialData });
     if (result) {
       toast.success("New key created");
       fetchKeys(selectedDS);
+      loadEntry(keyName);
     }
   };
 
@@ -163,8 +186,7 @@ export default function DashboardAdminPage() {
 
   if (isLoading) return (
     <div className="min-h-screen bg-[#0a0a0a] flex items-center justify-center text-white/50">
-      <RefreshCw className="animate-spin mr-2" size={20} />
-      <span>Booting Terminal...</span>
+      <Loader2 className="animate-spin mr-2" size={32} />
     </div>
   );
 
@@ -172,41 +194,74 @@ export default function DashboardAdminPage() {
     <div className="min-h-screen bg-[#0a0a0a] text-slate-200 flex flex-col lg:flex-row">
       <Toaster theme="dark" position="top-right" />
 
-      {/* Sidebar */}
+      {/* Sidebar Navigation */}
       <aside className="w-full lg:w-64 bg-[#111] border-r border-white/5 flex flex-col shrink-0">
-        <div className="p-6">
-          <Link href="/" className="font-bold text-white flex items-center gap-2 mb-8">
-            <div className="w-8 h-8 bg-blue-600 rounded flex items-center justify-center shadow-lg"><img src="https://cdn.lostyo.com/logo.png" className="w-5 h-5" alt="L" /></div>
-            <span className="tracking-tight">Lostyo Admin</span>
+        <div className="p-6 flex items-center justify-between">
+          <Link href="/" className="font-bold text-white flex items-center gap-2">
+            <div className="w-8 h-8 bg-blue-600 rounded flex items-center justify-center">
+              <img src="https://cdn.lostyo.com/logo.png" className="w-5 h-5" alt="L" />
+            </div>
+            <span>Lostyo Admin</span>
           </Link>
-
-          <nav className="space-y-1">
-            <button onClick={() => setActiveTab('overview')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm transition-colors ${activeTab === 'overview' ? 'bg-white/10 text-white' : 'text-slate-400 hover:bg-white/5'}`}><LayoutDashboard size={18} /> Overview</button>
-            <button onClick={() => setActiveTab('datastores')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm transition-colors ${activeTab === 'datastores' ? 'bg-white/10 text-white' : 'text-slate-400 hover:bg-white/5'}`}><Database size={18} /> DataStores</button>
-            <button onClick={() => setActiveTab('schemas')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm transition-colors ${activeTab === 'schemas' ? 'bg-white/10 text-white' : 'text-slate-400 hover:bg-white/5'}`}><Settings size={18} /> Schemas</button>
-          </nav>
-          
-          <div className="mt-8 mb-2 px-4 text-[10px] font-bold text-slate-600 uppercase">Universes</div>
-          <div className="space-y-1 overflow-y-auto max-h-[300px] custom-scrollbar">
-            {projects.map(p => (
-              <button key={p.id} onClick={() => setSelectedProject(p)} className={`w-full text-left px-4 py-2 rounded-md text-xs truncate transition-colors ${selectedProject?.id === p.id ? 'bg-blue-600/20 text-blue-400' : 'text-slate-500 hover:bg-white/5'}`}>{p.name}</button>
-            ))}
-          </div>
+          <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="lg:hidden">
+            {mobileMenuOpen ? <X /> : <Menu />}
+          </button>
         </div>
 
-        <div className="mt-auto p-4 bg-black/20 border-t border-white/5 flex items-center gap-3">
-          <img src={profile?.avatar_url} className="w-8 h-8 rounded-full" alt="" />
-          <div className="flex flex-col min-w-0 flex-grow">
-            <span className="text-xs font-bold text-white truncate">{profile?.roblox_display_name}</span>
-            <span className="text-[10px] text-slate-500">Developer</span>
+        <nav className={`flex-grow px-3 space-y-1 ${mobileMenuOpen ? 'block' : 'hidden lg:block'}`}>
+          <button 
+            onClick={() => { setActiveTab('overview'); setMobileMenuOpen(false); }}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-md text-sm font-medium transition-colors ${activeTab === 'overview' ? 'bg-white/10 text-white' : 'text-slate-400 hover:bg-white/5 hover:text-white'}`}
+          >
+            <LayoutDashboard size={18} /> Overview
+          </button>
+          <button 
+            onClick={() => { setActiveTab('datastores'); setMobileMenuOpen(false); }}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-md text-sm font-medium transition-colors ${activeTab === 'datastores' ? 'bg-white/10 text-white' : 'text-slate-400 hover:bg-white/5 hover:text-white'}`}
+          >
+            <Database size={18} /> DataStores
+          </button>
+          <button 
+            onClick={() => { setActiveTab('schemas'); setMobileMenuOpen(false); }}
+            className={`w-full flex items-center gap-3 px-4 py-3 rounded-md text-sm font-medium transition-colors ${activeTab === 'schemas' ? 'bg-white/10 text-white' : 'text-slate-400 hover:bg-white/5 hover:text-white'}`}
+          >
+            <Settings size={18} /> Schemas
+          </button>
+          
+          <div className="pt-6 pb-2 px-4 text-[10px] font-bold text-slate-600 uppercase tracking-wider">Experiences</div>
+          <div className="space-y-1 overflow-y-auto max-h-[300px] custom-scrollbar">
+            {projects.map(p => (
+              <button 
+                key={p.id} 
+                onClick={() => setSelectedProject(p)}
+                className={`w-full text-left px-4 py-2 rounded-md text-xs truncate transition-colors ${selectedProject?.id === p.id ? 'bg-blue-600/20 text-blue-400 border border-blue-500/20' : 'text-slate-500 hover:bg-white/5'}`}
+              >
+                {p.name}
+              </button>
+            ))}
           </div>
-          <button onClick={() => { Cookies.remove('lostyo_roblox_logged'); window.location.href = '/'; }} className="p-2 text-slate-500 hover:text-red-500"><LogOut size={16} /></button>
+        </nav>
+
+        <div className="p-4 bg-black/20 border-t border-white/5">
+          <div className="flex items-center gap-3 mb-4">
+            <img src={profile?.avatar_url} className="w-8 h-8 rounded-full bg-white/10" alt="" />
+            <div className="flex flex-col min-w-0">
+              <span className="text-xs font-bold text-white truncate">{profile?.roblox_display_name}</span>
+              <span className="text-[10px] text-slate-500 uppercase">Developer</span>
+            </div>
+          </div>
+          <button 
+            onClick={() => { Cookies.remove('lostyo_roblox_logged'); window.location.href = '/'; }}
+            className="w-full flex items-center justify-center gap-2 py-2 rounded border border-white/10 text-xs text-slate-400 hover:bg-red-500/10 hover:text-red-500 hover:border-red-500/20 transition-all"
+          >
+            <LogOut size={14} /> Sign Out
+          </button>
         </div>
       </aside>
 
       {/* Content */}
       <main className="flex-grow flex flex-col min-h-0 bg-[#0a0a0a]">
-        <header className="h-16 border-b border-white/5 px-8 flex items-center justify-between bg-[#111]/30 backdrop-blur">
+        <header className="h-16 border-b border-white/5 px-8 flex items-center justify-between bg-[#111]/30 backdrop-blur sticky top-0 z-10">
           <div className="flex items-center gap-3">
             <div className={`w-2 h-2 rounded-full ${isSyncing ? 'bg-yellow-500 animate-pulse' : 'bg-emerald-500'}`} />
             <span className="text-xs font-medium text-slate-400 uppercase tracking-wider">{selectedProject?.name} // Root Terminal</span>
@@ -217,33 +272,35 @@ export default function DashboardAdminPage() {
           </div>
         </header>
 
-        <div className="flex-grow p-8 lg:p-12 overflow-y-auto custom-scrollbar">
+        <div className="flex-grow p-6 lg:p-10 overflow-y-auto custom-scrollbar">
           <AnimatePresence mode="wait">
             
             {activeTab === 'overview' && (
-              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="max-w-6xl mx-auto space-y-10">
-                <div className="flex justify-between items-center border-b border-white/5 pb-8">
+              <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="max-w-6xl mx-auto space-y-8">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-white/5 pb-8">
                   <div>
-                    <h1 className="text-4xl font-bold text-white mb-2">{selectedProject?.name}</h1>
+                    <h1 className="text-3xl font-bold text-white mb-2">{selectedProject?.name}</h1>
                     <div className="flex items-center gap-4 text-xs text-slate-500">
                       <span className="flex items-center gap-1"><ShieldCheck size={14} className="text-emerald-500" /> Universe {selectedProject?.id}</span>
                       <span>•</span>
                       <span className="bg-white/5 px-2 py-0.5 rounded text-[10px] font-bold">{selectedProject?.status}</span>
                     </div>
                   </div>
-                  <button onClick={() => window.open(`https://www.roblox.com/games/${selectedProject?.roblox_place_id}`, '_blank')} className="flex items-center gap-2 px-6 py-3 bg-white text-black font-bold text-xs rounded-full hover:scale-105 transition-transform"><ExternalLink size={14} /> Open Roblox</button>
+                  <button onClick={() => window.open(`https://www.roblox.com/games/${selectedProject?.roblox_place_id}`, '_blank')} className="flex items-center gap-2 px-4 py-2 bg-white text-black font-bold text-xs rounded hover:bg-slate-200 transition-colors">
+                    Open on Roblox <ExternalLink size={14} />
+                  </button>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                   <StatCard icon={Eye} label="Total Visits" value={gameDetails?.visits} color="text-blue-400" />
                   <StatCard icon={ThumbsUp} label="Likes" value={gameDetails?.votesUp} color="text-emerald-400" />
                   <StatCard icon={Star} label="Favorites" value={gameDetails?.favoritesCount} color="text-yellow-400" />
-                  <StatCard icon={Clock} label="Launch Date" value={gameDetails?.created ? new Date(gameDetails.created).toLocaleDateString() : 'N/A'} color="text-slate-400" />
+                  <StatCard icon={Clock} label="Created" value={gameDetails?.created ? new Date(gameDetails.created).toLocaleDateString() : 'N/A'} color="text-purple-400" />
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                   <div className="lg:col-span-2 space-y-6">
-                    <div className="bg-[#111] border border-white/5 rounded-2xl p-8 space-y-6">
+                    <div className="bg-[#111] border border-white/5 rounded-lg p-6 space-y-6">
                       <div className="flex items-center justify-between">
                         <h3 className="text-sm font-bold text-white flex items-center gap-2"><BookOpen size={18} className="text-blue-500" /> Engineering Notes</h3>
                         <button onClick={() => handleUpdateSettings({ notes: settings.notes })} disabled={isSavingSettings} className="text-xs font-bold text-blue-500 hover:text-blue-400 uppercase tracking-widest">{isSavingSettings ? 'Saving...' : 'Save Notes'}</button>
@@ -251,20 +308,20 @@ export default function DashboardAdminPage() {
                       <textarea 
                         value={settings?.notes || ''}
                         onChange={(e) => setSettings({ ...settings, notes: e.target.value })}
-                        className="w-full h-64 bg-black/20 border border-white/5 rounded-xl p-4 text-sm text-slate-400 outline-none focus:border-blue-500/50 transition-colors resize-none font-mono"
+                        className="w-full h-64 bg-black/20 border border-white/5 rounded-md p-4 text-sm text-slate-400 outline-none focus:border-blue-500/50 transition-colors resize-none font-mono"
                         placeholder="Project technical documentation, API keys, or pending tasks..."
                       />
                     </div>
                   </div>
                   <div className="space-y-6">
-                    <div className="bg-gradient-to-br from-blue-600/10 to-indigo-600/10 border border-blue-500/20 rounded-2xl p-8">
+                    <div className="bg-[#111] border border-white/5 rounded-lg p-6">
                       <h3 className="text-sm font-bold text-white mb-4">Quick Actions</h3>
                       <div className="space-y-2">
-                        <button onClick={() => setActiveTab('datastores')} className="w-full py-3 bg-white text-black rounded-lg text-xs font-bold hover:bg-slate-200 transition-colors flex items-center justify-center gap-2"><Plus size={14} /> New Entry</button>
-                        <button onClick={fetchGameDetails} className="w-full py-3 bg-white/5 border border-white/10 text-white rounded-lg text-xs font-bold hover:bg-white/10 transition-colors">Force Sync API</button>
+                        <button onClick={() => setActiveTab('datastores')} className="w-full py-3 bg-white text-black rounded-md text-xs font-bold hover:bg-slate-200 transition-colors flex items-center justify-center gap-2"><Plus size={14} /> New Entry</button>
+                        <button onClick={fetchGameDetails} className="w-full py-3 bg-white/5 border border-white/10 text-white rounded-md text-xs font-bold hover:bg-white/10 transition-colors">Force Sync API</button>
                       </div>
                     </div>
-                    <div className="bg-[#111] border border-white/5 rounded-2xl p-8">
+                    <div className="bg-[#111] border border-white/5 rounded-lg p-6">
                       <h3 className="text-sm font-bold text-white mb-4">System Info</h3>
                       <div className="space-y-4">
                         <div className="flex justify-between items-center"><span className="text-[10px] text-slate-500 uppercase">Last Build</span><span className="text-xs text-white">Stable</span></div>
@@ -280,55 +337,96 @@ export default function DashboardAdminPage() {
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="h-full flex flex-col space-y-6">
                 <div className="flex items-center justify-between mb-2">
                   <h2 className="text-2xl font-bold text-white">Cloud Data Explorer</h2>
-                  <button onClick={createNewKey} className="px-4 py-2 bg-blue-600 text-white rounded-lg text-xs font-bold flex items-center gap-2 hover:bg-blue-500 transition-colors"><Plus size={14} /> Create Key</button>
+                  <button onClick={createNewKey} className="px-4 py-2 bg-blue-600 text-white rounded-md text-xs font-bold flex items-center gap-2 hover:bg-blue-500 transition-colors"><Plus size={14} /> Create Key</button>
                 </div>
                 
-                <div className="flex flex-col lg:flex-row gap-8 h-full min-h-[600px]">
-                  <div className="w-full lg:w-72 flex flex-col gap-4 shrink-0">
-                    <div className="bg-[#111] border border-white/5 rounded-xl flex-grow overflow-hidden flex flex-col">
-                      <div className="p-4 border-b border-white/5 bg-white/5 text-[10px] font-bold text-slate-400 uppercase tracking-widest">1. DataStore Cluster</div>
-                      <div className="overflow-y-auto custom-scrollbar">
+                <div className="flex flex-col lg:flex-row gap-6 h-full min-h-[600px]">
+                  <div className="w-full lg:w-72 flex flex-col gap-6 shrink-0">
+                    <div className="space-y-2">
+                      <label className="text-[10px] font-bold text-slate-500 uppercase">1. Select DataStore</label>
+                      <div className="bg-[#111] border border-white/5 rounded-md max-h-60 overflow-y-auto">
                         {datastores.map(ds => (
-                          <button key={ds.name} onClick={() => fetchKeys(ds.name)} className={`w-full text-left px-5 py-4 text-xs transition-colors border-b border-white/5 last:border-0 ${selectedDS === ds.name ? 'bg-blue-600 text-white' : 'text-slate-400 hover:bg-white/5'}`}>{ds.name}</button>
+                          <button 
+                            key={ds.name} 
+                            onClick={() => fetchKeys(ds.name)}
+                            className={`w-full text-left px-4 py-3 text-xs border-b border-white/5 last:border-0 hover:bg-white/5 transition-colors ${selectedDS === ds.name ? 'bg-blue-600/10 text-blue-400 font-bold' : 'text-slate-300'}`}
+                          >
+                            {ds.name}
+                          </button>
                         ))}
+                      </div>
+                    </div>
+
+                    <div className="space-y-2 flex-grow flex flex-col">
+                      <label className="text-[10px] font-bold text-slate-500 uppercase">2. Select Key</label>
+                      <div className="relative mb-2">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={14} />
+                        <input 
+                          placeholder="Search keys..." 
+                          value={searchKeyFilter}
+                          onChange={e => setSearchKeyFilter(e.target.value)}
+                          className="w-full h-10 bg-[#111] border border-white/5 rounded-md pl-10 pr-4 text-xs outline-none focus:border-blue-500/50"
+                        />
+                      </div>
+                      <div className="bg-[#111] border border-white/5 rounded-md flex-grow overflow-y-auto max-h-[400px]">
+                        {filteredKeys.length > 0 ? filteredKeys.map(k => (
+                          <button 
+                            key={k.key} 
+                            onClick={() => loadEntry(k.key)}
+                            className={`w-full text-left px-4 py-3 text-xs border-b border-white/5 last:border-0 hover:bg-white/5 transition-colors ${activeEntryKey === k.key ? 'bg-white/5 text-white font-bold' : 'text-slate-400'}`}
+                          >
+                            {k.key}
+                          </button>
+                        )) : (
+                          <div className="p-4 text-xs text-slate-600 italic">Select a DataStore first</div>
+                        )}
                       </div>
                     </div>
                   </div>
 
-                  <div className="w-full lg:w-80 flex flex-col gap-4 shrink-0">
-                    <div className="bg-[#111] border border-white/5 rounded-xl flex-grow overflow-hidden flex flex-col">
-                      <div className="p-4 border-b border-white/5 bg-white/5 text-[10px] font-bold text-slate-400 uppercase tracking-widest">2. Registry Keys</div>
-                      <div className="p-4 bg-black/20 border-b border-white/5"><div className="relative"><Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={14} /><input placeholder="Filter keys..." value={searchKeyFilter} onChange={e => setSearchKeyFilter(e.target.value)} className="w-full bg-[#111] border border-white/10 rounded-lg pl-9 pr-4 py-2 text-xs outline-none focus:border-blue-500/50" /></div></div>
-                      <div className="overflow-y-auto custom-scrollbar">
-                        {filteredKeys.map((k: any) => (
-                          <button key={k.key} onClick={() => loadEntry(k.key)} className={`w-full text-left px-5 py-4 text-xs transition-all border-b border-white/5 last:border-0 ${activeEntryKey === k.key ? 'bg-white/5 text-blue-400 font-bold pl-7' : 'text-slate-500 hover:bg-white/5'}`}>{k.key}</button>
-                        ))}
+                  <div className="flex-grow flex flex-col border border-white/5 rounded-lg bg-[#0d0d0d] overflow-hidden">
+                    <div className="h-14 bg-[#161616] border-b border-white/5 flex items-center justify-between px-6 shrink-0">
+                      <div className="flex items-center gap-2">
+                        <FileCode size={16} className="text-blue-500" />
+                        <span className="text-sm font-medium text-slate-400 truncate max-w-[200px]">
+                          {activeEntryKey || 'No file selected'}
+                        </span>
                       </div>
-                    </div>
-                  </div>
-
-                  <div className="flex-grow flex flex-col bg-[#0d0d0d] border border-white/5 rounded-xl overflow-hidden shadow-2xl relative">
-                    <div className="h-14 border-b border-white/5 px-6 flex items-center justify-between bg-[#161616]">
-                      <div className="flex items-center gap-3 text-xs font-medium text-slate-400"><FileCode size={16} className="text-blue-500" /> {activeEntryKey || 'Idle'}</div>
                       {activeEntryData && (
-                        <div className="flex items-center gap-2">
-                          <button onClick={deleteEntry} className="p-2 text-slate-500 hover:text-red-500 transition-colors"><Trash2 size={16} /></button>
-                          <button onClick={saveEntry} className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-xs font-bold rounded-lg hover:bg-blue-500 transition-colors"><Save size={14} /> Commit Changes</button>
+                        <div className="flex items-center gap-3">
+                          <button onClick={deleteEntry} className="p-2 text-slate-500 hover:text-red-500 transition-colors">
+                            <Trash2 size={16} />
+                          </button>
+                          <button 
+                            onClick={saveEntry}
+                            className="flex items-center gap-2 px-4 py-1.5 bg-blue-600 text-white text-xs font-bold rounded hover:bg-blue-500 transition-colors"
+                          >
+                            <Save size={14} /> Commit Changes
+                          </button>
                         </div>
                       )}
                     </div>
                     <div className="flex-grow relative">
-                      {activeEntryData ? (
+                      {entryError ? (
+                        <div className="absolute inset-0 flex flex-col items-center justify-center bg-red-900/10 text-red-400 p-8">
+                          <AlertCircle size={32} className="mb-4" />
+                          <p className="text-sm font-bold mb-2">Entry Not Found</p>
+                          <p className="text-xs text-center">{entryError}</p>
+                        </div>
+                      ) : activeEntryData ? (
                         <textarea 
                           value={typeof activeEntryData === 'string' ? activeEntryData : JSON.stringify(activeEntryData, null, 2)}
-                          onChange={e => { try { setActiveEntryData(JSON.parse(e.target.value)); } catch { setActiveEntryData(e.target.value); } }}
-                          className="absolute inset-0 w-full h-full bg-transparent p-8 font-mono text-[13px] text-emerald-400 outline-none resize-none custom-scrollbar leading-relaxed"
+                          onChange={e => {
+                            try { setActiveEntryData(JSON.parse(e.target.value)); } 
+                            catch { setActiveEntryData(e.target.value); }
+                          }}
+                          className="absolute inset-0 w-full h-full bg-transparent p-6 font-mono text-xs text-emerald-400 outline-none resize-none custom-scrollbar"
                           spellCheck={false}
                         />
                       ) : (
-                        <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-600/30 select-none">
-                          <Gamepad2 size={64} className="mb-4" />
-                          <p className="text-xs font-bold uppercase tracking-widest">Select an entry to begin orchestration</p>
+                        <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-600 opacity-50">
+                          <Gamepad2 size={48} className="mb-4" />
+                          <p className="text-xs uppercase font-bold tracking-widest">Select a key to edit data</p>
                         </div>
                       )}
                     </div>
@@ -346,14 +444,14 @@ export default function DashboardAdminPage() {
 
                  <div className="grid grid-cols-1 gap-6">
                     {datastores.map(ds => (
-                      <div key={ds.name} className="bg-[#111] border border-white/5 rounded-2xl p-8 space-y-4">
+                      <div key={ds.name} className="bg-[#111] border border-white/5 rounded-lg p-6 space-y-4">
                          <div className="flex items-center justify-between">
                             <h3 className="font-bold text-white">{ds.name}</h3>
                             <button 
                               onClick={() => handleUpdateSettings({ 
                                 schemas: { ...settings.schemas, [ds.name]: JSON.parse(document.getElementById(`schema-${ds.name}`)?.innerText || '{}') } 
                               })}
-                              className="text-xs font-bold text-blue-500 uppercase tracking-widest hover:text-blue-400"
+                              className="text-xs font-bold text-blue-500 hover:text-blue-400 uppercase tracking-widest"
                             >
                               Apply Schema
                             </button>
@@ -361,7 +459,7 @@ export default function DashboardAdminPage() {
                          <div 
                           id={`schema-${ds.name}`}
                           contentEditable 
-                          className="w-full min-h-[100px] bg-black/40 border border-white/5 rounded-xl p-6 font-mono text-xs text-emerald-500/70 outline-none focus:border-blue-500/30"
+                          className="w-full min-h-[100px] bg-black/40 border border-white/5 rounded-md p-4 font-mono text-xs text-emerald-400 outline-none focus:border-blue-500/30"
                          >
                            {JSON.stringify(settings?.schemas?.[ds.name] || {}, null, 2)}
                          </div>
@@ -386,10 +484,10 @@ export default function DashboardAdminPage() {
 }
 
 const StatCard = ({ icon: Icon, label, value, color }: any) => (
-  <div className="bg-[#111] border border-white/5 p-8 rounded-2xl group hover:border-white/10 transition-colors">
-    <Icon className={`${color} mb-4 group-hover:scale-110 transition-transform`} size={20} />
-    <div className="text-[10px] text-slate-500 uppercase font-black tracking-widest mb-1">{label}</div>
-    <div className="text-3xl font-bold text-white">
+  <div className="bg-[#111] border border-white/5 p-6 rounded-lg">
+    <Icon className={`${color} mb-3`} size={20} />
+    <div className="text-[10px] text-slate-500 uppercase font-bold mb-1">{label}</div>
+    <div className="text-2xl font-bold text-white">
       {typeof value === 'number' ? value.toLocaleString() : value || '0'}
     </div>
   </div>
