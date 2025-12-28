@@ -22,7 +22,7 @@ const GameCard = ({
     viewport={{ once: true }}
     whileHover={{ y: -10 }}
     onClick={() => link && window.open(link, '_blank')}
-    className="group relative aspect-[4/5] glass rounded-[3rem] overflow-hidden cursor-pointer"
+    className="group relative aspect-[4/5] glass rounded-[3rem] overflow-hidden cursor-pointer max-w-sm mx-auto w-full"
   >
     {/* Background Image if exists */}
     {image ? (
@@ -53,19 +53,7 @@ export const GameShowcase = () => {
       title: "CapToken", 
       category: "Strategy", 
       link: "https://www.roblox.com/pt/games/94278394125668/CapToken",
-      image: "https://tr.rbxcdn.com/180DAY-94278394125668/420/420/Image/Png" // Tentativa de usar o ícone oficial
-    },
-    { 
-      title: "Neon Drift", 
-      category: "Racing / MMO" 
-    },
-    { 
-      title: "Aetheria", 
-      category: "Open World RPG" 
-    },
-    { 
-      title: "Shadow Protocol", 
-      category: "Tactical FPS" 
+      image: "https://tr.rbxcdn.com/180DAY-94278394125668/420/420/Image/Png"
     }
   ];
 
@@ -74,16 +62,16 @@ export const GameShowcase = () => {
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-[radial-gradient(circle_at_50%_50%,rgba(29,78,216,0.03),transparent_70%)] pointer-events-none" />
       
       <div className="container mx-auto px-6 relative z-10">
-        <div className="flex justify-between items-end mb-20">
+        <div className="flex flex-col md:flex-row justify-between items-end mb-20 gap-8">
           <motion.div 
             initial={{ opacity: 0, x: -30 }}
             whileInView={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8 }}
             viewport={{ once: true }}
-            className="max-w-xl"
+            className="max-w-xl text-center md:text-left mx-auto md:mx-0"
           >
-            <h2 className="text-4xl md:text-6xl font-black text-white tracking-tighter mb-6">Our Creations.</h2>
-            <p className="text-white/30 text-lg font-medium">Bespoke experiences that push the boundaries of the Roblox platform.</p>
+            <h2 className="text-4xl md:text-6xl font-black text-white tracking-tighter mb-6">Our Creation.</h2>
+            <p className="text-white/30 text-lg font-medium">A bespoke experience that pushes the boundaries of the Roblox platform.</p>
           </motion.div>
           <motion.div 
             initial={{ opacity: 0, scale: 0.8 }}
@@ -96,7 +84,7 @@ export const GameShowcase = () => {
           </motion.div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="flex justify-center">
           {games.map((game, i) => (
             <GameCard 
               key={i} 
