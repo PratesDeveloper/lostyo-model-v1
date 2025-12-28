@@ -2,16 +2,15 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  LayoutDashboard, Users, Settings, Activity, Code, 
-  ShieldOff, Loader2, Gamepad2, ChevronRight,
-  Database, Zap, Lock, Power
+  LayoutDashboard, Users, Activity, Code, 
+  ShieldOff, Loader2, Gamepad2, Database, Zap, Lock, Power
 } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
 import Cookies from 'js-cookie';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ProjectSelector } from '@/components/admin/project-selector';
 import { ProjectDetails } from '@/components/admin/project-details';
+import { getProfileByRobloxId, getAllProjects } from '@/app/actions/profile';
 
 export default function DashboardAdminPage() {
   const [profile, setProfile] = useState<any>(null);
@@ -30,19 +29,14 @@ export default function DashboardAdminPage() {
         return;
       }
 
-      const { data: profileData, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('roblox_id', robloxId)
-        .single();
+      // Usando Server Action para buscar perfil e projetos com bypass de RLS
+      const profileData = await getProfileByRobloxId(robloxId);
       
       if (profileData && profileData.is_developer) {
         setProfile(profileData);
-        const { data: projectsData } = await supabase.from('projects').select('*');
-        if (projectsData) {
-          setProjects(projectsData);
-          if (projectsData.length > 0) setSelectedProject(projectsData[0]);
-        }
+        const projectsData = await getAllProjects();
+        setProjects(projectsData);
+        if (projectsData.length > 0) setSelectedProject(projectsData[0]);
       } else {
         router.replace('/');
       }
@@ -64,10 +58,9 @@ export default function DashboardAdminPage() {
     <div className="min-h-screen bg-[#030303] text-white flex overflow-hidden">
       <div className="noise opacity-[0.02]" />
       
-      {/* Sidebar Refinada */}
       <aside className="w-72 border-r border-white/5 flex flex-col p-8 hidden md:flex bg-[#050505] relative z-20">
         <Link href="/" className="flex items-center gap-3 mb-16 px-2 group">
-          <img src="https://cdn.lostyo.com/logo.png" className="w-7 h-7 group-hover:rotate-12 transition-transform" alt="Logo" />
+          <img src="https://cdn.lostyo.com/logo.png" className="w-7 h-7" alt="Logo" />
           <span className="font-black tracking-tighter text-xl uppercase">Admin</span>
         </Link>
 
@@ -105,7 +98,6 @@ export default function DashboardAdminPage() {
         </div>
       </aside>
 
-      {/* Main Content */}
       <main className="flex-grow p-10 lg:p-14 overflow-y-auto relative z-10 custom-scrollbar">
         <header className="flex justify-between items-end mb-16 pb-8 border-b border-white/5">
           <div>
@@ -124,12 +116,9 @@ export default function DashboardAdminPage() {
         </header>
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-10">
-          {/* Selector */}
           <div className="lg:col-span-1">
             <ProjectSelector projects={projects} onSelectProject={setSelectedProject} selectedProject={selectedProject} />
           </div>
-
-          {/* Details */}
           <div className="lg:col-span-3">
             <AnimatePresence mode="wait">
               {selectedProject ? (
@@ -154,13 +143,6 @@ export default function DashboardAdminPage() {
           </div>
         </div>
       </main>
-
-      <style jsx global>{`
-        .custom-scrollbar::-webkit-scrollbar { width: 5px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,0,0,0.1); border-radius: 10px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(255,0,0,0.2); }
-      `}</style>
     </div>
   );
 }
