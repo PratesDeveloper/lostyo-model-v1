@@ -1,16 +1,18 @@
-"use client";
 import "server-only";
 
 const ROBLOX_AUTH_URL = "https://apis.roblox.com/oauth/v1/authorize";
 const ROBLOX_TOKEN_URL = "https://apis.roblox.com/oauth/v1/token";
 const ROBLOX_USERINFO_URL = "https://apis.roblox.com/oauth/v1/userinfo";
 
+/**
+ * Biblioteca de integração Roblox OAuth 2.0.
+ * Executada apenas no servidor para proteger o client_secret.
+ */
 export const robloxLib = {
   getAuthorizationUrl() {
     const params = new URLSearchParams({
       client_id: process.env.ROBLOX_CLIENT_ID!,
       redirect_uri: process.env.ROBLOX_REDIRECT_URI!,
-      // Adicionado group:write para gerenciamento avançado
       scope: "openid profile group:read group:write", 
       response_type: "code",
       prompt: "select_account" 
