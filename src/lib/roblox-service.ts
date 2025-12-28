@@ -59,17 +59,25 @@ export const robloxService = {
       }
       
       const data = await response.json();
-      console.log(`[robloxService] Found ${data.data?.length || 0} universes`);
+      const games = data.data || [];
+      console.log(`[robloxService] Raw data length: ${games.length}`);
 
-      const universes = data.data.map((game: any) => ({
-        id: game.id.toString(),
-        name: game.name,
-        category: "Experience",
-        players_count: 0,
-        status: "Live",
-        roblox_place_id: game.rootPlaceId.toString()
-      }));
+      // Mapeamento seguro para evitar "toString of undefined"
+      const universes = games.map((game: any) => {
+        const universeId = game.id?.toString() || "";
+        const rootPlaceId = game.rootPlaceId?.toString() || "";
+        
+        return {
+          id: universeId,
+          name: game.name || "Unnamed Experience",
+          category: "Experience",
+          players_count: 0,
+          status: "Live",
+          roblox_place_id: rootPlaceId
+        };
+      }).filter((u: any) => u.id !== ""); // Remove entradas inválidas se houver
 
+      console.log(`[robloxService] Mapped ${universes.length} valid universes`);
       return { data: { universes }, success: true };
     } catch (err: any) {
       console.error(`[robloxService] listUserUniverses Exception: ${err.message}`);
