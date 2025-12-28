@@ -6,7 +6,7 @@ import {
   ShieldCheck, Loader2, Gamepad2, Database, 
   Zap, Power, RefreshCcw, LayoutGrid,
   Search, Save, Trash2, ExternalLink, Braces,
-  Settings
+  Settings, Star, Eye, ThumbsUp, Clock
 } from 'lucide-react';
 import Cookies from 'js-cookie';
 import Link from 'next/link';
@@ -26,6 +26,7 @@ export default function DashboardAdminPage() {
   const [activeEntryData, setActiveEntryData] = useState<any>(null);
   const [isSyncing, setIsSyncing] = useState(false);
   const [activeTab, setActiveTab] = useState<'overview' | 'datastores'>('overview');
+  const [gameDetails, setGameDetails] = useState<any>(null);
 
   const router = useRouter();
 
@@ -57,6 +58,19 @@ export default function DashboardAdminPage() {
       return null;
     } finally {
       setIsSyncing(false);
+    }
+  };
+
+  // Buscar detalhes do jogo (visitas, likes, etc.)
+  const fetchGameDetails = async (placeId: string) => {
+    try {
+      const response = await fetch(`https://games.roblox.com/v1/games?universeIds=${placeId}`);
+      const data = await response.json();
+      if (data.data && data.data.length > 0) {
+        setGameDetails(data.data[0]);
+      }
+    } catch (err) {
+      console.error("[DashboardAdmin] Failed to fetch game details", err);
     }
   };
 
@@ -118,17 +132,25 @@ export default function DashboardAdminPage() {
   };
 
   useEffect(() => {
-    if (selectedProject && activeTab === 'datastores') fetchDatastores();
+    if (selectedProject) {
+      fetchGameDetails(selectedProject.roblox_place_id);
+      if (activeTab === 'datastores') fetchDatastores();
+    }
   }, [selectedProject, activeTab]);
 
-  if (isLoading) return <div className="min-h-screen bg-[#050505] flex items-center justify-center"><Loader2 className="animate-spin text-blue-500 w-12 h-12" /></div>;
+  if (isLoading) return (
+    <div className="min-h-screen bg-[#050505] flex items-center justify-center">
+      <Loader2 className="animate-spin text-blue-500 w-12 h-12" />
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-[#050505] text-white flex font-sans selection:bg-blue-500/30 overflow-hidden">
       <Toaster theme="dark" richColors />
       
-      <aside className="w-80 border-r border-white/5 flex flex-col hidden xl:flex bg-[#080808] relative z-20">
-        <div className="p-10">
+      {/* Sidebar - Escondido em mobile */}
+      <aside className="w-80 border-r border-white/5 flex flex-col hidden lg:flex bg-[#080808] relative z-20">
+        <div className="p-8">
           <Link href="/" className="flex items-center gap-3 mb-12 group">
             <div className="w-10 h-10 rounded-2xl bg-blue-600 flex items-center justify-center shadow-lg group-hover:rotate-6 transition-transform">
               <img src="https://cdn.lostyo.com/logo.png" className="w-6 h-6" alt="Logo" />
@@ -153,18 +175,26 @@ export default function DashboardAdminPage() {
 
         <div className="mt-auto p-8 bg-black/20 border-t border-white/5">
           <div className="flex items-center gap-4 mb-6">
-            <div className="w-12 h-12 rounded-2xl border border-white/10 overflow-hidden"><img src={profile?.avatar_url} className="w-full h-full object-cover" /></div>
+            <div className="w-12 h-12 rounded-2xl border border-white/10 overflow-hidden">
+              <img src={profile?.avatar_url} className="w-full h-full object-cover" alt="Profile" />
+            </div>
             <div className="flex flex-col">
               <span className="text-[11px] font-black uppercase truncate">{profile?.roblox_display_name}</span>
               <span className="text-[8px] font-bold text-blue-500 uppercase tracking-widest">System Admin</span>
             </div>
           </div>
-          <button onClick={() => { Cookies.remove('lostyo_roblox_logged'); window.location.href = '/'; }} className="w-full h-12 flex items-center justify-center gap-3 rounded-2xl bg-white/5 text-white/40 hover:text-red-500 border border-white/5 transition-all"><Power size={16} /><span className="text-[9px] font-black uppercase tracking-widest">Disconnect</span></button>
+          <button
+            onClick={() => { Cookies.remove('lostyo_roblox_logged'); window.location.href = '/'; }}
+            className="w-full h-12 flex items-center justify-center gap-3 rounded-2xl bg-white/5 text-white/40 hover:text-red-500 border border-white/5 transition-all"
+          >
+            <Power size={16} />
+            <span className="text-[9px] font-black uppercase tracking-widest">Disconnect</span>
+          </button>
         </div>
       </aside>
 
       <main className="flex-grow flex flex-col h-screen overflow-hidden">
-        <header className="h-24 border-b border-white/5 flex items-center justify-between px-10 bg-[#080808]">
+        <header className="h-24 border-b border-white/5 flex items-center justify-between px-6 md:px-10 bg-[#080808]">
           <div className="flex items-center gap-4">
             <div className={`w-2 h-2 rounded-full ${isSyncing ? 'bg-yellow-500 animate-pulse' : 'bg-emerald-500'}`} />
             <h1 className="text-xs font-black uppercase tracking-[0.4em] text-white/40">Remote Protocol // Real-Time</h1>
@@ -182,7 +212,8 @@ export default function DashboardAdminPage() {
         </header>
 
         <div className="flex-grow flex overflow-hidden">
-          <div className="w-80 border-r border-white/5 p-8 overflow-y-auto custom-scrollbar">
+          {/* Sidebar Mobile - Visível em telas menores */}
+          <div className="w-80 border-r border-white/5 p-6 overflow-y-auto custom-scrollbar lg:hidden">
             <div className="mb-6 px-2 flex justify-between items-center">
               <h3 className="text-[10px] font-black text-white/30 uppercase tracking-widest">Real Universes</h3>
               <span className="text-[9px] font-bold text-blue-500 px-2 py-0.5 bg-blue-500/10 rounded">{projects.length}</span>
@@ -195,8 +226,8 @@ export default function DashboardAdminPage() {
                 </div>
               ) : (
                 projects.map((p) => (
-                  <div 
-                    key={p.id} 
+                  <div
+                    key={p.id}
                     onClick={() => setSelectedProject(p)}
                     className={`p-5 rounded-2xl border cursor-pointer transition-all ${selectedProject?.id === p.id ? 'bg-blue-600/10 border-blue-500/50' : 'bg-white/5 border-white/5 hover:bg-white/10'}`}
                   >
@@ -213,34 +244,56 @@ export default function DashboardAdminPage() {
             </div>
           </div>
 
-          <div className="flex-grow p-12 overflow-y-auto custom-scrollbar bg-[#060606]">
+          <div className="flex-grow p-6 md:p-12 overflow-y-auto custom-scrollbar bg-[#060606]">
             <AnimatePresence mode="wait">
               {activeTab === 'overview' && selectedProject && (
                 <motion.div key="overview" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-12 max-w-5xl mx-auto">
-                   <div className="flex justify-between items-end">
-                      <div>
-                        <h2 className="text-6xl font-black tracking-tighter uppercase mb-2">{selectedProject.name}</h2>
-                        <div className="text-[10px] font-bold text-blue-500 uppercase tracking-widest">Universe ID: {selectedProject.id}</div>
+                   <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-8">
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-3">
+                         <div className="px-3 py-1 bg-blue-600/10 border border-blue-500/20 rounded-full text-[9px] font-black text-blue-500 uppercase tracking-widest">
+                           Cluster Active
+                         </div>
+                         <div className="px-3 py-1 bg-white/5 border border-white/10 rounded-full text-[9px] font-black text-white/40 uppercase tracking-widest">
+                           ID: {selectedProject.roblox_place_id}
+                         </div>
                       </div>
-                      <button onClick={() => window.open(`https://www.roblox.com/games/${selectedProject.roblox_place_id}`, '_blank')} className="h-14 px-8 bg-white text-black rounded-2xl font-black uppercase text-[10px] flex items-center gap-3 hover:scale-105 transition-all">Launch Experience <ExternalLink size={16} /></button>
+                      <h2 className="text-4xl md:text-6xl font-black tracking-tighter uppercase mb-2">{selectedProject.name}</h2>
+                      <div className="text-[10px] font-bold text-blue-500 uppercase tracking-widest">Universe ID: {selectedProject.id}</div>
+                    </div>
+                     <button
+                      onClick={() => window.open(`https://www.roblox.com/games/${selectedProject.roblox_place_id}`, '_blank')}
+                      className="h-14 px-8 bg-white text-black rounded-2xl font-black uppercase text-[10px] flex items-center gap-3 hover:scale-105 transition-all"
+                    >
+                      Launch Experience <ExternalLink size={16} />
+                    </button>
                    </div>
                    
-                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                      <div className="p-8 bg-white/[0.02] border border-white/5 rounded-3xl"><Users size={24} className="text-blue-500 mb-4" /><div className="text-[10px] font-black text-white/20 uppercase mb-1">Status</div><div className="text-3xl font-black uppercase">{selectedProject.status}</div></div>
-                      <div className="p-8 bg-white/[0.02] border border-white/5 rounded-3xl"><Zap size={24} className="text-yellow-500 mb-4" /><div className="text-[10px] font-black text-white/20 uppercase mb-1">Live Sync</div><div className="text-3xl font-black uppercase">Active</div></div>
-                      <div className="p-8 bg-white/[0.02] border border-white/5 rounded-3xl"><Activity size={24} className="text-emerald-500 mb-4" /><div className="text-[10px] font-black text-white/20 uppercase mb-1">Place ID</div><div className="text-3xl font-black">{selectedProject.roblox_place_id}</div></div>
-                   </div>
-
-                   <div className="p-10 glass border border-white/5 rounded-[3rem]">
-                      <h3 className="text-xl font-black uppercase mb-6 flex items-center gap-3"><Settings className="text-blue-500" /> API Control Panel</h3>
-                      <p className="text-white/30 text-xs font-medium leading-relaxed mb-8">
-                        This experience is being managed via Roblox OAuth 2.0. All changes made to DataStores or universe properties will reflect instantly in the production environment.
-                      </p>
-                      <div className="grid grid-cols-2 gap-8 text-[10px] font-black uppercase tracking-widest text-white/40">
-                         <div className="flex justify-between border-b border-white/5 pb-4"><span>Cloud Connection</span><span className="text-emerald-400">Authenticated</span></div>
-                         <div className="flex justify-between border-b border-white/5 pb-4"><span>Access Level</span><span className="text-blue-400">Developer</span></div>
+                   {/* Game Details Section */}
+                   {gameDetails && (
+                     <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                      <div className="p-6 bg-white/[0.02] border border-white/5 rounded-3xl">
+                        <Eye size={24} className="text-blue-500 mb-4" />
+                        <div className="text-[10px] font-black text-white/20 uppercase mb-1">Visits</div>
+                        <div className="text-3xl font-black uppercase">{gameDetails.visits.toLocaleString()}</div>
                       </div>
-                   </div>
+                      <div className="p-6 bg-white/[0.02] border border-white/5 rounded-3xl">
+                        <ThumbsUp size={24} className="text-emerald-500 mb-4" />
+                        <div className="text-[10px] font-black text-white/20 uppercase mb-1">Likes</div>
+                        <div className="text-3xl font-black uppercase">{gameDetails.votesUp.toLocaleString()}</div>
+                      </div>
+                      <div className="p-6 bg-white/[0.02] border border-white/5 rounded-3xl">
+                        <Star size={24} className="text-yellow-500 mb-4" />
+                        <div className="text-[10px] font-black text-white/20 uppercase mb-1">Favorites</div>
+                        <div className="text-3xl font-black uppercase">{gameDetails.favoritesCount.toLocaleString()}</div>
+                      </div>
+                      <div className="p-6 bg-white/[0.02] border border-white/5 rounded-3xl">
+                        <Clock size={24} className="text-purple-500 mb-4" />
+                        <div className="text-[10px] font-black text-white/20 uppercase mb-1">Created</div>
+                        <div className="text-2xl font-black">{new Date(gameDetails.created).toLocaleDateString()}</div>
+                      </div>
+                     </div>
+                   )}
                 </motion.div>
               )}
 
@@ -248,14 +301,16 @@ export default function DashboardAdminPage() {
                 <motion.div key="datastores" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-10 max-w-6xl mx-auto">
                    <div className="flex justify-between items-center mb-10">
                       <h2 className="text-4xl font-black tracking-tighter uppercase">Cloud Data Explorer</h2>
-                      <button onClick={fetchDatastores} className="h-10 px-4 bg-white/5 rounded-xl text-[10px] font-black uppercase flex items-center gap-2 hover:bg-white/10 transition-all"><RefreshCcw size={14} /> Sync DataStores</button>
+                      <button onClick={fetchDatastores} className="h-10 px-4 bg-white/5 rounded-xl text-[10px] font-black uppercase flex items-center gap-2 hover:bg-white/10 transition-all">
+                        <RefreshCcw size={14} /> Sync DataStores
+                      </button>
                    </div>
 
                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                       <div className="lg:col-span-1 space-y-6">
                         <div className="space-y-2">
                            <label className="text-[10px] font-black text-white/20 uppercase tracking-widest px-2">Select Cluster</label>
-                           <select 
+                           <select
                             value={selectedDS}
                             onChange={(e) => setSelectedDS(e.target.value)}
                             className="w-full h-14 bg-white/5 border border-white/5 rounded-2xl px-6 text-xs font-bold uppercase outline-none focus:border-blue-500 transition-all appearance-none"
@@ -268,7 +323,7 @@ export default function DashboardAdminPage() {
                            <label className="text-[10px] font-black text-white/20 uppercase tracking-widest px-2">Key Identifier</label>
                            <div className="relative">
                               <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20" size={16} />
-                              <input 
+                              <input
                                 value={searchKey}
                                 onChange={(e) => setSearchKey(e.target.value)}
                                 placeholder="Player_ID / Key"
@@ -276,7 +331,12 @@ export default function DashboardAdminPage() {
                               />
                            </div>
                         </div>
-                        <button onClick={loadEntry} className="w-full h-16 bg-blue-600 text-white rounded-2xl font-black uppercase text-[10px] tracking-widest hover:scale-[1.02] transition-all shadow-xl shadow-blue-600/20">Fetch Cloud Data</button>
+                        <button
+                          onClick={loadEntry}
+                          className="w-full h-16 bg-blue-600 text-white rounded-2xl font-black uppercase text-[10px] tracking-widest hover:scale-[1.02] transition-all shadow-xl shadow-blue-600/20"
+                        >
+                          Fetch Cloud Data
+                        </button>
                       </div>
 
                       <div className="lg:col-span-2">
@@ -288,14 +348,18 @@ export default function DashboardAdminPage() {
                                </div>
                                {activeEntryData && (
                                  <div className="flex gap-4">
-                                    <button onClick={saveEntry} className="text-blue-500 hover:text-blue-400 flex items-center gap-2 text-[10px] font-black uppercase"><Save size={14} /> Save to Cloud</button>
-                                    <button onClick={() => setActiveEntryData(null)} className="text-white/20 hover:text-red-500 flex items-center gap-2 text-[10px] font-black uppercase"><Trash2 size={14} /> Clear</button>
+                                    <button onClick={saveEntry} className="text-blue-500 hover:text-blue-400 flex items-center gap-2 text-[10px] font-black uppercase">
+                                      <Save size={14} /> Save to Cloud
+                                    </button>
+                                    <button onClick={() => setActiveEntryData(null)} className="text-white/20 hover:text-red-500 flex items-center gap-2 text-[10px] font-black uppercase">
+                                      <Trash2 size={14} /> Clear
+                                    </button>
                                  </div>
                                )}
                             </div>
                             <div className="p-8">
                                {activeEntryData ? (
-                                 <textarea 
+                                 <textarea
                                   value={typeof activeEntryData === 'string' ? activeEntryData : JSON.stringify(activeEntryData, null, 2)}
                                   onChange={(e) => {
                                     try {
