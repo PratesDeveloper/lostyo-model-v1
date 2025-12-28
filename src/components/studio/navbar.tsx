@@ -22,8 +22,8 @@ export const Navbar = () => {
       const loggedCookie = Cookies.get('lostyo_roblox_logged');
       if (loggedCookie === 'true') {
         setIsLogged(true);
-        // Em um cenário real, buscaríamos o perfil baseado no ID salvo na sessão
-        // Aqui buscamos o perfil mais recente atualizado (simplificação para o teste)
+        
+        // Tenta buscar o perfil mais recente (que é o que acabou de logar)
         const { data } = await supabase
           .from('profiles')
           .select('*')
@@ -31,7 +31,13 @@ export const Navbar = () => {
           .limit(1)
           .single();
         
-        if (data) setProfile(data);
+        if (data) {
+          setProfile(data);
+        } else {
+          // Se o cookie estiver lá, mas o perfil não for encontrado, desloga
+          Cookies.remove('lostyo_roblox_logged');
+          setIsLogged(false);
+        }
       }
     };
     checkLogin();
