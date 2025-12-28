@@ -5,7 +5,8 @@ import {
   LayoutDashboard, Users, Activity, Code, 
   ShieldCheck, Loader2, Gamepad2, Database, 
   Zap, Lock, Power, RefreshCcw, LayoutGrid,
-  Search, Save, Trash2, ExternalLink, Braces
+  Search, Save, Trash2, ExternalLink, Braces,
+  Settings // Importação adicionada
 } from 'lucide-react';
 import Cookies from 'js-cookie';
 import Link from 'next/link';
