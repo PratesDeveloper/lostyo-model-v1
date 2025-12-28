@@ -23,6 +23,7 @@ export const Navbar = () => {
       if (loggedCookie === 'true') {
         setIsLogged(true);
         
+        // Buscar o perfil mais recente (que é o que acabou de logar)
         const { data } = await supabase
           .from('profiles')
           .select('*')
@@ -33,6 +34,7 @@ export const Navbar = () => {
         if (data) {
           setProfile(data);
         } else {
+          // Se o cookie estiver lá, mas o perfil não for encontrado, desloga
           Cookies.remove('lostyo_roblox_logged');
           setIsLogged(false);
         }

@@ -36,8 +36,8 @@ export async function GET(req: Request) {
 
     if (error) throw error;
 
-    // 5. Redirecionar para o dashboard (Aqui você pode gerar um JWT se desejar uma sessão customizada)
-    const response = NextResponse.redirect(new URL('/dashboard', req.url));
+    // 5. Redirecionar para a página inicial (não mais para o dashboard)
+    const response = NextResponse.redirect(new URL('/', req.url));
     
     // Cookie de segurança para identificar que o usuário está logado
     response.cookies.set('lostyo_roblox_logged', 'true', { 
