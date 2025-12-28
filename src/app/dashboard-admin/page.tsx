@@ -25,7 +25,7 @@ interface Project {
   category: string;
   players_count: number;
   status: string;
-  roblox_place_id: string;
+  roblox_place_id: string; /* Adicionado roblox_place_id aqui */
 }
 
 const AdminSidebar = ({ isDeveloper }: { isDeveloper: boolean }) => {
