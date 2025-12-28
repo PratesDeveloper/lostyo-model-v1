@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { 
   LayoutDashboard, Database, Gamepad2, Search, 
   Save, Trash2, ExternalLink, RefreshCw, 
-  Menu, X, ChevronRight, FileCode, Users, 
+  Menu, X, ChevronRight, FileCode, 
   Eye, ThumbsUp, Star, Clock, LogOut, ShieldCheck,
   Plus, Settings, BookOpen, AlertCircle, CheckCircle2,
   Loader2
@@ -15,6 +15,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { getProfileByRobloxId, getProjectSettings, updateProjectSettings } from '@/app/actions/profile';
 import { toast, Toaster } from 'sonner';
+import { CreateKeyForm } from '@/components/admin/create-key-form';
 
 export default function DashboardAdminPage() {
   const [profile, setProfile] = useState<any>(null);
@@ -22,7 +23,7 @@ export default function DashboardAdminPage() {
   const [selectedProject, setSelectedProject] = useState<any>(null);
   const [settings, setSettings] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false); // <-- Adicionado aqui
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   
   // DataStore State
   const [datastores, setDatastores] = useState<any[]>([]);
@@ -39,6 +40,7 @@ export default function DashboardAdminPage() {
   const [activeTab, setActiveTab] = useState<'overview' | 'datastores' | 'schemas'>('overview');
   const [gameDetails, setGameDetails] = useState<any>(null);
   const [isSavingSettings, setIsSavingSettings] = useState(false);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
   const router = useRouter();
 
@@ -52,7 +54,6 @@ export default function DashboardAdminPage() {
       });
       const data = await response.json();
       if (!response.ok) {
-        // Captura o erro da API Bridge
         throw new Error(data.error || "Request failed");
       }
       return data;
@@ -109,6 +110,12 @@ export default function DashboardAdminPage() {
     if (result?.datastores) setDatastores(result.datastores);
   };
 
+  const handleKeyCreated = (keyName: string) => {
+    // Atualiza a lista de chaves e carrega a nova chave
+    fetchKeys(selectedDS);
+    loadEntry(keyName);
+  };
+
   const fetchKeys = async (dsName: string) => {
     setSelectedDS(dsName);
     setActiveEntryData(null);
@@ -152,23 +159,6 @@ export default function DashboardAdminPage() {
     }
   };
 
-  const createNewKey = async () => {
-    const keyName = prompt("Enter new Key name:");
-    if (!keyName || !selectedDS) return;
-    
-    if (dsKeys.some(k => k.key === keyName)) {
-      return toast.error("Key already exists in this DataStore.");
-    }
-    
-    const initialData = settings?.schemas?.[selectedDS] || {};
-    const result = await callRobloxAPI('setEntry', { datastoreName: selectedDS, entryKey: keyName, value: initialData });
-    if (result) {
-      toast.success("New key created");
-      fetchKeys(selectedDS);
-      loadEntry(keyName);
-    }
-  };
-
   const handleUpdateSettings = async (updates: any) => {
     setIsSavingSettings(true);
     try {
@@ -193,6 +183,15 @@ export default function DashboardAdminPage() {
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-slate-200 flex flex-col lg:flex-row">
       <Toaster theme="dark" position="top-right" />
+
+      {/* Modal de Criação de Key */}
+      <CreateKeyForm 
+        datastoreName={selectedDS}
+        onKeyCreated={handleKeyCreated}
+        callRobloxAPI={callRobloxAPI}
+        isOpen={isCreateModalOpen}
+        setIsOpen={setIsCreateModalOpen}
+      />
 
       {/* Sidebar Navigation */}
       <aside className="w-full lg:w-64 bg-[#111] border-r border-white/5 flex flex-col shrink-0">
@@ -317,7 +316,7 @@ export default function DashboardAdminPage() {
                     <div className="bg-[#111] border border-white/5 rounded-lg p-6">
                       <h3 className="text-sm font-bold text-white mb-4">Quick Actions</h3>
                       <div className="space-y-2">
-                        <button onClick={() => setActiveTab('datastores')} className="w-full py-3 bg-white text-black rounded-md text-xs font-bold hover:bg-slate-200 transition-colors flex items-center justify-center gap-2"><Plus size={14} /> New Entry</button>
+                        <button onClick={() => selectedDS ? setIsCreateModalOpen(true) : toast.error("Please select a DataStore first.")} className="w-full py-3 bg-white text-black rounded-md text-xs font-bold hover:bg-slate-200 transition-colors flex items-center justify-center gap-2"><Plus size={14} /> New Entry</button>
                         <button onClick={fetchGameDetails} className="w-full py-3 bg-white/5 border border-white/10 text-white rounded-md text-xs font-bold hover:bg-white/10 transition-colors">Force Sync API</button>
                       </div>
                     </div>
@@ -337,7 +336,7 @@ export default function DashboardAdminPage() {
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="h-full flex flex-col space-y-6">
                 <div className="flex items-center justify-between mb-2">
                   <h2 className="text-2xl font-bold text-white">Cloud Data Explorer</h2>
-                  <button onClick={createNewKey} className="px-4 py-2 bg-blue-600 text-white rounded-md text-xs font-bold flex items-center gap-2 hover:bg-blue-500 transition-colors"><Plus size={14} /> Create Key</button>
+                  <button onClick={() => selectedDS ? setIsCreateModalOpen(true) : toast.error("Please select a DataStore first.")} className="px-4 py-2 bg-blue-600 text-white rounded-md text-xs font-bold flex items-center gap-2 hover:bg-blue-500 transition-colors"><Plus size={14} /> Create Key</button>
                 </div>
                 
                 <div className="flex flex-col lg:flex-row gap-6 h-full min-h-[600px]">
