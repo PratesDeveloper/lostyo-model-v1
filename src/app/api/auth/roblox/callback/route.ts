@@ -36,11 +36,19 @@ export async function GET(req: Request) {
 
     if (error) throw error;
 
-    // 5. Redirecionar para a página inicial (não mais para o dashboard)
+    // 5. Redirecionar para a página inicial
     const response = NextResponse.redirect(new URL('/', req.url));
     
     // Cookie de segurança para identificar que o usuário está logado
     response.cookies.set('lostyo_roblox_logged', 'true', { 
+      path: '/', 
+      httpOnly: true, 
+      secure: true, 
+      sameSite: 'lax' 
+    });
+    
+    // NOVO: Salvar o roblox_id no cookie para que a Navbar possa buscar o perfil
+    response.cookies.set('lostyo_roblox_id', userInfo.sub, { 
       path: '/', 
       httpOnly: true, 
       secure: true, 

@@ -20,24 +20,28 @@ export const Navbar = () => {
   useEffect(() => {
     const checkLogin = async () => {
       const loggedCookie = Cookies.get('lostyo_roblox_logged');
-      if (loggedCookie === 'true') {
+      const robloxId = Cookies.get('lostyo_roblox_id');
+
+      if (loggedCookie === 'true' && robloxId) {
         setIsLogged(true);
         
-        // Buscar o perfil mais recente (que é o que acabou de logar)
+        // Buscar o perfil usando o roblox_id salvo no cookie
         const { data } = await supabase
           .from('profiles')
           .select('*')
-          .order('updated_at', { ascending: false })
-          .limit(1)
+          .eq('roblox_id', robloxId)
           .single();
         
         if (data) {
           setProfile(data);
         } else {
-          // Se o cookie estiver lá, mas o perfil não for encontrado, desloga
+          // Se o perfil não for encontrado, limpar cookies
           Cookies.remove('lostyo_roblox_logged');
+          Cookies.remove('lostyo_roblox_id');
           setIsLogged(false);
         }
+      } else {
+        setIsLogged(false);
       }
     };
     checkLogin();
@@ -45,6 +49,7 @@ export const Navbar = () => {
 
   const handleLogout = () => {
     Cookies.remove('lostyo_roblox_logged');
+    Cookies.remove('lostyo_roblox_id'); // Remover o ID também
     window.location.href = '/';
   };
   
