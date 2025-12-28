@@ -32,7 +32,6 @@ export default function DashboardAdminPage() {
 
   const router = useRouter();
 
-  // Função centralizada para chamadas via Bridge/Proxy
   const callRobloxAPI = async (action: string, params: any = {}) => {
     setIsSyncing(true);
     try {
@@ -77,7 +76,6 @@ export default function DashboardAdminPage() {
 
   useEffect(() => { loadBaseData(); }, []);
 
-  // AGORA USANDO O PROXY INTERNO PARA EVITAR CORS
   const fetchGameDetails = async () => {
     if (!selectedProject?.id) return;
     setIsSyncing(true);
@@ -86,6 +84,8 @@ export default function DashboardAdminPage() {
       const data = await response.json();
       if (data.data && data.data.length > 0) {
         setGameDetails(data.data[0]);
+      } else {
+        setGameDetails(null);
       }
     } catch (err) {
       console.error("[Dashboard] Error fetching game details via proxy", err);
@@ -267,14 +267,12 @@ export default function DashboardAdminPage() {
                       <button onClick={() => window.open(`https://www.roblox.com/games/${selectedProject.roblox_place_id}`, '_blank')} className="w-full md:w-auto h-14 px-8 bg-white text-black rounded-2xl font-black uppercase text-[10px] flex items-center justify-center gap-3 hover:scale-105 transition-all shadow-xl shadow-white/5">Launch Production <ExternalLink size={16} /></button>
                    </div>
 
-                   {gameDetails ? (
-                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                        <div className="p-8 bg-white/[0.03] border border-white/5 rounded-[2.5rem]"><Eye className="text-blue-500 mb-6" size={24} /><div className="text-[10px] font-black text-white/20 uppercase mb-1">Total Visits</div><div className="text-3xl font-black text-white tracking-tight">{gameDetails.visits.toLocaleString()}</div></div>
-                        <div className="p-8 bg-white/[0.03] border border-white/5 rounded-[2.5rem]"><ThumbsUp className="text-emerald-500 mb-6" size={24} /><div className="text-[10px] font-black text-white/20 uppercase mb-1">Likes</div><div className="text-3xl font-black text-white tracking-tight">{gameDetails.votesUp.toLocaleString()}</div></div>
-                        <div className="p-8 bg-white/[0.03] border border-white/5 rounded-[2.5rem]"><Star className="text-yellow-500 mb-6" size={24} /><div className="text-[10px] font-black text-white/20 uppercase mb-1">Favorites</div><div className="text-3xl font-black text-white tracking-tight">{gameDetails.favoritesCount.toLocaleString()}</div></div>
-                        <div className="p-8 bg-white/[0.03] border border-white/5 rounded-[2.5rem]"><Clock className="text-purple-500 mb-6" size={24} /><div className="text-[10px] font-black text-white/20 uppercase mb-1">Created</div><div className="text-2xl font-black text-white tracking-tight">{new Date(gameDetails.created).toLocaleDateString()}</div></div>
-                     </div>
-                   ) : <div className="p-16 border-2 border-dashed border-white/5 rounded-[3rem] text-center opacity-30"><Loader2 className="animate-spin mx-auto mb-4" /> <span className="text-[10px] font-black uppercase tracking-[0.2em]">Interrogating Universe...</span></div>}
+                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                      <div className="p-8 bg-white/[0.03] border border-white/5 rounded-[2.5rem]"><Eye className="text-blue-500 mb-6" size={24} /><div className="text-[10px] font-black text-white/20 uppercase mb-1">Total Visits</div><div className="text-3xl font-black text-white tracking-tight">{(gameDetails?.visits || 0).toLocaleString()}</div></div>
+                      <div className="p-8 bg-white/[0.03] border border-white/5 rounded-[2.5rem]"><ThumbsUp className="text-emerald-500 mb-6" size={24} /><div className="text-[10px] font-black text-white/20 uppercase mb-1">Likes</div><div className="text-3xl font-black text-white tracking-tight">{(gameDetails?.votesUp || 0).toLocaleString()}</div></div>
+                      <div className="p-8 bg-white/[0.03] border border-white/5 rounded-[2.5rem]"><Star className="text-yellow-500 mb-6" size={24} /><div className="text-[10px] font-black text-white/20 uppercase mb-1">Favorites</div><div className="text-3xl font-black text-white tracking-tight">{(gameDetails?.favoritesCount || 0).toLocaleString()}</div></div>
+                      <div className="p-8 bg-white/[0.03] border border-white/5 rounded-[2.5rem]"><Clock className="text-purple-500 mb-6" size={24} /><div className="text-[10px] font-black text-white/20 uppercase mb-1">Created</div><div className="text-2xl font-black text-white tracking-tight">{gameDetails?.created ? new Date(gameDetails.created).toLocaleDateString() : '---'}</div></div>
+                   </div>
 
                    <div className="p-12 bg-white/[0.01] border border-white/5 rounded-[3rem] relative overflow-hidden group">
                       <div className="absolute top-0 right-0 p-10 opacity-5 group-hover:opacity-10 transition-opacity"><ShieldCheck size={160} /></div>
