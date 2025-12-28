@@ -1,5 +1,5 @@
 "use client";
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { 
   LayoutDashboard, 
@@ -12,55 +12,67 @@ import {
   Bell,
   Search,
   ExternalLink,
-  ShieldCheck
+  ShieldCheck,
+  User as UserIcon,
+  LogOut
 } from 'lucide-react';
-import { 
-  AreaChart, 
-  Area, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  ResponsiveContainer 
-} from 'recharts';
-
-const data = [
-  { name: 'Mon', players: 4000 },
-  { name: 'Tue', players: 3000 },
-  { name: 'Wed', players: 2000 },
-  { name: 'Thu', players: 2780 },
-  { name: 'Fri', players: 1890 },
-  { name: 'Sat', players: 2390 },
-  { name: 'Sun', players: 3490 },
-];
-
-const StatCard = ({ icon: Icon, label, value, trend, index }: any) => (
-  <motion.div
-    initial={{ opacity: 0, y: 20 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ delay: index * 0.1 }}
-    className="glass p-8 rounded-[2.5rem] border border-white/5"
-  >
-    <div className="flex justify-between items-start mb-6">
-      <div className="w-12 h-12 rounded-2xl bg-blue-600/10 flex items-center justify-center text-blue-500">
-        <Icon size={24} />
-      </div>
-      <span className="text-[10px] font-black text-emerald-400 bg-emerald-400/10 px-2 py-1 rounded-full">
-        {trend}
-      </span>
-    </div>
-    <div className="text-[10px] font-black uppercase tracking-[0.2em] text-white/20 mb-1">{label}</div>
-    <div className="text-3xl font-black text-white tracking-tighter">{value}</div>
-  </motion.div>
-);
+import { supabase } from '@/integrations/supabase/client';
+import Cookies from 'js-cookie';
+import Link from 'next/link';
 
 export default function DashboardPage() {
+  const [profile, setProfile] = useState<any>(null);
+  const [projects, setProjects] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      // 1. Buscar perfil do usuário logado (baseado na última atualização do Roblox para simplicidade)
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('*')
+        .order('updated_at', { ascending: false })
+        .limit(1)
+        .single();
+      
+      if (profileData) {
+        setProfile(profileData);
+        
+        // 2. Buscar projetos reais deste usuário
+        const { data: projectsData } = await supabase
+          .from('projects')
+          .select('*')
+          .eq('owner_id', profileData.roblox_id);
+        
+        if (projectsData) setProjects(projectsData);
+      }
+      setIsLoading(false);
+    };
+
+    fetchDashboardData();
+  }, []);
+
+  const handleLogout = () => {
+    Cookies.remove('lostyo_roblox_logged');
+    window.location.href = '/';
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-[#030303] flex items-center justify-center">
+        <Activity className="animate-spin text-blue-500" size={48} />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#030303] text-white flex">
       {/* Sidebar */}
       <aside className="w-20 lg:w-72 border-r border-white/5 flex flex-col p-6 hidden md:flex">
         <div className="flex items-center gap-4 mb-12 lg:px-4">
-          <img src="https://cdn.lostyo.com/logo.png" className="w-8 h-8" alt="Logo" />
+          <Link href="/">
+            <img src="https://cdn.lostyo.com/logo.png" className="w-8 h-8 cursor-pointer" alt="Logo" />
+          </Link>
           <span className="font-black tracking-tighter text-xl hidden lg:block">Lostyo</span>
         </div>
 
@@ -84,13 +96,10 @@ export default function DashboardPage() {
             <Settings size={20} />
             <span className="text-xs font-bold uppercase tracking-widest hidden lg:block">Settings</span>
           </button>
-          <div className="flex items-center gap-4 p-4 mt-4 lg:bg-white/5 rounded-3xl">
-            <div className="w-10 h-10 rounded-full bg-blue-600 flex-shrink-0" />
-            <div className="hidden lg:block overflow-hidden">
-              <div className="text-[10px] font-black truncate">Lostyo_Admin</div>
-              <div className="text-[8px] font-bold text-white/20 uppercase tracking-widest">Premium Partner</div>
-            </div>
-          </div>
+          <button onClick={handleLogout} className="w-full flex items-center gap-4 p-4 rounded-2xl text-red-500/60 hover:bg-red-500/5 hover:text-red-500 transition-all">
+            <LogOut size={20} />
+            <span className="text-xs font-bold uppercase tracking-widest hidden lg:block">Sign Out</span>
+          </button>
         </div>
       </aside>
 
@@ -98,74 +107,89 @@ export default function DashboardPage() {
       <main className="flex-grow p-6 lg:p-12 max-h-screen overflow-y-auto">
         <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 mb-12">
           <div>
-            <h1 className="text-3xl lg:text-5xl font-black tracking-tighter mb-2">Studio Overview.</h1>
-            <p className="text-white/30 text-sm font-medium">Real-time performance across your metaverse assets.</p>
+            <h1 className="text-3xl lg:text-5xl font-black tracking-tighter mb-2">Welcome, {profile?.roblox_display_name}.</h1>
+            <p className="text-white/30 text-sm font-medium">Managing your digital ecosystem from the studio.</p>
           </div>
           
           <div className="flex items-center gap-4 w-full sm:w-auto">
-            <div className="relative flex-grow sm:flex-grow-0">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20" size={16} />
-              <input 
-                placeholder="Search..." 
-                className="bg-white/5 border-none h-12 rounded-full pl-12 pr-6 text-xs font-bold text-white focus:ring-1 ring-blue-500 w-full sm:w-64 transition-all"
-              />
+            <div className="h-12 px-6 bg-white/5 rounded-full flex items-center gap-3 border border-white/5">
+              <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="text-[10px] font-black uppercase tracking-widest text-white/40">Studio Verified</span>
             </div>
-            <button className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center text-white/40 hover:text-white transition-colors">
-              <Bell size={20} />
-            </button>
             <button className="h-12 px-6 bg-white text-black rounded-full text-[10px] font-black uppercase tracking-[0.2em] flex items-center gap-2 hover:scale-105 transition-transform whitespace-nowrap">
               <Plus size={16} /> New Project
             </button>
           </div>
         </header>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
-          {/* Main Chart Column */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Projects Column */}
           <div className="lg:col-span-2 space-y-8">
-            <div className="glass rounded-[3rem] p-10 border border-white/5">
-              <div className="flex justify-between items-center mb-10">
-                <h3 className="text-xl font-black tracking-tighter">Engagement Growth</h3>
-                <select className="bg-white/5 border-none text-[10px] font-black uppercase px-4 py-2 rounded-full outline-none">
-                  <option>Last 7 Days</option>
-                  <option>Last 30 Days</option>
-                </select>
-              </div>
-              <div className="h-[300px] w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={data}>
-                    <defs>
-                      <linearGradient id="colorPlayers" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
-                        <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
-                    <XAxis 
-                      dataKey="name" 
-                      axisLine={false} 
-                      tickLine={false} 
-                      tick={{ fill: 'rgba(255,255,255,0.2)', fontSize: 10, fontWeight: 700 }} 
-                    />
-                    <YAxis hide />
-                    <Tooltip 
-                      contentStyle={{ backgroundColor: '#111', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '1rem' }}
-                      itemStyle={{ color: '#fff', fontSize: '10px', fontWeight: 900, textTransform: 'uppercase' }}
-                    />
-                    <Area type="monotone" dataKey="players" stroke="#3b82f6" strokeWidth={3} fillOpacity={1} fill="url(#colorPlayers)" />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-
-            {/* Stats Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              <StatCard icon={Users} label="Total Players" value="1.2M" trend="+12.5%" index={0} />
-              <StatCard icon={Activity} label="Active Now" value="42,109" trend="+3.2%" index={1} />
+            <div className="glass rounded-[3rem] p-10 border border-white/5 relative overflow-hidden">
+               <div className="relative z-10">
+                  <h3 className="text-xl font-black tracking-tighter mb-8 flex items-center gap-3">
+                    <Gamepad2 className="text-blue-500" /> Your Experiences
+                  </h3>
+                  
+                  {projects.length === 0 ? (
+                    <div className="py-20 text-center border-2 border-dashed border-white/5 rounded-[2rem]">
+                       <Gamepad2 size={48} className="text-white/5 mx-auto mb-4" />
+                       <p className="text-white/20 text-sm font-medium mb-6">No projects synchronized yet.</p>
+                       <button className="h-10 px-6 bg-white/5 hover:bg-white/10 text-white rounded-full text-[9px] font-black uppercase tracking-widest transition-all">
+                          Link Experience
+                       </button>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                       {projects.map((project, i) => (
+                         <div key={i} className="p-6 bg-white/5 rounded-3xl flex justify-between items-center border border-white/5">
+                            <div className="flex items-center gap-4">
+                               <div className="w-12 h-12 bg-blue-600/10 rounded-2xl flex items-center justify-center text-blue-500">
+                                  <Gamepad2 size={24} />
+                               </div>
+                               <div>
+                                  <div className="text-sm font-black uppercase">{project.name}</div>
+                                  <div className="text-[10px] font-bold text-white/20 uppercase tracking-widest">{project.category}</div>
+                               </div>
+                            </div>
+                            <div className="text-right">
+                               <div className="text-xs font-black">{project.players_count} Players</div>
+                               <div className="text-[9px] font-bold text-emerald-400 uppercase tracking-widest">{project.status}</div>
+                            </div>
+                         </div>
+                       ))}
+                    </div>
+                  )}
+               </div>
             </div>
           </div>
 
-          {/* Right Column: Group & Projects */}
+          {/* Right Column: Group & Profile */}
           <div className="space-y-8">
+             {/* Profile Card */}
+             <div className="glass rounded-[3rem] p-10 border border-white/5 text-center">
+                <div className="w-24 h-24 rounded-full border-4 border-blue-600/20 p-1 mx-auto mb-6">
+                   <img 
+                    src={profile?.avatar_url} 
+                    className="w-full h-full rounded-full object-cover" 
+                    alt="Profile" 
+                   />
+                </div>
+                <h4 className="text-xl font-black tracking-tighter mb-1">{profile?.roblox_display_name}</h4>
+                <p className="text-white/20 text-[10px] font-bold uppercase tracking-[0.3em] mb-8">@{profile?.roblox_username}</p>
+                
+                <div className="grid grid-cols-2 gap-4">
+                   <div className="p-4 bg-white/5 rounded-2xl border border-white/5">
+                      <div className="text-[9px] font-black text-white/20 uppercase tracking-widest mb-1">Total Bits</div>
+                      <div className="text-sm font-black">1.2M</div>
+                   </div>
+                   <div className="p-4 bg-white/5 rounded-2xl border border-white/5">
+                      <div className="text-[9px] font-black text-white/20 uppercase tracking-widest mb-1">Rank</div>
+                      <div className="text-sm font-black text-blue-500">Whale</div>
+                   </div>
+                </div>
+             </div>
+
             {/* Group Status Card */}
             <div className="bg-gradient-to-br from-blue-600/20 to-indigo-900/20 rounded-[3rem] p-10 border border-blue-500/20 relative overflow-hidden group">
                <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:scale-110 transition-transform">
@@ -189,33 +213,6 @@ export default function DashboardPage() {
                     Enter Group <ExternalLink size={14} />
                   </button>
                </div>
-            </div>
-
-            {/* Project List */}
-            <div className="glass rounded-[3rem] p-10 border border-white/5">
-              <h3 className="text-xl font-black tracking-tighter mb-8">Active Projects</h3>
-              <div className="space-y-6">
-                {[
-                  { name: "Neon Drift", status: "Stable", players: "12k" },
-                  { name: "Shadow Protocol", status: "Testing", players: "4.5k" },
-                ].map((project, i) => (
-                  <div key={i} className="flex items-center justify-between group cursor-pointer">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center text-white/20 group-hover:bg-blue-600/10 group-hover:text-blue-500 transition-all">
-                        <Gamepad2 size={20} />
-                      </div>
-                      <div>
-                        <div className="text-xs font-black uppercase tracking-widest mb-1">{project.name}</div>
-                        <div className="text-[9px] font-bold text-white/20 uppercase tracking-widest">{project.status}</div>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-[10px] font-black">{project.players}</div>
-                      <div className="text-[8px] font-bold text-emerald-400">Live</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
             </div>
           </div>
         </div>
