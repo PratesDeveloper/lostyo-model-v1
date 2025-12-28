@@ -15,8 +15,8 @@ export const robloxLib = {
       redirect_uri: process.env.ROBLOX_REDIRECT_URI!,
       scope: "openid profile group:read group:write", 
       response_type: "code",
-      // Mudança crucial: 'consent' força a exibição da tela de permissões
-      prompt: "consent" 
+      // Combinando prompts para satisfazer os requisitos da API do Roblox
+      prompt: "select_account consent" 
     });
     return `${ROBLOX_AUTH_URL}?${params.toString()}`;
   },
