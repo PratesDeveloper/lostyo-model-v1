@@ -73,21 +73,14 @@ export const Navbar = () => {
                 </div>
 
                 <DropdownMenuItem asChild>
-                  <Link href="/dashboard" className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 cursor-pointer transition-colors">
+                  <Link href={isDeveloper ? "/dashboard-admin" : "/"} className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 cursor-pointer transition-colors">
                     <LayoutDashboard size={16} className="text-blue-500" />
-                    <span className="font-bold text-xs uppercase tracking-widest">User Panel</span>
+                    <span className="font-bold text-xs uppercase tracking-widest">
+                      {isDeveloper ? "Admin Panel" : "Dashboard"}
+                    </span>
                   </Link>
                 </DropdownMenuItem>
                 
-                {isDeveloper && (
-                  <DropdownMenuItem asChild>
-                    <Link href="/dashboard-admin" className="flex items-center gap-3 p-3 rounded-xl hover:bg-red-500/10 cursor-pointer text-red-400 mt-1 transition-colors">
-                      <Shield size={16} />
-                      <span className="font-bold text-xs uppercase tracking-widest">Admin Core</span>
-                    </Link>
-                  </DropdownMenuItem>
-                )}
-
                 <DropdownMenuSeparator className="bg-white/5 mx-2 my-2" />
                 <DropdownMenuItem onClick={handleLogout} className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 text-white/40 hover:text-red-500 cursor-pointer transition-colors">
                   <LogOut size={16} />
