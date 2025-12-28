@@ -6,7 +6,7 @@ import {
   ShieldCheck, Loader2, Gamepad2, Database, 
   Zap, Lock, Power, RefreshCcw, LayoutGrid,
   Search, Save, Trash2, ExternalLink, Braces,
-  Settings // Importação adicionada
+  Settings
 } from 'lucide-react';
 import Cookies from 'js-cookie';
 import Link from 'next/link';
@@ -32,24 +32,26 @@ export default function DashboardAdminPage() {
 
   const loadBaseData = async () => {
     const robloxId = Cookies.get('lostyo_roblox_id');
-    const logged = Cookies.get('lostyo_roblox_logged');
 
-    if (!robloxId || logged !== 'true') {
-      router.replace('/login');
-      return;
+    // MODO TESTE: Busca perfil real se houver cookie, senão usa mock
+    let profileData = null;
+    if (robloxId) {
+        profileData = await getProfileByRobloxId(robloxId);
     }
 
-    const profileData = await getProfileByRobloxId(robloxId);
-    if (profileData && profileData.is_developer) {
-      setProfile(profileData);
-      const projectsData = await getAllProjects();
-      setProjects(projectsData);
-      if (projectsData.length > 0 && !selectedProject) {
-        setSelectedProject(projectsData[0]);
-      }
-    } else {
-      router.replace('/');
+    setProfile(profileData || {
+      roblox_display_name: "Test Admin",
+      avatar_url: "https://cdn.lostyo.com/logo.png",
+      is_developer: true
+    });
+
+    const projectsData = await getAllProjects();
+    setProjects(projectsData);
+    
+    if (projectsData.length > 0 && !selectedProject) {
+      setSelectedProject(projectsData[0]);
     }
+    
     setIsLoading(false);
   };
 
@@ -136,7 +138,9 @@ export default function DashboardAdminPage() {
 
         <div className="mt-auto p-8 bg-black/20 border-t border-white/5">
           <div className="flex items-center gap-4 mb-6">
-            <div className="w-12 h-12 rounded-2xl border border-white/10 overflow-hidden"><img src={profile?.avatar_url} className="w-full h-full object-cover" /></div>
+            <div className="w-12 h-12 rounded-2xl border border-white/10 overflow-hidden bg-blue-600/10">
+              <img src={profile?.avatar_url} className="w-full h-full object-cover" />
+            </div>
             <div className="flex flex-col">
               <span className="text-[11px] font-black uppercase truncate">{profile?.roblox_display_name}</span>
               <span className="text-[8px] font-bold text-blue-500 uppercase tracking-widest">System Admin</span>

@@ -4,18 +4,10 @@ import { cookies } from 'next/headers';
 
 /**
  * API Bridge
- * Valida a autorização do administrador e executa a ação solicitada.
+ * MODO TESTE: Permite acesso sem validação rigorosa de cookie por enquanto.
  */
 export async function POST(req: Request) {
   try {
-    const cookieStore = await cookies();
-    const isLogged = cookieStore.get('lostyo_roblox_logged')?.value === 'true';
-    
-    // Verificação de segurança primária
-    if (!isLogged) {
-      return NextResponse.json({ error: "Unauthorized Access" }, { status: 401 });
-    }
-
     const body = await req.json();
     const { action, universeId, datastoreName, entryKey, value } = body;
 
