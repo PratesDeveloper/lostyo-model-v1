@@ -15,7 +15,8 @@ import {
   ShieldCheck,
   User as UserIcon,
   LogOut,
-  Code
+  Code,
+  Wrench
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import Cookies from 'js-cookie';
@@ -67,7 +68,12 @@ export default function DashboardPage() {
 
   useEffect(() => {
     const fetchDashboardData = async () => {
-      // 1. Buscar perfil do usuário logado (baseado na última atualização do Roblox para simplicidade)
+      const loggedCookie = Cookies.get('lostyo_roblox_logged');
+      if (!loggedCookie) {
+        window.location.href = '/login';
+        return;
+      }
+
       const { data: profileData } = await supabase
         .from('profiles')
         .select('*')
@@ -78,7 +84,6 @@ export default function DashboardPage() {
       if (profileData) {
         setProfile(profileData);
         
-        // 2. Buscar projetos reais deste usuário
         const { data: projectsData } = await supabase
           .from('projects')
           .select('*')
@@ -125,12 +130,12 @@ export default function DashboardPage() {
             { icon: Users, label: "Community" },
             { icon: Activity, label: "Analytics" },
             { icon: CircleDollarSign, label: "Monetization" },
-            ...(isDeveloper ? [{ icon: Code, label: "Dev Tools" }] : []), // Opção de Dev Tools
+            ...(isDeveloper ? [{ icon: Code, label: "Dev Tools", link: "/dashboard-admin" }] : []), // Link para Admin
           ].map((item, i) => (
-            <button key={i} className={`w-full flex items-center gap-4 p-4 rounded-2xl transition-all ${item.active ? 'bg-blue-600 text-white shadow-xl shadow-blue-600/20' : 'text-white/30 hover:bg-white/5'}`}>
+            <Link key={i} href={item.link || '#'} className={`w-full flex items-center gap-4 p-4 rounded-2xl transition-all ${item.active ? 'bg-blue-600 text-white shadow-xl shadow-blue-600/20' : 'text-white/30 hover:bg-white/5'}`}>
               <item.icon size={20} />
               <span className="text-xs font-bold uppercase tracking-widest hidden lg:block">{item.label}</span>
-            </button>
+            </Link>
           ))}
         </nav>
 
@@ -167,103 +172,26 @@ export default function DashboardPage() {
           </div>
         </header>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
-          {/* Main Chart Column */}
-          <div className="lg:col-span-2 space-y-8">
-            <div className="glass rounded-[3rem] p-10 border border-white/5">
-              <div className="flex justify-between items-center mb-10">
-                <h3 className="text-xl font-black tracking-tighter">Engagement Growth</h3>
-                <select className="bg-white/5 border-none text-[10px] font-black uppercase px-4 py-2 rounded-full outline-none">
-                  <option>Last 7 Days</option>
-                  <option>Last 30 Days</option>
-                </select>
-              </div>
-              <div className="h-[300px] w-full">
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={data}>
-                    <defs>
-                      <linearGradient id="colorPlayers" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
-                        <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
-                    <XAxis 
-                      dataKey="name" 
-                      axisLine={false} 
-                      tickLine={false} 
-                      tick={{ fill: 'rgba(255,255,255,0.2)', fontSize: 10, fontWeight: 700 }} 
-                    />
-                    <YAxis hide />
-                    <Tooltip 
-                      contentStyle={{ backgroundColor: '#111', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '1rem' }}
-                      itemStyle={{ color: '#fff', fontSize: '10px', fontWeight: 900, textTransform: 'uppercase' }}
-                    />
-                    <Area type="monotone" dataKey="players" stroke="#3b82f6" strokeWidth={3} fillOpacity={1} fill="url(#colorPlayers)" />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-
-            {/* Stats Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              <StatCard icon={Users} label="Total Players" value="1.2M" trend="+12.5%" index={0} />
-              <StatCard icon={Activity} label="Active Now" value="42,109" trend="+3.2%" index={1} />
-            </div>
-          </div>
-
-          {/* Right Column: Group & Profile */}
-          <div className="space-y-8">
-             {/* Profile Card */}
-             <div className="glass rounded-[3rem] p-10 border border-white/5 text-center">
-                <div className="w-24 h-24 rounded-full border-4 border-blue-600/20 p-1 mx-auto mb-6">
-                   <img 
-                    src={profile?.avatar_url} 
-                    className="w-full h-full rounded-full object-cover" 
-                    alt="Profile" 
-                   />
-                </div>
-                <h4 className="text-xl font-black tracking-tighter mb-1">{profile?.roblox_display_name}</h4>
-                <p className="text-white/20 text-[10px] font-bold uppercase tracking-[0.3em] mb-8">@{profile?.roblox_username}</p>
-                
-                <div className="grid grid-cols-2 gap-4">
-                   <div className="p-4 bg-white/5 rounded-2xl border border-white/5">
-                      <div className="text-[9px] font-black text-white/20 uppercase tracking-widest mb-1">Total Bits</div>
-                      <div className="text-sm font-black">1.2M</div>
-                   </div>
-                   <div className="p-4 bg-white/5 rounded-2xl border border-white/5">
-                      <div className="text-[9px] font-black text-white/20 uppercase tracking-widest mb-1">Rank</div>
-                      <div className="text-sm font-black text-blue-500">{isDeveloper ? 'Studio Lead' : 'Whale'}</div>
-                   </div>
-                </div>
-             </div>
-
-            {/* Group Status Card */}
-            <div className="bg-gradient-to-br from-blue-600/20 to-indigo-900/20 rounded-[3rem] p-10 border border-blue-500/20 relative overflow-hidden group">
-               <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:scale-110 transition-transform">
-                  <ShieldCheck size={120} />
-               </div>
-               <div className="relative z-10">
-                  <div className="flex items-center gap-3 mb-6">
-                     <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center">
-                        <Users size={20} className="text-white" />
-                     </div>
-                     <h3 className="text-xs font-black uppercase tracking-widest text-white">Lostyo Group</h3>
-                  </div>
-                  <h4 className="text-xl font-black tracking-tighter mb-2">Join our Community</h4>
-                  <p className="text-white/40 text-xs font-medium mb-8 leading-relaxed">
-                     Get exclusive developer access and early testing for new metaverse assets.
-                  </p>
-                  <button 
-                    onClick={() => window.open('https://www.roblox.com/share/g/122525496', '_blank')}
-                    className="w-full h-14 bg-white text-black rounded-2xl text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-[0.98] transition-all"
-                  >
-                    Enter Group <ExternalLink size={14} />
-                  </button>
-               </div>
-            </div>
-          </div>
-        </div>
+        {/* Conteúdo em Manutenção */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="glass rounded-[3rem] p-10 md:p-20 text-center border border-white/5 mt-10"
+        >
+          <Wrench size={64} className="text-blue-500 mx-auto mb-8" />
+          <h2 className="text-3xl font-black text-white tracking-tighter mb-4">Analytics Under Maintenance</h2>
+          <p className="text-white/40 max-w-xl mx-auto mb-10">
+            We are currently upgrading our real-time analytics engine. Please check back soon for detailed performance metrics.
+          </p>
+          
+          {isDeveloper && (
+            <Link href="/dashboard-admin">
+              <button className="h-12 px-8 bg-red-600 hover:bg-red-700 text-white rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-2 mx-auto">
+                Access Admin Tools <ArrowRight size={14} />
+              </button>
+            </Link>
+          )}
+        </motion.div>
       </main>
     </div>
   );

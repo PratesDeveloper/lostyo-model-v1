@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { supabase } from '@/integrations/supabase/client';
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { User, LogOut, LayoutDashboard } from 'lucide-react';
+import { User, LogOut, LayoutDashboard, Code } from 'lucide-react';
 import { 
   DropdownMenu, 
   DropdownMenuContent, 
@@ -23,7 +23,6 @@ export const Navbar = () => {
       if (loggedCookie === 'true') {
         setIsLogged(true);
         
-        // Tenta buscar o perfil mais recente (que é o que acabou de logar)
         const { data } = await supabase
           .from('profiles')
           .select('*')
@@ -34,7 +33,6 @@ export const Navbar = () => {
         if (data) {
           setProfile(data);
         } else {
-          // Se o cookie estiver lá, mas o perfil não for encontrado, desloga
           Cookies.remove('lostyo_roblox_logged');
           setIsLogged(false);
         }
@@ -47,6 +45,8 @@ export const Navbar = () => {
     Cookies.remove('lostyo_roblox_logged');
     window.location.href = '/';
   };
+  
+  const isDeveloper = profile?.is_developer ?? false;
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 flex justify-center py-6 px-4">
@@ -84,9 +84,22 @@ export const Navbar = () => {
                 <DropdownMenuItem asChild>
                   <Link href="/dashboard" className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/5 cursor-pointer">
                     <LayoutDashboard size={18} className="text-blue-500" />
-                    <span className="font-bold text-xs uppercase tracking-widest">Dashboard</span>
+                    <span className="font-bold text-xs uppercase tracking-widest">User Dashboard</span>
                   </Link>
                 </DropdownMenuItem>
+                
+                {isDeveloper && (
+                  <>
+                    <DropdownMenuSeparator className="bg-white/5 mx-2" />
+                    <DropdownMenuItem asChild>
+                      <Link href="/dashboard-admin" className="flex items-center gap-3 p-3 rounded-xl hover:bg-red-500/10 cursor-pointer text-red-400">
+                        <Code size={18} />
+                        <span className="font-bold text-xs uppercase tracking-widest">Admin Tools</span>
+                      </Link>
+                    </DropdownMenuItem>
+                  </>
+                )}
+
                 <DropdownMenuSeparator className="bg-white/5 mx-2" />
                 <DropdownMenuItem onClick={handleLogout} className="flex items-center gap-3 p-3 rounded-xl hover:bg-red-500/10 text-red-400 cursor-pointer">
                   <LogOut size={18} />
