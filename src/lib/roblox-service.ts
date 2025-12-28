@@ -23,6 +23,10 @@ export const robloxService = {
         const errorText = await response.text();
         return { error: `Roblox API Error: ${response.status}`, details: errorText, success: false };
       }
+      
+      // Para métodos que não retornam JSON (como DELETE)
+      if (response.status === 204 || method === "DELETE") return { success: true };
+      
       const data = await response.json();
       return { data, success: true };
     } catch (err: any) {
@@ -34,12 +38,8 @@ export const robloxService = {
     const url = `${ROBLOX_GAMES_API}/v2/users/${userId}/games?accessFilter=Public&limit=50&sortOrder=Desc`;
     try {
       const response = await fetch(url);
-      if (!response.ok) throw new Error(`Roblox API returned ${response.status}`);
-      
       const data = await response.json();
       const games = data.data || [];
-      
-      // Mapeamento seguro com fallback para evitar erros de undefined
       const universes = games.map((game: any) => ({
         id: (game.id || "").toString(),
         name: game.name || "Unknown Experience",
@@ -47,27 +47,20 @@ export const robloxService = {
         players_count: 0,
         status: "Live",
         roblox_place_id: (game.rootPlaceId || "").toString()
-      })).filter((u: any) => u.id !== ""); // Filtra jogos inválidos sem ID
-      
+      })).filter((u: any) => u.id !== "");
       return { data: { universes }, success: true };
     } catch (err: any) {
-      console.error("[robloxService] listUserUniverses error:", err.message);
       return { error: "Failed to fetch games", details: err.message, success: false };
     }
   },
 
   async getUniverseDetails(universeId: string) {
-    if (!universeId) return { error: "Missing universe ID", success: false };
-    
     const url = `${ROBLOX_GAMES_API}/v1/games?universeIds=${universeId}`;
     try {
       const response = await fetch(url);
-      if (!response.ok) throw new Error(`Roblox API returned ${response.status}`);
-      
       const data = await response.json();
       return { data: data.data?.[0] || null, success: true };
     } catch (err: any) {
-      console.error("[robloxService] getUniverseDetails error:", err.message);
       return { error: "Failed to fetch details", details: err.message, success: false };
     }
   },
@@ -93,6 +86,13 @@ export const robloxService = {
       `/datastores/v1/universes/${universeId}/standard-datastores/datastore/entries/entry?datastoreName=${datastoreName}&entryKey=${entryKey}`,
       "POST",
       value
+    );
+  },
+
+  async deleteEntry(universeId: string, datastoreName: string, entryKey: string) {
+    return this.fetchCloud(
+      `/datastores/v1/universes/${universeId}/standard-datastores/datastore/entries/entry?datastoreName=${datastoreName}&entryKey=${entryKey}`,
+      "DELETE"
     );
   }
 };

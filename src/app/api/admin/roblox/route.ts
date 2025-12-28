@@ -20,6 +20,7 @@ export async function POST(req: Request) {
       case 'listKeys': result = await robloxService.listDataStoreKeys(universeId, datastoreName); break;
       case 'getEntry': result = await robloxService.getEntry(universeId, datastoreName, entryKey); break;
       case 'setEntry': result = await robloxService.setEntry(universeId, datastoreName, entryKey, value); break;
+      case 'deleteEntry': result = await robloxService.deleteEntry(universeId, datastoreName, entryKey); break;
       default: return NextResponse.json({ error: "Invalid action" }, { status: 400 });
     }
 
