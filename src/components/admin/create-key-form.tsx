@@ -4,41 +4,14 @@ import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Plus, Save } from 'lucide-react';
+import { Save } from 'lucide-react';
 import { toast } from 'sonner';
 
-// Schema Zod baseado no JSON fornecido
-const defaultSchema = z.object({
-  UserId: z.number().int().positive().describe('Roblox User ID'),
-  Bits: z.number().int().min(0).default(10000000),
-  JoinDate: z.number().int().default(Math.floor(Date.now() / 1000)),
-  // Outros campos complexos serão inicializados como JSON vazio ou arrays
-  ActionHistory: z.array(z.object({
-    ActionType: z.string(),
-    Price: z.number(),
-    Symbol: z.string(),
-    Timestamp: z.number(),
-  })).default([]),
-  CreatedTokensList: z.array(z.any()).default([]),
-  Inventory: z.array(z.any()).default([]),
-  RedeemedCodes: z.array(z.any()).default([]),
-  Settings: z.object({
-    Notifications: z.boolean().default(true),
-    TradeConfirmation: z.boolean().default(true),
-  }).default({ Notifications: true, TradeConfirmation: true }),
-  Statistics: z.object({
-    HighestBalanceEver: z.number().default(10),
-    PlayTime: z.number().default(0),
-    TokensCreatedCount: z.number().default(0),
-    TotalTrades: z.number().default(0),
-    TotalVolumeTraded: z.number().default(0),
-  }).default({ HighestBalanceEver: 10, PlayTime: 0, TokensCreatedCount: 0, TotalTrades: 0, TotalVolumeTraded: 0 }),
-});
-
+// Schema Zod para validação do formulário de entrada
 const formSchema = z.object({
   keyName: z.string().min(3, { message: "Key name must be at least 3 characters." }),
   userId: z.string().regex(/^\d+$/, { message: "User ID must be a number." }),
@@ -50,9 +23,23 @@ interface CreateKeyFormProps {
   callRobloxAPI: (action: string, params: any) => Promise<any>;
   isOpen: boolean;
   setIsOpen: (open: boolean) => void;
+  initialSchema?: any; // Novo prop para o schema do Supabase
 }
 
-export const CreateKeyForm = ({ datastoreName, onKeyCreated, callRobloxAPI, isOpen, setIsOpen }: CreateKeyFormProps) => {
+// Schema padrão de fallback (se não houver nada no Supabase)
+const defaultFallbackSchema = {
+  ActionHistory: [],
+  Bits: 10000000,
+  JoinDate: 0,
+  CreatedTokensList: [],
+  Inventory: [],
+  RedeemedCodes: [],
+  Settings: { Notifications: true, TradeConfirmation: true },
+  Statistics: { HighestBalanceEver: 10, PlayTime: 0, TokensCreatedCount: 0, TotalTrades: 0, TotalVolumeTraded: 0 },
+  UserId: 0,
+};
+
+export const CreateKeyForm = ({ datastoreName, onKeyCreated, callRobloxAPI, isOpen, setIsOpen, initialSchema }: CreateKeyFormProps) => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -68,15 +55,19 @@ export const CreateKeyForm = ({ datastoreName, onKeyCreated, callRobloxAPI, isOp
     }
 
     try {
-      // 1. Constrói o objeto de dados baseado no schema padrão
-      const initialData = defaultSchema.parse({
+      // Usa o schema do Supabase ou o fallback
+      const baseSchema = initialSchema || defaultFallbackSchema;
+      
+      // Constrói o objeto de dados, sobrescrevendo campos dinâmicos
+      const initialData = {
+        ...baseSchema,
         UserId: parseInt(values.userId),
         JoinDate: Math.floor(Date.now() / 1000), // Garante timestamp atual
-      });
+      };
 
       const entryKey = values.keyName;
 
-      // 2. Cria a nova entrada na Roblox Cloud
+      // Cria a nova entrada na Roblox Cloud
       const result = await callRobloxAPI('setEntry', { 
         datastoreName, 
         entryKey, 
@@ -144,11 +135,10 @@ export const CreateKeyForm = ({ datastoreName, onKeyCreated, callRobloxAPI, isOp
             />
 
             <div className="p-4 bg-white/5 border border-white/10 rounded-md text-xs text-slate-400">
-                <p className="font-bold text-white mb-1">Schema Applied:</p>
+                <p className="font-bold text-white mb-1">Schema Source:</p>
                 <ul className="list-disc list-inside space-y-0.5">
+                    <li>{initialSchema ? <span className="text-emerald-400">Using custom schema from Supabase.</span> : <span className="text-yellow-400">Using default fallback schema.</span>}</li>
                     <li><span className="text-blue-400">JoinDate</span> set to current Unix Timestamp.</li>
-                    <li><span className="text-blue-400">Bits</span> initialized to 10,000,000.</li>
-                    <li>Complex fields initialized as empty arrays/objects.</li>
                 </ul>
             </div>
 
