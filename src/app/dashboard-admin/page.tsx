@@ -9,12 +9,24 @@ import {
   Code,
   ShieldOff,
   Loader2,
-  ArrowRight
+  ArrowRight,
+  Gamepad2
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import Cookies from 'js-cookie';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { ProjectSelector } from '@/components/admin/project-selector';
+import { ProjectDetails } from '@/components/admin/project-details';
+
+interface Project {
+  id: string;
+  name: string;
+  category: string;
+  players_count: number;
+  status: string;
+  roblox_place_id: string;
+}
 
 const AdminSidebar = ({ isDeveloper }: { isDeveloper: boolean }) => {
   const handleLogout = () => {
@@ -61,6 +73,8 @@ const AdminSidebar = ({ isDeveloper }: { isDeveloper: boolean }) => {
 
 export default function DashboardAdminPage() {
   const [profile, setProfile] = useState<any>(null);
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
@@ -81,8 +95,19 @@ export default function DashboardAdminPage() {
       
       if (profileData && profileData.is_developer) {
         setProfile(profileData);
+        
+        // Buscar projetos do estúdio (todos, já que é o painel admin)
+        const { data: projectsData } = await supabase
+          .from('projects')
+          .select('*');
+        
+        if (projectsData) {
+          setProjects(projectsData as Project[]);
+          if (projectsData.length > 0) {
+            setSelectedProject(projectsData[0] as Project);
+          }
+        }
       } else {
-        // Redireciona se não for desenvolvedor
         router.replace('/dashboard');
       }
       setIsLoading(false);
@@ -99,10 +124,7 @@ export default function DashboardAdminPage() {
     );
   }
 
-  if (!profile) {
-    // Se não for admin e o redirecionamento falhar por algum motivo
-    return null; 
-  }
+  if (!profile) return null; 
 
   return (
     <div className="min-h-screen bg-[#030303] text-white flex">
@@ -124,23 +146,31 @@ export default function DashboardAdminPage() {
           </div>
         </motion.header>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="glass rounded-[3rem] p-10 md:p-20 text-center border border-white/5"
-        >
-          <Settings size={64} className="text-red-500 mx-auto mb-8" />
-          <h2 className="text-3xl font-black text-white tracking-tighter mb-4">System Management Hub</h2>
-          <p className="text-white/40 max-w-xl mx-auto mb-10">
-            This area is reserved for Studio Leads. Use the sidebar to manage users, projects, and system logs.
-          </p>
-          <Link href="/dashboard">
-            <button className="h-12 px-8 bg-white/5 hover:bg-white/10 text-white rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-2">
-              Return to User Dashboard <ArrowRight size={14} />
-            </button>
-          </Link>
-        </motion.div>
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+          {/* Coluna de Seleção de Projeto */}
+          <div className="lg:col-span-1">
+            <ProjectSelector 
+              projects={projects} 
+              onSelectProject={setSelectedProject} 
+              selectedProject={selectedProject} 
+            />
+          </div>
+
+          {/* Coluna de Detalhes do Projeto */}
+          <div className="lg:col-span-3">
+            <div className="glass rounded-[3rem] p-10 border border-white/5">
+              {selectedProject ? (
+                <ProjectDetails project={selectedProject} />
+              ) : (
+                <div className="py-20 text-center">
+                  <Gamepad2 size={48} className="text-white/5 mx-auto mb-4" />
+                  <h3 className="text-xl font-black text-white/40">Select a Project to Manage</h3>
+                  <p className="text-white/20 text-sm">Use the sidebar to choose an experience.</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
       </main>
     </div>
   );
