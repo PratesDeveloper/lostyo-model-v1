@@ -16,7 +16,8 @@ import {
   User as UserIcon,
   LogOut,
   Code,
-  Wrench
+  Wrench,
+  ArrowRight // Importação adicionada
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import Cookies from 'js-cookie';
