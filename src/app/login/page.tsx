@@ -1,24 +1,27 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Loader2, ArrowRight } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
 
 export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const error = searchParams.get('error');
+    if (error === 'auth_failed') {
+      toast.error("Authentication failed. Please try again.");
+    }
+  }, [searchParams]);
 
   const handleRobloxLogin = () => {
     setIsLoading(true);
-    toast.info("Connecting to Roblox OAuth...", {
-      description: "Redirecting to secure authorization server."
-    });
-    
-    // Simulação de delay para feedback visual antes de ir para o dashboard
-    setTimeout(() => {
-      window.location.href = "/dashboard";
-    }, 1500);
+    // Redireciona para a nossa rota de API que inicia o OAuth
+    window.location.href = "/api/auth/roblox";
   };
 
   return (
@@ -52,7 +55,7 @@ export default function LoginPage() {
               ) : (
                 <img src="/roblox-logo.png" className="w-6 h-6 object-contain" alt="Roblox" />
               )}
-              <span>{isLoading ? 'Authorizing...' : 'Sign in with Roblox'}</span>
+              <span>{isLoading ? 'Redirecting...' : 'Sign in with Roblox'}</span>
               {!isLoading && <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />}
             </Button>
             
