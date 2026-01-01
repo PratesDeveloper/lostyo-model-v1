@@ -28,13 +28,13 @@ const StatItem = ({ label, value, index }: { label: string, value: string, index
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.1 }}
-      className="p-10 md:p-14 bg-neutral-50 rounded-[3rem] w-full"
+      className="p-12 md:p-16 bg-[#F2F3F5] rounded-[4rem] w-full"
     >
-      <div className="text-[10px] font-black uppercase tracking-[0.3em] text-neutral-400 mb-4">
+      <div className="text-[11px] font-black uppercase tracking-[0.3em] text-[#A3A4A6] mb-4">
         {label}
       </div>
-      <div className="text-5xl md:text-7xl font-black text-neutral-900 tracking-tighter">
-        {value.includes('M') || value.includes('+') ? `${displayValue}${suffix}` : value}
+      <div className="text-6xl md:text-8xl font-black text-black tracking-tighter">
+        {displayValue}{suffix}
       </div>
     </motion.div>
   );
@@ -44,10 +44,10 @@ export const Stats = () => {
   return (
     <section className="py-20 bg-white">
       <div className="container mx-auto px-6">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <StatItem index={0} label="Global Users" value="200M+" />
-          <StatItem index={1} label="Experience Tier" value="Premium" />
-          <StatItem index={2} label="Network Active" value="2025" />
+          <StatItem index={1} label="Experience" value="Premium" />
+          <StatItem index={2} label="Network" value="Active" />
         </div>
       </div>
     </section>

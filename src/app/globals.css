@@ -5,34 +5,30 @@
 @layer base {
   :root {
     --background: 0 0% 100%;
-    --foreground: 0 0% 7%; /* Quase preto para leitura perfeita */
-    --primary: 217 91% 60%;
-    --secondary: 210 20% 98%; /* Cinza muito sutil para cards */
-    --accent: 217 91% 60%;
+    --foreground: 240 10% 4%; /* Preto profundo para texto */
+    --card: 210 5% 96%; /* Cinza muito claro para o fundo dos cards */
+    --primary: 217 91% 60%; /* Azul Big Games (59, 130, 246) */
+    --muted-foreground: 215 2% 65%; /* O cinza 163, 164, 166 para textos secundários */
   }
 }
 
 @layer base {
   * {
-    @apply border-none outline-none;
+    @apply border-none outline-none ring-0 focus:ring-0;
   }
   body {
-    @apply bg-white text-neutral-900 antialiased selection:bg-blue-500/10 overflow-x-hidden;
+    @apply bg-white text-[#0A0A0A] antialiased selection:bg-[#3B82F6]/20 overflow-x-hidden;
     font-family: 'Inter', sans-serif;
   }
 }
 
-/* Utilitários de Design Refinados */
-.section-padding {
-  @apply py-24 md:py-32;
+/* Big Games Chunky Style */
+.big-card {
+  @apply bg-[#F2F3F5] rounded-[3rem] transition-all duration-300;
 }
 
-.chunky-card {
-  @apply bg-[#F8F9FA] rounded-[2.5rem] md:rounded-[4rem] transition-all duration-300;
-}
-
-.text-secondary {
-  @apply text-neutral-500 font-medium;
+.big-button {
+  @apply bg-[#3B82F6] text-white rounded-full font-black uppercase tracking-widest transition-all active:scale-95;
 }
 
 ::-webkit-scrollbar {
