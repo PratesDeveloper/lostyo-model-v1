@@ -11,9 +11,6 @@ import { Button } from "@/components/ui/button";
 import { Save, Database, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 
-// Cores customizadas para o tema
-const HIGHLIGHT = 'bg-blue-500';
-
 const formSchema = z.object({
   datastoreName: z.string().min(3, { message: "Name must be at least 3 characters." }).regex(/^[a-zA-Z0-9_]+$/, { message: "Only letters, numbers, and underscores are allowed." }),
   initialKeyName: z.string().min(3, { message: "Initial key name must be at least 3 characters." }),
@@ -89,10 +86,10 @@ export const CreateDatastoreModal = ({ isOpen, setIsOpen, onDatastoreCreated, ca
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogContent className="sm:max-w-[500px] bg-gray-700 border-gray-600 text-white rounded-xl">
+      <DialogContent className="sm:max-w-[500px] bg-[#111] border-white/10 text-white rounded-lg">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold text-white flex items-center gap-2"><Database size={20} /> Create New DataStore</DialogTitle>
-          <p className="text-sm text-gray-400">This action initializes the DataStore in Roblox Cloud by creating the first key.</p>
+          <p className="text-sm text-slate-400">This action initializes the DataStore in Roblox Cloud by creating the first key.</p>
         </DialogHeader>
         
         <Form {...form}>
@@ -102,11 +99,11 @@ export const CreateDatastoreModal = ({ isOpen, setIsOpen, onDatastoreCreated, ca
               name="datastoreName"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-gray-300">DataStore Name</FormLabel>
+                  <FormLabel className="text-slate-300">DataStore Name</FormLabel>
                   <FormControl>
                     <Input 
                       placeholder="e.g., PlayerData" 
-                      className="bg-gray-800 border-gray-600 text-white focus:border-blue-500 rounded-lg" 
+                      className="bg-black/20 border-white/10 text-white focus:border-blue-500" 
                       {...field} 
                     />
                   </FormControl>
@@ -121,11 +118,11 @@ export const CreateDatastoreModal = ({ isOpen, setIsOpen, onDatastoreCreated, ca
                     name="initialKeyName"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel className="text-gray-300">Initial Key Name</FormLabel>
+                            <FormLabel className="text-slate-300">Initial Key Name</FormLabel>
                             <FormControl>
                                 <Input 
                                     placeholder="e.g., Player_123" 
-                                    className="bg-gray-800 border-gray-600 text-white focus:border-blue-500 rounded-lg" 
+                                    className="bg-black/20 border-white/10 text-white focus:border-blue-500" 
                                     {...field} 
                                 />
                             </FormControl>
@@ -138,11 +135,11 @@ export const CreateDatastoreModal = ({ isOpen, setIsOpen, onDatastoreCreated, ca
                     name="initialUserId"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel className="text-gray-300">Initial User ID</FormLabel>
+                            <FormLabel className="text-slate-300">Initial User ID</FormLabel>
                             <FormControl>
                                 <Input 
                                     placeholder="Roblox User ID" 
-                                    className="bg-gray-800 border-gray-600 text-white focus:border-blue-500 rounded-lg" 
+                                    className="bg-black/20 border-white/10 text-white focus:border-blue-500" 
                                     {...field} 
                                 />
                             </FormControl>
@@ -152,14 +149,14 @@ export const CreateDatastoreModal = ({ isOpen, setIsOpen, onDatastoreCreated, ca
                 />
             </div>
 
-            <div className="p-4 bg-yellow-900/20 border border-yellow-500/20 rounded-lg text-xs text-yellow-400 flex items-start gap-3">
+            <div className="p-4 bg-yellow-900/20 border border-yellow-500/20 rounded-md text-xs text-yellow-400 flex items-start gap-3">
                 <AlertCircle size={16} className="mt-0.5 flex-shrink-0" />
                 <p>The initial key will be created using the default schema to ensure the DataStore is immediately available for use.</p>
             </div>
 
             <Button 
               type="submit" 
-              className={`w-full ${HIGHLIGHT} hover:bg-blue-600 text-white font-bold flex items-center gap-2 rounded-lg`}
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold flex items-center gap-2"
               disabled={form.formState.isSubmitting}
             >
               <Save size={16} />
