@@ -9,6 +9,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import { CreateKeyForm } from './create-key-form';
 
+// Cores customizadas para o tema
+const CARD_BG = 'bg-gray-700';
+const HIGHLIGHT = 'bg-blue-500';
+const TEXT_COLOR = 'text-gray-300';
+
 interface DataStoreExplorerProps {
   selectedProject: any;
   settings: any;
@@ -41,7 +46,6 @@ export const DataStoreExplorer = ({
   }, [selectedProject]);
 
   const fetchDatastores = async () => {
-    // Correção: Passando um objeto vazio como segundo argumento
     const result = await callRobloxAPI('listDataStores', {}); 
     if (result?.datastores) setDatastores(result.datastores);
   };
@@ -137,10 +141,10 @@ export const DataStoreExplorer = ({
       <div className="flex items-center justify-between mb-2">
         <h2 className="text-2xl font-bold text-white">Cloud Data Explorer</h2>
         <div className="flex gap-3">
-          <button onClick={clearDatastore} disabled={!selectedDS || dsKeys.length === 0} className="px-4 py-2 bg-red-600/10 text-red-400 rounded-md text-xs font-bold flex items-center gap-2 hover:bg-red-600/20 transition-colors disabled:opacity-50">
+          <button onClick={clearDatastore} disabled={!selectedDS || dsKeys.length === 0} className="px-4 py-2 bg-red-600/10 text-red-400 rounded-xl text-xs font-bold flex items-center gap-2 hover:bg-red-600/20 transition-colors disabled:opacity-50">
             <Trash2 size={14} /> Clear All Keys
           </button>
-          <button onClick={() => selectedDS ? setIsCreateModalOpen(true) : toast.error("Please select a DataStore first.")} className="px-4 py-2 bg-blue-600 text-white rounded-md text-xs font-bold flex items-center gap-2 hover:bg-blue-500 transition-colors">
+          <button onClick={() => selectedDS ? setIsCreateModalOpen(true) : toast.error("Please select a DataStore first.")} className={`px-4 py-2 ${HIGHLIGHT} text-white rounded-xl text-xs font-bold flex items-center gap-2 hover:bg-blue-600 transition-colors`}>
             <Plus size={14} /> New Key
           </button>
         </div>
@@ -149,13 +153,13 @@ export const DataStoreExplorer = ({
       <div className="flex flex-col lg:flex-row gap-6 h-full min-h-[600px]">
         <div className="w-full lg:w-72 flex flex-col gap-6 shrink-0">
           <div className="space-y-2">
-            <label className="text-[10px] font-bold text-slate-500 uppercase">1. Select DataStore</label>
-            <div className="bg-[#111] border border-white/5 rounded-md max-h-60 overflow-y-auto">
+            <label className="text-[10px] font-bold text-gray-400 uppercase">1. Select DataStore</label>
+            <div className={`${CARD_BG} border border-gray-600 rounded-xl max-h-60 overflow-y-auto`}>
               {datastores.map(ds => (
                 <button 
                   key={ds.name} 
                   onClick={() => fetchKeys(ds.name)}
-                  className={`w-full text-left px-4 py-3 text-xs border-b border-white/5 last:border-0 hover:bg-white/5 transition-colors ${selectedDS === ds.name ? 'bg-blue-600/10 text-blue-400 font-bold' : 'text-slate-300'}`}
+                  className={`w-full text-left px-4 py-3 text-sm border-b border-gray-600 last:border-0 hover:bg-gray-600 transition-colors rounded-xl ${selectedDS === ds.name ? 'bg-blue-600 text-white font-bold' : TEXT_COLOR}`}
                 >
                   {ds.name}
                 </button>
@@ -164,52 +168,52 @@ export const DataStoreExplorer = ({
           </div>
 
           <div className="space-y-2 flex-grow flex flex-col">
-            <label className="text-[10px] font-bold text-slate-500 uppercase">2. Select Key</label>
+            <label className="text-[10px] font-bold text-gray-400 uppercase">2. Select Key</label>
             <div className="relative mb-2">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={14} />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={14} />
               <input 
                 placeholder="Search keys..." 
                 value={searchKeyFilter}
                 onChange={e => setSearchKeyFilter(e.target.value)}
-                className="w-full h-10 bg-[#111] border border-white/5 rounded-md pl-10 pr-4 text-xs outline-none focus:border-blue-500/50"
+                className={`w-full h-10 ${CARD_BG} border border-gray-600 rounded-xl pl-10 pr-4 text-sm outline-none focus:border-blue-500 transition-colors ${TEXT_COLOR}`}
               />
             </div>
-            <div className="bg-[#111] border border-white/5 rounded-md flex-grow overflow-y-auto max-h-[400px]">
+            <div className={`${CARD_BG} border border-gray-600 rounded-xl flex-grow overflow-y-auto max-h-[400px]`}>
               {isKeysLoading ? (
-                <div className="p-4 text-xs text-slate-600 italic flex items-center gap-2">
+                <div className={`p-4 text-sm text-gray-400 italic flex items-center gap-2`}>
                   <Loader2 size={14} className="animate-spin" /> Loading keys...
                 </div>
               ) : filteredKeys.length > 0 ? filteredKeys.map(k => (
                 <button 
                   key={k.key} 
                   onClick={() => loadEntry(k.key)}
-                  className={`w-full text-left px-4 py-3 text-xs border-b border-white/5 last:border-0 hover:bg-white/5 transition-colors ${activeEntryKey === k.key ? 'bg-white/5 text-white font-bold' : 'text-slate-400'}`}
+                  className={`w-full text-left px-4 py-3 text-sm border-b border-gray-600 last:border-0 hover:bg-gray-600 transition-colors ${activeEntryKey === k.key ? 'bg-gray-600 text-white font-bold' : TEXT_COLOR}`}
                 >
                   {k.key}
                 </button>
               )) : (
-                <div className="p-4 text-xs text-slate-600 italic">Select a DataStore first</div>
+                <div className={`p-4 text-sm text-gray-400 italic`}>Select a DataStore first</div>
               )}
             </div>
           </div>
         </div>
 
-        <div className="flex-grow flex flex-col border border-white/5 rounded-lg bg-[#0d0d0d] overflow-hidden">
-          <div className="h-14 bg-[#161616] border-b border-white/5 flex items-center justify-between px-6 shrink-0">
+        <div className="flex-grow flex flex-col border border-gray-600 rounded-xl bg-gray-800 overflow-hidden">
+          <div className={`h-14 bg-gray-800 border-b border-gray-600 flex items-center justify-between px-6 shrink-0`}>
             <div className="flex items-center gap-2">
-              <FileCode size={16} className="text-blue-500" />
-              <span className="text-sm font-medium text-slate-400 truncate max-w-[200px]">
+              <FileCode size={16} className="text-blue-400" />
+              <span className="text-sm font-medium text-gray-400 truncate max-w-[200px]">
                 {activeEntryKey || 'No file selected'}
               </span>
             </div>
             {activeEntryData && (
               <div className="flex items-center gap-3">
-                <button onClick={deleteEntry} className="p-2 text-slate-500 hover:text-red-500 transition-colors">
+                <button onClick={deleteEntry} className="p-2 text-gray-400 hover:text-red-500 transition-colors rounded-lg hover:bg-gray-700">
                   <Trash2 size={16} />
                 </button>
                 <button 
                   onClick={saveEntry}
-                  className="flex items-center gap-2 px-4 py-1.5 bg-blue-600 text-white text-xs font-bold rounded hover:bg-blue-500 transition-colors"
+                  className={`flex items-center gap-2 px-4 py-1.5 ${HIGHLIGHT} text-white text-xs font-bold rounded-lg hover:bg-blue-600 transition-colors`}
                 >
                   <Save size={14} /> Commit Changes
                 </button>
@@ -218,7 +222,7 @@ export const DataStoreExplorer = ({
           </div>
           <div className="flex-grow relative">
             {entryError ? (
-              <div className="absolute inset-0 flex flex-col items-center justify-center bg-red-900/10 text-red-400 p-8">
+              <div className="absolute inset-0 flex flex-col items-center justify-center bg-red-900/20 text-red-400 p-8 rounded-xl">
                 <AlertCircle size={32} className="mb-4" />
                 <p className="text-sm font-bold mb-2">Entry Not Found</p>
                 <p className="text-xs text-center">{entryError}</p>
@@ -230,11 +234,11 @@ export const DataStoreExplorer = ({
                   try { setActiveEntryData(JSON.parse(e.target.value)); } 
                   catch { setActiveEntryData(e.target.value); }
                 }}
-                className="absolute inset-0 w-full h-full bg-transparent p-6 font-mono text-xs text-emerald-400 outline-none resize-none custom-scrollbar"
+                className="absolute inset-0 w-full h-full bg-transparent p-6 font-mono text-sm text-emerald-400 outline-none resize-none custom-scrollbar"
                 spellCheck={false}
               />
             ) : (
-              <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-600 opacity-50">
+              <div className="absolute inset-0 flex flex-col items-center justify-center text-gray-600 opacity-50">
                 <Gamepad2 size={48} className="mb-4" />
                 <p className="text-xs uppercase font-bold tracking-widest">Select a key to edit data</p>
               </div>

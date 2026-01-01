@@ -11,6 +11,9 @@ import { Button } from "@/components/ui/button";
 import { Save } from 'lucide-react';
 import { toast } from 'sonner';
 
+// Cores customizadas para o tema
+const HIGHLIGHT = 'bg-blue-500';
+
 // Schema Zod para validação do formulário de entrada
 const formSchema = z.object({
   keyName: z.string().min(3, { message: "Key name must be at least 3 characters." }),
@@ -88,10 +91,10 @@ export const CreateKeyForm = ({ datastoreName, onKeyCreated, callRobloxAPI, isOp
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogContent className="sm:max-w-[425px] bg-[#111] border-white/10 text-white rounded-lg">
+      <DialogContent className="sm:max-w-[425px] bg-gray-700 border-gray-600 text-white rounded-xl">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold text-white">Create New Data Entry</DialogTitle>
-          <p className="text-sm text-slate-400">
+          <p className="text-sm text-gray-400">
             DataStore: <span className="font-mono text-blue-400">{datastoreName || 'N/A'}</span>
           </p>
         </DialogHeader>
@@ -103,11 +106,11 @@ export const CreateKeyForm = ({ datastoreName, onKeyCreated, callRobloxAPI, isOp
               name="keyName"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-slate-300">Entry Key Name (e.g., Player_12345)</FormLabel>
+                  <FormLabel className="text-gray-300">Entry Key Name (e.g., Player_12345)</FormLabel>
                   <FormControl>
                     <Input 
                       placeholder="Enter unique key name" 
-                      className="bg-black/20 border-white/10 text-white focus:border-blue-500" 
+                      className="bg-gray-800 border-gray-600 text-white focus:border-blue-500 rounded-lg" 
                       {...field} 
                     />
                   </FormControl>
@@ -121,11 +124,11 @@ export const CreateKeyForm = ({ datastoreName, onKeyCreated, callRobloxAPI, isOp
               name="userId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-slate-300">Initial User ID (for schema)</FormLabel>
+                  <FormLabel className="text-gray-300">Initial User ID (for schema)</FormLabel>
                   <FormControl>
                     <Input 
                       placeholder="Roblox User ID (e.g., 7468377959)" 
-                      className="bg-black/20 border-white/10 text-white focus:border-blue-500" 
+                      className="bg-gray-800 border-gray-600 text-white focus:border-blue-500 rounded-lg" 
                       {...field} 
                     />
                   </FormControl>
@@ -134,7 +137,7 @@ export const CreateKeyForm = ({ datastoreName, onKeyCreated, callRobloxAPI, isOp
               )}
             />
 
-            <div className="p-4 bg-white/5 border border-white/10 rounded-md text-xs text-slate-400">
+            <div className="p-4 bg-gray-800 border border-gray-600 rounded-lg text-xs text-gray-400">
                 <p className="font-bold text-white mb-1">Schema Source:</p>
                 <ul className="list-disc list-inside space-y-0.5">
                     <li>{initialSchema ? <span className="text-emerald-400">Using custom schema from Supabase.</span> : <span className="text-yellow-400">Using default fallback schema.</span>}</li>
@@ -144,7 +147,7 @@ export const CreateKeyForm = ({ datastoreName, onKeyCreated, callRobloxAPI, isOp
 
             <Button 
               type="submit" 
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold flex items-center gap-2"
+              className={`w-full ${HIGHLIGHT} hover:bg-blue-600 text-white font-bold flex items-center gap-2 rounded-lg`}
               disabled={!datastoreName || form.formState.isSubmitting}
             >
               <Save size={16} />
