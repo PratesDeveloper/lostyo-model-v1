@@ -5,10 +5,10 @@
 @layer base {
   :root {
     --background: 0 0% 100%;
-    --foreground: 240 10% 10%;
-    --card: 0 0% 96%;
-    --card-foreground: 240 10% 10%;
-    --primary: 217 91% 60%; /* RGB 59, 130, 246 */
+    --foreground: 0 0% 7%; /* Quase preto para leitura perfeita */
+    --primary: 217 91% 60%;
+    --secondary: 210 20% 98%; /* Cinza muito sutil para cards */
+    --accent: 217 91% 60%;
   }
 }
 
@@ -17,18 +17,22 @@
     @apply border-none outline-none;
   }
   body {
-    @apply bg-white text-[#1a1a1a] antialiased selection:bg-blue-500/10 overflow-x-hidden cursor-default;
+    @apply bg-white text-neutral-900 antialiased selection:bg-blue-500/10 overflow-x-hidden;
     font-family: 'Inter', sans-serif;
   }
 }
 
-/* Big Games Style Utilities */
-.chunky-card {
-  @apply bg-[#F5F5F5] rounded-[3rem] transition-all duration-300;
+/* Utilitários de Design Refinados */
+.section-padding {
+  @apply py-24 md:py-32;
 }
 
-.chunky-button {
-  @apply bg-[#3B82F6] text-white rounded-full font-black uppercase tracking-widest transition-all active:scale-95 hover:brightness-110;
+.chunky-card {
+  @apply bg-[#F8F9FA] rounded-[2.5rem] md:rounded-[4rem] transition-all duration-300;
+}
+
+.text-secondary {
+  @apply text-neutral-500 font-medium;
 }
 
 ::-webkit-scrollbar {
