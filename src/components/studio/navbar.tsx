@@ -40,63 +40,49 @@ export const Navbar = () => {
   const isDeveloper = profile?.is_developer ?? false;
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 flex justify-center py-8 px-6">
-      <div className="w-full max-w-5xl h-16 bg-[#F5F5F5] rounded-full flex items-center justify-between px-8 shadow-sm">
+    <nav className="fixed top-0 left-0 right-0 z-50 flex justify-center py-4 md:py-8 px-4 md:px-6">
+      <div className="w-full max-w-5xl h-14 md:h-16 bg-[#F5F5F5]/90 backdrop-blur-md rounded-full flex items-center justify-between px-6 md:px-8 shadow-sm">
         <Link href="/" className="flex items-center gap-2 group">
-          <img src="https://cdn.lostyo.com/logo.png" alt="Lostyo" className="w-6 h-6 object-contain" />
-          <span className="font-black tracking-tighter text-base text-[#3B82F6] uppercase">Lostyo</span>
+          <img src="https://cdn.lostyo.com/logo.png" alt="Lostyo" className="w-5 h-5 md:w-6 md:h-6 object-contain" />
+          <span className="font-black tracking-tighter text-sm md:text-base text-[#3B82F6] uppercase">Lostyo</span>
         </Link>
 
-        <div className="flex items-center gap-6">
-          <div className="hidden md:flex items-center gap-8 text-[11px] font-bold uppercase tracking-widest text-black/40">
+        <div className="flex items-center gap-4 md:gap-8">
+          <div className="hidden sm:flex items-center gap-6 md:gap-8 text-[10px] md:text-[11px] font-bold uppercase tracking-widest text-black/40">
             <a href="#games" className="hover:text-black transition-colors">Experience</a>
             <a href="#services" className="hover:text-black transition-colors">Services</a>
           </div>
 
-          <div className="flex items-center gap-4">
-            {isLogged && profile ? (
-              <DropdownMenu>
-                <DropdownMenuTrigger className="outline-none">
-                  <div className="flex items-center gap-2 p-1 pr-4 bg-black/5 hover:bg-black/10 rounded-full transition-all cursor-pointer">
-                    <Avatar className="w-9 h-9">
-                      <AvatarImage src={profile.avatar_url} />
-                      <AvatarFallback className="bg-[#3B82F6] text-white"><User size={16} /></AvatarFallback>
-                    </Avatar>
-                    <span className="text-[10px] font-black text-black/60 uppercase tracking-widest hidden sm:block">
-                      Account
-                    </span>
-                  </div>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56 bg-white border-none text-black rounded-[2rem] p-3 mt-4 shadow-xl">
-                  <div className="px-4 py-4 mb-2">
-                    <div className="text-[10px] font-black text-[#3B82F6] uppercase tracking-widest mb-1">User Cluster</div>
-                    <div className="text-sm font-black truncate">{profile.roblox_display_name}</div>
-                  </div>
-
+          {/* O acesso ao dashboard agora é discreto e só aparece se já estiver logado */}
+          {isLogged && profile && (
+            <DropdownMenu>
+              <DropdownMenuTrigger className="outline-none">
+                <Avatar className="w-8 h-8 md:w-9 md:h-9 cursor-pointer hover:opacity-80 transition-opacity">
+                  <AvatarImage src={profile.avatar_url} />
+                  <AvatarFallback className="bg-[#3B82F6] text-white"><User size={14} /></AvatarFallback>
+                </Avatar>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56 bg-white border-none text-black rounded-[1.5rem] p-3 mt-4 shadow-xl">
+                <div className="px-4 py-3 mb-2">
+                  <div className="text-[9px] font-black text-[#3B82F6] uppercase tracking-widest mb-0.5">Connected</div>
+                  <div className="text-xs font-black truncate">{profile.roblox_display_name}</div>
+                </div>
+                {isDeveloper && (
                   <DropdownMenuItem asChild>
-                    <Link href={isDeveloper ? "/dashboard-admin" : "/"} className="flex items-center gap-3 p-4 rounded-2xl hover:bg-black/5 cursor-pointer transition-colors">
-                      <LayoutDashboard size={16} className="text-[#3B82F6]" />
-                      <span className="font-bold text-xs uppercase tracking-widest">
-                        Dashboard
-                      </span>
+                    <Link href="/dashboard-admin" className="flex items-center gap-3 p-3 rounded-xl hover:bg-black/5 cursor-pointer transition-colors">
+                      <LayoutDashboard size={14} className="text-[#3B82F6]" />
+                      <span className="font-bold text-[10px] uppercase tracking-widest">Dashboard</span>
                     </Link>
                   </DropdownMenuItem>
-                  
-                  <DropdownMenuSeparator className="bg-black/5 mx-2 my-2" />
-                  <DropdownMenuItem onClick={handleLogout} className="flex items-center gap-3 p-4 rounded-2xl hover:bg-red-50 text-red-500 cursor-pointer transition-colors">
-                    <LogOut size={16} />
-                    <span className="font-bold text-xs uppercase tracking-widest">Log out</span>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            ) : (
-              <Link href="/login">
-                <button className="h-11 px-8 bg-[#3B82F6] text-white rounded-full text-[11px] font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all">
-                  Authorize
-                </button>
-              </Link>
-            )}
-          </div>
+                )}
+                <DropdownMenuSeparator className="bg-black/5 mx-2 my-2" />
+                <DropdownMenuItem onClick={handleLogout} className="flex items-center gap-3 p-3 rounded-xl hover:bg-red-50 text-red-500 cursor-pointer transition-colors">
+                  <LogOut size={14} />
+                  <span className="font-bold text-[10px] uppercase tracking-widest">Log out</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
         </div>
       </div>
     </nav>
