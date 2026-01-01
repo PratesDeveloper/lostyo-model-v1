@@ -19,6 +19,7 @@ export default function Home() {
         <GameShowcase />
         <Services />
         
+        {/* CTA Section */}
         <section className="py-40 px-6">
           <motion.div 
             initial={{ opacity: 0, scale: 0.98 }}
@@ -40,23 +41,36 @@ export default function Home() {
         </section>
       </main>
 
-      <footer className="py-24 bg-white border-t border-black/5">
-        <div className="container mx-auto px-6">
+      {/* Footer redesenhado (Estilo Big Games / Navbar Match) */}
+      <footer className="flex justify-center px-6">
+        <div className="w-full max-w-5xl bg-[#F5F5F5] rounded-t-[4rem] p-12 md:p-20">
           <div className="flex flex-col md:flex-row justify-between items-center gap-12">
-            <div className="flex items-center gap-4">
-              <img src="https://cdn.lostyo.com/logo.png" alt="Lostyo" className="w-8 h-8" />
-              <span className="font-black text-2xl tracking-tighter text-black uppercase">Lostyo Studios</span>
+            <div className="flex flex-col items-center md:items-start gap-4">
+              <div className="flex items-center gap-3">
+                <img src="https://cdn.lostyo.com/logo.png" alt="Lostyo" className="w-8 h-8" />
+                <span className="font-black text-2xl tracking-tighter text-[#3B82F6] uppercase">Lostyo</span>
+              </div>
+              <p className="text-[10px] font-bold text-black/20 uppercase tracking-[0.4em] text-center md:text-left">
+                Premium Digital Architecture
+              </p>
             </div>
 
-            <div className="flex gap-10 text-[11px] font-black uppercase tracking-[0.2em] text-black/30">
+            <div className="flex flex-wrap justify-center gap-8 md:gap-12 text-[11px] font-black uppercase tracking-[0.2em] text-black/40">
               <Link href="/terms" className="hover:text-black transition-colors">Terms</Link>
-              <Link href="/security" className="hover:text-white transition-colors">Security</Link>
+              <Link href="/security" className="hover:text-black transition-colors">Security</Link>
               <a href="https://discord.gg/lostyo" target="_blank" className="hover:text-[#5865F2] transition-colors">Discord</a>
             </div>
+          </div>
 
+          <div className="mt-16 pt-8 border-t border-black/5 flex flex-col md:flex-row justify-between items-center gap-6">
             <p className="text-[10px] font-bold text-black/10 uppercase tracking-[0.4em]">
-              © 2025 ALL RIGHTS RESERVED.
+              © 2025 LOSTYO STUDIOS.
             </p>
+            <div className="flex gap-4">
+              <div className="w-8 h-8 rounded-full bg-black/5" />
+              <div className="w-8 h-8 rounded-full bg-black/5" />
+              <div className="w-8 h-8 rounded-full bg-black/5" />
+            </div>
           </div>
         </div>
       </footer>

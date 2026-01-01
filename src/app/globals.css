@@ -6,10 +6,9 @@
   :root {
     --background: 0 0% 100%;
     --foreground: 240 10% 10%;
-    --card: 0 0% 98%;
+    --card: 0 0% 96%;
     --card-foreground: 240 10% 10%;
     --primary: 217 91% 60%; /* RGB 59, 130, 246 */
-    --border: 240 5% 90%;
   }
 }
 
@@ -23,18 +22,13 @@
   }
 }
 
-/* Novo estilo Flat Card */
-.flat-card {
-  @apply bg-[#A3A3A3]/10 backdrop-blur-sm transition-all duration-500;
+/* Big Games Style Utilities */
+.chunky-card {
+  @apply bg-[#F5F5F5] rounded-[3rem] transition-all duration-300;
 }
 
-.flat-card-hover {
-  @apply hover:bg-[#A3A3A3]/20 hover:scale-[1.02] active:scale-[0.98];
-}
-
-/* Gradiente de Texto Flat */
-.text-highlight {
-  @apply text-[#3B82F6];
+.chunky-button {
+  @apply bg-[#3B82F6] text-white rounded-full font-black uppercase tracking-widest transition-all active:scale-95 hover:brightness-110;
 }
 
 ::-webkit-scrollbar {

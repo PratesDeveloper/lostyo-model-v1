@@ -44,7 +44,7 @@ export const Navbar = () => {
       <div className="w-full max-w-5xl h-16 bg-[#F5F5F5] rounded-full flex items-center justify-between px-8 shadow-sm">
         <Link href="/" className="flex items-center gap-2 group">
           <img src="https://cdn.lostyo.com/logo.png" alt="Lostyo" className="w-6 h-6 object-contain" />
-          <span className="font-black tracking-tighter text-base text-black uppercase">Lostyo</span>
+          <span className="font-black tracking-tighter text-base text-[#3B82F6] uppercase">Lostyo</span>
         </Link>
 
         <div className="flex items-center gap-6">
