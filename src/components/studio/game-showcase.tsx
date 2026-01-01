@@ -15,48 +15,39 @@ const GameCard = ({
   link?: string,
   image?: string
 }) => {
-  const [imgError, setImgError] = useState(false);
-
   return (
     <motion.div 
       initial={{ opacity: 0, y: 40 }}
       whileInView={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.1, duration: 0.8, ease: "easeOut" }}
+      transition={{ delay: index * 0.1, duration: 0.8 }}
       viewport={{ once: true }}
-      whileHover={{ y: -10 }}
       onClick={() => link && window.open(link, '_blank')}
-      className="group relative aspect-[4/5] glass rounded-[3rem] overflow-hidden cursor-pointer max-w-sm mx-auto w-full"
+      className="group relative aspect-[16/10] bg-[#F5F5F5] rounded-[4rem] overflow-hidden cursor-pointer w-full max-w-5xl mx-auto"
     >
-      {/* Background Image Logic */}
       <div className="absolute inset-0 z-0">
-        {image && !imgError ? (
+        {image ? (
           <img 
             src={image} 
             alt={title}
-            onError={() => setImgError(true)}
-            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+            className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
           />
         ) : (
-          <div className="w-full h-full bg-[#1A1A1E] flex items-center justify-center">
-            <div className="absolute inset-0 bg-blue-600/5 animate-pulse" />
-            <span className="text-[10px] font-black text-white/10 uppercase tracking-[0.5em] rotate-90">
-              Lostyo Experience
-            </span>
+          <div className="w-full h-full bg-[#F5F5F5] flex items-center justify-center">
+            <span className="text-black/5 font-black text-6xl uppercase tracking-widest">Lostyo</span>
           </div>
         )}
       </div>
       
-      {/* Overlays */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent z-10" />
-      <div className="absolute inset-0 bg-blue-600/0 group-hover:bg-blue-600/10 transition-colors duration-700 z-10" />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10" />
       
-      {/* Content */}
-      <div className="absolute bottom-10 left-10 right-10 z-20">
-        <span className="text-blue-500 text-[10px] font-black uppercase tracking-widest mb-2 block">{category}</span>
-        <h3 className="text-3xl font-black text-white tracking-tighter">{title}</h3>
-        <div className="mt-4 flex items-center gap-2 text-[9px] font-bold text-white/30 uppercase tracking-[0.2em] opacity-0 group-hover:opacity-100 transition-opacity">
-          Play Experience <div className="w-1 h-1 rounded-full bg-blue-500" />
+      <div className="absolute bottom-14 left-14 right-14 z-20 flex justify-between items-end">
+        <div>
+          <span className="text-[#3B82F6] text-xs font-black uppercase tracking-widest mb-3 block">{category}</span>
+          <h3 className="text-5xl font-black text-white tracking-tighter uppercase">{title}</h3>
         </div>
+        <button className="h-16 px-10 bg-white text-black rounded-full font-black uppercase tracking-widest text-[11px] opacity-0 group-hover:opacity-100 transition-all translate-y-4 group-hover:translate-y-0 shadow-2xl">
+          Launch Node
+        </button>
       </div>
     </motion.div>
   );
@@ -66,40 +57,21 @@ export const GameShowcase = () => {
   const games = [
     { 
       title: "CapToken", 
-      category: "Strategy", 
+      category: "Simulation / Strategy", 
       link: "https://www.roblox.com/pt/games/94278394125668/CapToken",
       image: "https://tr.rbxcdn.com/180DAY-e75c09bfe9457c2384a4d43b6ca7f1bb/352/352/Image/Png/noFilter"
     }
   ];
 
   return (
-    <section id="games" className="py-32 bg-[#030303] relative overflow-hidden">
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-[radial-gradient(circle_at_50%_50%,rgba(29,78,216,0.03),transparent_70%)] pointer-events-none" />
-      
-      <div className="container mx-auto px-6 relative z-10">
-        <div className="flex flex-col md:flex-row justify-between items-end mb-20 gap-8">
-          <motion.div 
-            initial={{ opacity: 0, x: -30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8 }}
-            viewport={{ once: true }}
-            className="max-w-xl text-center md:text-left mx-auto md:mx-0"
-          >
-            <h2 className="text-4xl md:text-6xl font-black text-white tracking-tighter mb-6">Our Creation.</h2>
-            <p className="text-white/30 text-lg font-medium">A bespoke experience that pushes the boundaries of the Roblox platform.</p>
-          </motion.div>
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.8 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 1 }}
-            viewport={{ once: true }}
-            className="text-white/10 font-black text-8xl tracking-tighter hidden lg:block"
-          >
-            01
-          </motion.div>
+    <section id="games" className="py-40 bg-white">
+      <div className="container mx-auto px-6">
+        <div className="text-center mb-24">
+          <h2 className="text-6xl md:text-8xl font-black text-black tracking-tighter uppercase mb-6">Masterpiece.</h2>
+          <p className="text-black/30 text-xl font-medium">Bespoke experiences tailored for the next generation of players.</p>
         </div>
 
-        <div className="flex justify-center">
+        <div className="space-y-12">
           {games.map((game, i) => (
             <GameCard 
               key={i} 

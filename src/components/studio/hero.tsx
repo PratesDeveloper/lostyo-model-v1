@@ -5,35 +5,30 @@ import { MoveRight } from 'lucide-react';
 
 export const Hero = () => {
   return (
-    <section className="relative min-h-[85vh] md:min-h-screen flex flex-col items-center justify-center pt-32 pb-10 px-6 overflow-hidden">
-      {/* Background Gradient */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-full max-w-[800px] h-[400px] bg-blue-600/5 blur-[100px] -z-10" />
-      
+    <section className="relative min-h-[90vh] flex flex-col items-center justify-center pt-32 pb-20 px-6 bg-white overflow-hidden">
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
+        initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8 }}
-        className="text-center max-w-5xl"
+        transition={{ duration: 1, ease: [0.23, 1, 0.32, 1] }}
+        className="text-center max-w-6xl"
       >
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-white/5 bg-white/5 text-[9px] md:text-[10px] font-bold uppercase tracking-[0.2em] text-blue-400 mb-8">
-          <span className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse" />
-          The Gold Standard of Roblox Development
+        <div className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-[#F5F5F5] text-[10px] font-black uppercase tracking-[0.25em] text-[#3B82F6] mb-10">
+          Digital Architecture & Engineering
         </div>
 
-        <h1 className="text-5xl md:text-8xl lg:text-[9rem] font-black leading-[1.1] md:leading-[0.9] tracking-tighter mb-8 text-mask">
-          SHAPING <br className="hidden md:block" /> THE METAVERSE.
+        <h1 className="text-6xl md:text-[10rem] font-black leading-[0.9] tracking-tighter mb-10 text-black">
+          SHAPING <br /> THE <span className="text-[#3B82F6]">SOCIAL</span> FRONT.
         </h1>
 
-        <p className="text-white/40 text-base md:text-xl font-medium max-w-2xl mx-auto mb-10 leading-relaxed px-4">
-          We engineer hyper-realistic environments and complex systems, 
-          bridging the gap between traditional gaming and the social frontier.
+        <p className="text-black/40 text-lg md:text-2xl font-medium max-w-3xl mx-auto mb-14 leading-relaxed px-4">
+          We bridge the gap between traditional gaming and the social frontier through high-fidelity digital experiences.
         </p>
 
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-          <button className="w-full sm:w-auto h-14 md:h-16 px-10 bg-white text-black rounded-full text-[11px] font-black uppercase tracking-[0.2em] flex items-center justify-center gap-3 hover:scale-105 transition-transform">
-            Our Experiences <MoveRight size={18} />
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-5">
+          <button className="w-full sm:w-auto h-16 md:h-20 px-12 bg-black text-white rounded-full text-[12px] font-black uppercase tracking-[0.2em] flex items-center justify-center gap-3 hover:scale-105 transition-all shadow-lg shadow-black/10">
+            Our Work <MoveRight size={20} />
           </button>
-          <button className="w-full sm:w-auto h-14 md:h-16 px-10 glass glass-hover rounded-full text-[11px] font-black uppercase tracking-[0.2em] flex items-center justify-center hover:scale-105 transition-transform">
+          <button className="w-full sm:w-auto h-16 md:h-20 px-12 bg-[#F5F5F5] text-black rounded-full text-[12px] font-black uppercase tracking-[0.2em] flex items-center justify-center hover:bg-[#EAEAEA] transition-all">
             Inquire Project
           </button>
         </div>

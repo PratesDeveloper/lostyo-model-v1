@@ -9,7 +9,7 @@ const StatItem = ({ label, value, index }: { label: string, value: string, index
 
   useEffect(() => {
     let start = 0;
-    const duration = 2000; // 2 segundos de animação
+    const duration = 2000;
     const increment = targetValue / (duration / 16);
     
     const timer = setInterval(() => {
@@ -27,16 +27,16 @@ const StatItem = ({ label, value, index }: { label: string, value: string, index
 
   return (
     <motion.div 
-      initial={{ opacity: 0, y: 30 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.1, duration: 0.8, ease: "easeOut" }}
+      initial={{ opacity: 0, scale: 0.9 }}
+      whileInView={{ opacity: 1, scale: 1 }}
+      transition={{ delay: index * 0.1, duration: 0.8 }}
       viewport={{ once: true }}
-      className="flex flex-col items-center text-center"
+      className="flex flex-col items-center text-center p-12 bg-[#F5F5F5] rounded-[3.5rem] w-full"
     >
-      <span className="text-[10px] font-black uppercase tracking-[0.4em] text-white/20 mb-3">
+      <span className="text-[11px] font-black uppercase tracking-[0.3em] text-black/20 mb-4">
         {label}
       </span>
-      <span className="text-3xl md:text-4xl font-black text-white tracking-tighter">
+      <span className="text-5xl md:text-6xl font-black text-black tracking-tighter">
         {displayValue}{suffix}
       </span>
     </motion.div>
@@ -45,15 +45,15 @@ const StatItem = ({ label, value, index }: { label: string, value: string, index
 
 export const Stats = () => {
   const items = [
-    { label: "Global Scale", value: "200M+" },
-    { label: "Boutique Quality", value: "Premium" },
-    { label: "Studio Established", value: "2025" }
+    { label: "Global Reach", value: "200M+" },
+    { label: "High Fidelity", value: "Premium" },
+    { label: "Est. Network", value: "2025" }
   ];
 
   return (
-    <section className="py-20 border-y border-white/5 bg-white/[0.01]">
+    <section className="py-20 bg-white">
       <div className="container mx-auto px-6">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-8 justify-items-center">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {items.map((item, index) => (
             <StatItem 
               key={index}
