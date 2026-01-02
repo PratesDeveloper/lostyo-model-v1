@@ -12,7 +12,7 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import Cookies from 'js-cookie';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 import { getProfileByRobloxId, getProjectSettings, updateProjectSettings } from '@/app/actions/profile';
 import { toast, Toaster } from 'sonner';
 import { CreateDatastoreModal } from '@/components/admin/create-datastore-modal';
@@ -44,14 +44,15 @@ export default function DashboardAdminPage() {
   const [isCreateDSModalOpen, setIsCreateDSModalOpen] = useState(false);
 
   const router = useRouter();
+  const params = useParams();
 
-  const callRobloxAPI = async (action: string, params: any = {}) => {
+  const callRobloxAPI = async (action: string, paramsObj: any = {}) => {
     setIsSyncing(true);
     try {
       const response = await fetch('/api/admin/roblox', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action, universeId: selectedProject?.id, ...params })
+        body: JSON.stringify({ action, universeId: selectedProject?.id, ...paramsObj })
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "Request failed");
@@ -67,9 +68,11 @@ export default function DashboardAdminPage() {
   const loadBaseData = async () => {
     const robloxId = Cookies.get('lostyo_roblox_id');
     const logged = Cookies.get('lostyo_roblox_logged');
+    const adminToken = Cookies.get('lostyo_admin_token');
 
-    if (!robloxId || logged !== 'true') {
-      router.replace('/login');
+    // Validação tripla de segurança
+    if (!robloxId || logged !== 'true' || adminToken !== params.token) {
+      router.replace('/v1/access');
       return;
     }
 
@@ -129,7 +132,7 @@ export default function DashboardAdminPage() {
   );
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-slate-200 flex flex-col lg:flex-row">
+    <div className="min-h-screen bg-[#0a0a0a] text-slate-200 flex flex-col lg:flex-row font-sans">
       <Toaster theme="dark" position="top-right" />
 
       <CreateDatastoreModal
@@ -183,7 +186,11 @@ export default function DashboardAdminPage() {
               <span className="text-[10px] text-slate-500 uppercase">Developer</span>
             </div>
           </div>
-          <button onClick={() => { Cookies.remove('lostyo_roblox_logged'); window.location.href = '/'; }} className="w-full flex items-center justify-center gap-2 py-2 rounded border border-white/10 text-xs text-slate-400 hover:bg-red-500/10 hover:text-red-500 hover:border-red-500/20 transition-all">
+          <button onClick={() => { 
+            Cookies.remove('lostyo_roblox_logged'); 
+            Cookies.remove('lostyo_admin_token');
+            window.location.href = '/'; 
+          }} className="w-full flex items-center justify-center gap-2 py-2 rounded border border-white/10 text-xs text-slate-400 hover:bg-red-500/10 hover:text-red-500 hover:border-red-500/20 transition-all">
             <LogOut size={14} /> Sign Out
           </button>
         </div>
