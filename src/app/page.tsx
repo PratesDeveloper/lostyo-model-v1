@@ -5,10 +5,12 @@ import { Hero } from '@/components/studio/hero';
 import { Stats } from '@/components/studio/stats';
 import { GameShowcase } from '@/components/studio/game-showcase';
 import { Services } from '@/components/studio/services';
+import { ContactModal } from '@/components/studio/contact-modal';
 import { motion, useSpring, useMotionValue } from 'framer-motion';
 import Link from 'next/link';
 
 export default function Home() {
+  const [isContactOpen, setIsContactOpen] = useState(false);
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
 
@@ -39,9 +41,10 @@ export default function Home() {
       
       <div className="noise" />
       <Navbar />
+      <ContactModal isOpen={isContactOpen} setIsOpen={setIsContactOpen} />
       
       <main className="relative z-10">
-        <Hero />
+        <Hero onContactClick={() => setIsContactOpen(true)} />
         <Stats />
         
         <motion.div
@@ -71,7 +74,10 @@ export default function Home() {
             <p className="text-white/40 text-base md:text-xl font-medium mb-10 max-w-xl mx-auto">
               Partner with a studio that understands the future of immersive play.
             </p>
-            <button className="h-16 md:h-20 px-10 md:px-16 bg-white text-black rounded-full font-black uppercase tracking-widest text-[11px] hover:scale-105 transition-all shadow-2xl shadow-white/5">
+            <button 
+              onClick={() => setIsContactOpen(true)}
+              className="h-16 md:h-20 px-10 md:px-16 bg-white text-black rounded-full font-black uppercase tracking-widest text-[11px] hover:scale-105 transition-all shadow-2xl shadow-white/5"
+            >
               Send an Inquiry
             </button>
           </motion.div>

@@ -3,7 +3,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { MoveRight } from 'lucide-react';
 
-export const Hero = () => {
+export const Hero = ({ onContactClick }: { onContactClick?: () => void }) => {
   return (
     <section className="relative min-h-[85vh] md:min-h-screen flex flex-col items-center justify-center pt-32 pb-10 px-6 overflow-hidden">
       {/* Background Gradient */}
@@ -30,10 +30,15 @@ export const Hero = () => {
         </p>
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-          <button className="w-full sm:w-auto h-14 md:h-16 px-10 bg-white text-black rounded-full text-[11px] font-black uppercase tracking-[0.2em] flex items-center justify-center gap-3 hover:scale-105 transition-transform">
-            Our Experiences <MoveRight size={18} />
-          </button>
-          <button className="w-full sm:w-auto h-14 md:h-16 px-10 glass glass-hover rounded-full text-[11px] font-black uppercase tracking-[0.2em] flex items-center justify-center hover:scale-105 transition-transform">
+          <a href="#games" className="w-full sm:w-auto">
+            <button className="w-full h-14 md:h-16 px-10 bg-white text-black rounded-full text-[11px] font-black uppercase tracking-[0.2em] flex items-center justify-center gap-3 hover:scale-105 transition-transform">
+              Our Experiences <MoveRight size={18} />
+            </button>
+          </a>
+          <button 
+            onClick={onContactClick}
+            className="w-full sm:w-auto h-14 md:h-16 px-10 glass glass-hover rounded-full text-[11px] font-black uppercase tracking-[0.2em] flex items-center justify-center hover:scale-105 transition-transform"
+          >
             Inquire Project
           </button>
         </div>
