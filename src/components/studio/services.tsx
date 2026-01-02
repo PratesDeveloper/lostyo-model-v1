@@ -7,14 +7,15 @@ const ServiceCard = ({ icon: Icon, title, desc, index }: any) => (
   <motion.div
     initial={{ opacity: 0, y: 20 }}
     whileInView={{ opacity: 1, y: 0 }}
-    transition={{ delay: index * 0.1 }}
-    className="p-12 md:p-16 bg-[#F2F3F5] rounded-[4rem] group hover:bg-[#3B82F6] transition-all duration-500"
+    transition={{ delay: index * 0.1, duration: 0.8 }}
+    viewport={{ once: true }}
+    className="p-10 glass rounded-[3rem] glass-hover"
   >
-    <div className="w-20 h-20 rounded-3xl bg-white flex items-center justify-center text-[#3B82F6] mb-12 shadow-sm">
-      <Icon size={32} />
+    <div className="w-12 h-12 rounded-2xl bg-blue-600/10 flex items-center justify-center text-blue-500 mb-8">
+      <Icon size={24} />
     </div>
-    <h3 className="text-4xl font-black text-black group-hover:text-white mb-6 tracking-tighter uppercase leading-none">{title}</h3>
-    <p className="text-[#666] group-hover:text-white/80 text-lg leading-snug font-medium transition-colors">
+    <h3 className="text-2xl font-black text-white mb-4 tracking-tighter">{title}</h3>
+    <p className="text-white/40 text-sm leading-relaxed font-medium">
       {desc}
     </p>
   </motion.div>
@@ -22,19 +23,32 @@ const ServiceCard = ({ icon: Icon, title, desc, index }: any) => (
 
 export const Services = () => {
   return (
-    <section id="services" className="py-40 bg-white">
+    <section id="services" className="py-32 relative">
       <div className="container mx-auto px-6">
-        <div className="max-w-4xl mb-24">
-          <div className="text-[#3B82F6] text-[12px] font-black uppercase tracking-[0.4em] mb-6">Our DNA</div>
-          <h2 className="text-6xl md:text-9xl font-black text-black tracking-tighter uppercase leading-[0.85]">
-            BUILT TO <br /> <span className="text-[#3B82F6]">LAST.</span>
-          </h2>
+        <div className="max-w-2xl mb-20">
+          <h2 className="text-4xl md:text-6xl font-black text-white tracking-tighter mb-6">Our Expertise.</h2>
+          <p className="text-white/30 text-lg font-medium">We don't just build games; we engineer digital worlds with precision and scale.</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <ServiceCard index={0} icon={PencilRuler} title="Creative" desc="Premium art direction and environment design for next-gen social play." />
-          <ServiceCard index={1} icon={Cpu} title="Technical" desc="High-performance backend systems built for massive concurrent users." />
-          <ServiceCard index={2} icon={Music} title="Audio" desc="Spatial soundscapes and original scores that define the social atmosphere." />
+          <ServiceCard 
+            index={0}
+            icon={PencilRuler}
+            title="Creative Direction"
+            desc="Concept art, level design, and UI/UX that feels native and premium to the next generation of players."
+          />
+          <ServiceCard 
+            index={1}
+            icon={Cpu}
+            title="Technical Excellence"
+            desc="High-performance Luau scripting, custom backend solutions, and data-driven gameplay systems."
+          />
+          <ServiceCard 
+            index={2}
+            icon={Music}
+            title="Immersive Sound"
+            desc="Custom spatial audio and original soundtracks designed to deepen player immersion and emotional connection."
+          />
         </div>
       </div>
     </section>
