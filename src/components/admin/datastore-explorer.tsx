@@ -7,7 +7,6 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
-import { CreateKeyForm } from './create-key-form';
 
 interface DataStoreExplorerProps {
   selectedProject: any;
@@ -41,14 +40,8 @@ export const DataStoreExplorer = ({
   }, [selectedProject]);
 
   const fetchDatastores = async () => {
-    // Correção: Passando um objeto vazio como segundo argumento
     const result = await callRobloxAPI('listDataStores', {}); 
     if (result?.datastores) setDatastores(result.datastores);
-  };
-
-  const handleKeyCreated = (keyName: string) => {
-    fetchKeys(selectedDS);
-    loadEntry(keyName);
   };
 
   const fetchKeys = async (dsName: string) => {
@@ -96,50 +89,13 @@ export const DataStoreExplorer = ({
     }
   };
 
-  const clearDatastore = async () => {
-    if (!selectedDS) return toast.error("Please select a DataStore first.");
-    if (!confirm(`WARNING: This will delete ALL ${dsKeys.length} keys in '${selectedDS}'. Are you absolutely sure?`)) return;
-
-    let successCount = 0;
-    let errorCount = 0;
-
-    for (const key of dsKeys) {
-      const result = await callRobloxAPI('deleteEntry', { datastoreName: selectedDS, entryKey: key.key });
-      if (result) {
-        successCount++;
-      } else {
-        errorCount++;
-      }
-    }
-
-    if (errorCount === 0) {
-      toast.success(`Successfully cleared all ${successCount} keys from ${selectedDS}.`);
-    } else {
-      toast.warning(`Cleared ${successCount} keys, but failed to delete ${errorCount} keys.`);
-    }
-    
-    fetchKeys(selectedDS);
-  };
-
   const filteredKeys = dsKeys.filter(k => k.key.toLowerCase().includes(searchKeyFilter.toLowerCase()));
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="h-full flex flex-col space-y-6">
-      <CreateKeyForm 
-        datastoreName={selectedDS}
-        onKeyCreated={handleKeyCreated}
-        callRobloxAPI={callRobloxAPI}
-        isOpen={isCreateModalOpen}
-        setIsOpen={setIsCreateModalOpen}
-        initialSchema={settings?.schemas?.[selectedDS]}
-      />
-
       <div className="flex items-center justify-between mb-2">
         <h2 className="text-2xl font-bold text-white">Cloud Data Explorer</h2>
         <div className="flex gap-3">
-          <button onClick={clearDatastore} disabled={!selectedDS || dsKeys.length === 0} className="px-4 py-2 bg-red-600/10 text-red-400 rounded-md text-xs font-bold flex items-center gap-2 hover:bg-red-600/20 transition-colors disabled:opacity-50">
-            <Trash2 size={14} /> Clear All Keys
-          </button>
           <button onClick={() => selectedDS ? setIsCreateModalOpen(true) : toast.error("Please select a DataStore first.")} className="px-4 py-2 bg-blue-600 text-white rounded-md text-xs font-bold flex items-center gap-2 hover:bg-blue-500 transition-colors">
             <Plus size={14} /> New Key
           </button>
@@ -147,6 +103,7 @@ export const DataStoreExplorer = ({
       </div>
       
       <div className="flex flex-col lg:flex-row gap-6 h-full min-h-[600px]">
+        {/* Left Nav: DataStores & Keys */}
         <div className="w-full lg:w-72 flex flex-col gap-6 shrink-0">
           <div className="space-y-2">
             <label className="text-[10px] font-bold text-slate-500 uppercase">1. Select DataStore</label>
@@ -194,6 +151,7 @@ export const DataStoreExplorer = ({
           </div>
         </div>
 
+        {/* Right Editor Area */}
         <div className="flex-grow flex flex-col border border-white/5 rounded-lg bg-[#0d0d0d] overflow-hidden">
           <div className="h-14 bg-[#161616] border-b border-white/5 flex items-center justify-between px-6 shrink-0">
             <div className="flex items-center gap-2">
