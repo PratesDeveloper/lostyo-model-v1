@@ -39,10 +39,15 @@ export const ProjectDetails = ({ project }: { project: Project }) => {
   const fetchRealData = async () => {
     setLoading(true);
     try {
-      const ds = await getProjectDataStores(project.roblox_place_id);
-      setDatastores(ds);
+      const response = await fetch('/api/admin/roblox', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'listDataStores', universeId: project.id })
+      });
+      const data = await response.json();
+      setDatastores(data.datastores || []);
     } catch (err) {
-      toast.error("Failed to authenticate with Roblox Open Cloud");
+      toast.error("Failed to load Cloud data");
     }
     setLoading(false);
   };
@@ -61,7 +66,7 @@ export const ProjectDetails = ({ project }: { project: Project }) => {
                Cluster Active
              </div>
              <div className="px-3 py-1 bg-white/5 border border-white/10 rounded-full text-[9px] font-black text-white/40 uppercase tracking-widest">
-               ID: {project.roblox_place_id}
+               ID: {project.id}
              </div>
           </div>
           <h2 className="text-7xl font-black tracking-tighter text-white uppercase leading-none">{project.name}</h2>
@@ -121,7 +126,7 @@ export const ProjectDetails = ({ project }: { project: Project }) => {
             ) : (
               <div className="p-16 border-2 border-dashed border-white/5 rounded-[3rem] text-center">
                  <AlertCircle size={40} className="text-white/10 mx-auto mb-4" />
-                 <p className="text-xs font-black uppercase tracking-widest text-white/20">Access Token Required</p>
+                 <p className="text-xs font-black uppercase tracking-widest text-white/20">Cloud Access Required</p>
                  <p className="text-[10px] text-white/10 mt-2">Initialize Roblox Open Cloud credentials to view DataStore clusters.</p>
               </div>
             )}
@@ -139,25 +144,6 @@ export const ProjectDetails = ({ project }: { project: Project }) => {
               <button className="w-full h-14 bg-white text-black rounded-2xl text-[10px] font-black uppercase tracking-widest hover:scale-[1.02] transition-transform">
                  Open Metrics Hub
               </button>
-           </div>
-
-           <div className="p-8 border border-white/5 bg-white/[0.02] rounded-[3rem] space-y-6">
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] font-black uppercase text-white/40 tracking-widest">Configuration</span>
-                <Settings size={14} className="text-white/20" />
-              </div>
-              <div className="space-y-4">
-                 {[
-                   { label: "Public Access", status: "Enabled", color: "text-emerald-400" },
-                   { label: "Private Servers", status: "100 R$", color: "text-blue-400" },
-                   { label: "API Sync", status: "Active", color: "text-emerald-400" }
-                 ].map((conf, i) => (
-                   <div key={i} className="flex justify-between items-center pb-3 border-b border-white/5 last:border-0 last:pb-0">
-                      <span className="text-[10px] font-bold text-white/30">{conf.label}</span>
-                      <span className={`text-[9px] font-black uppercase ${conf.color}`}>{conf.status}</span>
-                   </div>
-                 ))}
-              </div>
            </div>
         </div>
       </div>

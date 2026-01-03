@@ -16,10 +16,10 @@ export const PlayerIntel = ({ onJumpToData }: { onJumpToData: (userId: string) =
     setLoading(true);
     setPlayer(null);
     try {
-      const data = await robloxUtils.getPlayerInfo(searchId);
+      const data = await robloxUtils.getUser(searchId);
       if (data.error) throw new Error(data.error);
       
-      const thumbnail = await robloxUtils.getPlayerThumbnail(searchId);
+      const thumbnail = await robloxUtils.getUserThumb(searchId);
       
       setPlayer({ ...data, thumbnail });
       toast.success("Identity localized successfully.");

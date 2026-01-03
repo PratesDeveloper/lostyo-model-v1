@@ -2,33 +2,42 @@ import { NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
 
-/**
- * Proxy universal para APIs do Roblox.
- * Uso: /api/proxy/roblox?domain=users&endpoint=v1/users/7468377959
- */
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   const domain = searchParams.get('domain') || 'users';
-  const endpoint = searchParams.get('endpoint');
-
-  if (!endpoint) {
-    return NextResponse.json({ error: 'Missing endpoint parameter' }, { status: 400 });
+  // Pegamos o endpoint bruto da query string para evitar quebras com '?' e '&'
+  const urlObj = new URL(req.url);
+  const fullSearch = urlObj.search;
+  const endpointMatch = fullSearch.match(/endpoint=([^&]+)/);
+  
+  if (!endpointMatch) {
+    return NextResponse.json({ error: 'Missing endpoint' }, { status: 400 });
   }
 
+  const endpoint = decodeURIComponent(endpointMatch[1]);
+  // Reconstruímos a URL com os parâmetros adicionais que podem ter vindo no proxy
+  const additionalParams = fullSearch.split(endpointMatch[0])[1] || '';
+  const finalEndpoint = endpoint + additionalParams;
+
   try {
-    const url = `https://${domain}.roblox.com/${endpoint}`;
-    const response = await fetch(url, {
+    const targetUrl = `https://${domain}.roblox.com/${finalEndpoint}`;
+    
+    const response = await fetch(targetUrl, {
       method: 'GET',
-      headers: { 'Content-Type': 'application/json' },
-      next: { revalidate: 300 } // Cache de 5 minutos
+      headers: { 
+        'Content-Type': 'application/json',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+      },
     });
 
-    if (!response.ok) throw new Error(`Roblox API responded with ${response.status}`);
+    if (!response.ok) {
+      const err = await response.text();
+      return NextResponse.json({ error: 'Roblox API Error', details: err }, { status: response.status });
+    }
 
     const data = await response.json();
     return NextResponse.json(data);
   } catch (err: any) {
-    console.error("[Roblox Proxy Error]:", err.message);
-    return NextResponse.json({ error: 'Failed to fetch from Roblox', details: err.message }, { status: 500 });
+    return NextResponse.json({ error: 'Proxy Exception', details: err.message }, { status: 500 });
   }
 }
