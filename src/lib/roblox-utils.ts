@@ -1,5 +1,5 @@
 export const robloxUtils = {
-  // Usuários
+  // Users
   async getUser(userId: string) {
     const endpoint = encodeURIComponent(`v1/users/${userId}`);
     const res = await fetch(`/api/proxy/roblox?domain=users&endpoint=${endpoint}`);
@@ -13,6 +13,12 @@ export const robloxUtils = {
     return data.data?.[0]?.imageUrl;
   },
 
+  async getUserGroups(userId: string) {
+    const endpoint = encodeURIComponent(`v1/users/${userId}/groups/roles`);
+    const res = await fetch(`/api/proxy/roblox?domain=groups&endpoint=${endpoint}`);
+    return res.json();
+  },
+
   // Jogos (Universos)
   async getGameDetails(universeId: string) {
     const endpoint = encodeURIComponent(`v1/games?universeIds=${universeId}`);
@@ -24,6 +30,12 @@ export const robloxUtils = {
   async getGamepasses(universeId: string) {
     const endpoint = encodeURIComponent(`v1/games/${universeId}/game-passes?limit=100`);
     const res = await fetch(`/api/proxy/roblox?domain=games&endpoint=${endpoint}`);
+    return res.json();
+  },
+
+  async getGameBadges(universeId: string) {
+    const endpoint = encodeURIComponent(`v1/universes/${universeId}/badges?limit=10&sortOrder=Desc`);
+    const res = await fetch(`/api/proxy/roblox?domain=badges&endpoint=${endpoint}`);
     return res.json();
   },
 

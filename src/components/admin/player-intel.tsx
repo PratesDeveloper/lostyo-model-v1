@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { Search, User, Shield, BarChart2, Loader2, Database, ExternalLink } from 'lucide-react';
+import { Search, User, Shield, BarChart2, Loader2, Database, ExternalLink, Users, Award, MapPin } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import { robloxUtils } from '@/lib/roblox-utils';
@@ -10,18 +10,24 @@ export const PlayerIntel = ({ onJumpToData }: { onJumpToData: (userId: string) =
   const [searchId, setSearchId] = useState("");
   const [loading, setLoading] = useState(false);
   const [player, setPlayer] = useState<any>(null);
+  const [groups, setGroups] = useState<any[]>([]);
 
   const fetchPlayer = async () => {
     if (!searchId) return;
     setLoading(true);
     setPlayer(null);
+    setGroups([]);
     try {
       const data = await robloxUtils.getUser(searchId);
       if (data.error) throw new Error(data.error);
       
-      const thumbnail = await robloxUtils.getUserThumb(searchId);
+      const [thumbnail, groupData] = await Promise.all([
+        robloxUtils.getUserThumb(searchId),
+        robloxUtils.getUserGroups(searchId)
+      ]);
       
       setPlayer({ ...data, thumbnail });
+      setGroups(groupData.data || []);
       toast.success("Identity localized successfully.");
     } catch (err: any) {
       toast.error("Access denied or ID not found.");
@@ -32,26 +38,26 @@ export const PlayerIntel = ({ onJumpToData }: { onJumpToData: (userId: string) =
 
   return (
     <div className="space-y-8 h-full flex flex-col">
-      <div className="bg-[#08080A] border border-white/5 rounded-[2.5rem] p-10">
+      <div className="bg-white/[0.02] border border-white/5 rounded-[2.5rem] p-10 backdrop-blur-md">
         <div className="flex items-center gap-3 mb-8">
-          <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
+          <div className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
           <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-white/30">Network Reconnaissance</h3>
         </div>
         <div className="flex gap-4">
           <div className="relative flex-grow">
-            <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-white/20" size={20} />
+            <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-white/20" size={20} />
             <input 
               placeholder="Inject UserID..." 
               value={searchId}
               onChange={e => setSearchId(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && fetchPlayer()}
-              className="w-full h-16 bg-black/40 border border-white/5 rounded-2xl pl-14 pr-4 text-sm text-white focus:border-blue-500/50 outline-none transition-all font-mono"
+              className="w-full h-16 bg-black/20 border border-white/5 rounded-3xl pl-16 pr-6 text-sm text-white focus:border-blue-500/50 outline-none transition-all font-mono placeholder:text-white/10"
             />
           </div>
           <button 
             onClick={fetchPlayer}
             disabled={loading}
-            className="h-16 px-10 bg-blue-600 hover:bg-blue-500 text-white rounded-2xl font-black uppercase tracking-widest text-[11px] flex items-center gap-3 transition-all disabled:opacity-50 shadow-xl shadow-blue-900/20"
+            className="h-16 px-12 bg-white text-black hover:bg-blue-500 hover:text-white rounded-3xl font-black uppercase tracking-widest text-[10px] flex items-center gap-3 transition-all disabled:opacity-50"
           >
             {loading ? <Loader2 className="animate-spin" size={18} /> : "Query ID"}
           </button>
@@ -65,64 +71,85 @@ export const PlayerIntel = ({ onJumpToData }: { onJumpToData: (userId: string) =
             animate={{ opacity: 1, y: 0 }}
             className="grid grid-cols-1 lg:grid-cols-3 gap-8 flex-grow"
           >
-            {/* Perfil Esquerdo */}
-            <div className="lg:col-span-1 bg-[#08080A] border border-white/5 rounded-[3rem] p-12 flex flex-col items-center text-center relative overflow-hidden">
-              <div className="absolute top-0 left-0 w-full h-1 bg-blue-500" />
+            {/* Left Profile Panel */}
+            <div className="lg:col-span-1 bg-white/[0.02] border border-white/5 rounded-[3rem] p-12 flex flex-col items-center text-center relative overflow-hidden backdrop-blur-md">
+              <div className="absolute top-0 left-0 w-full h-1 bg-blue-600/50" />
               <div className="relative mb-8">
-                <div className="absolute inset-0 bg-blue-500/30 blur-[60px] rounded-full" />
-                <img src={player.thumbnail} className="w-40 h-40 rounded-full border-4 border-white/10 relative z-10 shadow-2xl" alt="" />
+                <div className="absolute inset-0 bg-blue-500/10 blur-[60px] rounded-full" />
+                <img src={player.thumbnail} className="w-44 h-44 rounded-full border-8 border-white/[0.03] relative z-10 shadow-2xl" alt="" />
               </div>
-              <h2 className="text-3xl font-black text-white tracking-tighter mb-2">{player.displayName}</h2>
-              <p className="text-sm font-bold text-blue-500/60 uppercase tracking-widest mb-10">@{player.name}</p>
+              <h2 className="text-4xl font-black text-white tracking-tighter mb-2 leading-none uppercase">{player.displayName}</h2>
+              <p className="text-sm font-bold text-blue-500/60 uppercase tracking-widest mb-12">@{player.name}</p>
               
-              <div className="w-full space-y-4">
+              <div className="w-full space-y-3">
                 <MetricItem label="System UID" value={player.id} />
                 <MetricItem label="Birth Protocol" value={new Date(player.created).toLocaleDateString()} />
               </div>
 
-              <div className="mt-auto pt-10 w-full">
+              <div className="mt-auto pt-12 w-full">
                 <button 
                   onClick={() => onJumpToData(player.id)}
-                  className="w-full h-14 bg-white/5 border border-white/10 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-blue-600 hover:border-blue-500 transition-all flex items-center justify-center gap-3 group"
+                  className="w-full h-16 bg-white/5 border border-white/10 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-white hover:text-black transition-all flex items-center justify-center gap-3 group"
                 >
-                  <Database size={16} className="group-hover:scale-110 transition-transform" /> Sync with DataStore
+                  <Database size={16} /> Sync with DataStore
                 </button>
               </div>
             </div>
 
-            {/* Status Direito */}
+            {/* Right Status Panel */}
             <div className="lg:col-span-2 space-y-8">
-               <div className="bg-[#08080A] border border-white/5 rounded-[3rem] p-10">
-                  <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-white/20 mb-10 flex items-center gap-4">
+               <div className="bg-white/[0.02] border border-white/5 rounded-[3rem] p-12 backdrop-blur-md">
+                  <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-white/20 mb-12 flex items-center gap-4">
                     <Shield size={18} className="text-blue-500" /> Security Clearing
                   </h3>
-                  <div className="grid grid-cols-2 gap-6">
-                    <StatusBox label="Account Status" value={player.isBanned ? "TERMINATED" : "ACTIVE"} color={player.isBanned ? "text-red-500" : "text-emerald-500"} />
-                    <StatusBox label="Verified Badge" value={player.hasVerifiedBadge ? "VERIFIED" : "NONE"} color="text-blue-400" />
-                    <StatusBox label="Risk Level" value="LOW" color="text-emerald-500" />
-                    <StatusBox label="Last Seen" value="Detected" color="text-white/40" />
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                    <StatusBox label="Status" value={player.isBanned ? "BANNED" : "ACTIVE"} color={player.isBanned ? "text-red-500" : "text-emerald-500"} />
+                    <StatusBox label="Badge" value={player.hasVerifiedBadge ? "VERIFIED" : "NONE"} color="text-blue-400" />
+                    <StatusBox label="Risk" value="MINIMAL" color="text-emerald-500" />
+                    <StatusBox label="Presence" value="OFFLINE" color="text-white/20" />
                   </div>
                </div>
 
-               <div className="bg-[#08080A] border border-white/5 rounded-[3rem] p-10 flex-grow relative overflow-hidden">
-                  <div className="absolute -right-20 -bottom-20 opacity-5">
-                    <BarChart2 size={300} />
+               <div className="grid grid-cols-1 md:grid-cols-2 gap-8 flex-grow">
+                  <div className="bg-white/[0.02] border border-white/5 rounded-[3rem] p-12 backdrop-blur-md">
+                    <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-white/20 mb-8 flex items-center gap-4">
+                      <Users size={18} className="text-emerald-500" /> Group Affiliations
+                    </h3>
+                    <div className="space-y-4 max-h-[300px] overflow-y-auto custom-scrollbar pr-2">
+                      {groups.length > 0 ? groups.map((g, i) => (
+                        <div key={i} className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/5">
+                          <div className="min-w-0">
+                            <p className="text-xs font-black text-white truncate">{g.group.name}</p>
+                            <p className="text-[10px] font-bold text-white/20 uppercase tracking-widest">{g.role.name}</p>
+                          </div>
+                          <span className="text-[10px] font-black text-blue-500/60">LVL {g.role.rank}</span>
+                        </div>
+                      )) : (
+                        <p className="text-[10px] font-black text-white/10 uppercase tracking-widest text-center py-10">No public groups detected</p>
+                      )}
+                    </div>
                   </div>
-                  <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-white/20 mb-10 flex items-center gap-4">
-                    <BarChart2 size={18} className="text-emerald-500" /> Network Telemetry
-                  </h3>
-                  <div className="p-16 border-2 border-dashed border-white/5 rounded-[2.5rem] text-center flex flex-col items-center">
-                    <Loader2 size={32} className="text-white/10 animate-spin mb-6" />
-                    <p className="text-[10px] font-black text-white/20 uppercase tracking-[0.3em] mb-2">Ingesting Live Stream...</p>
-                    <p className="text-[9px] text-white/5 max-w-[250px] leading-relaxed">Place the tracking script in your Roblox experience to enable real-time behavior forensics.</p>
+
+                  <div className="bg-white/[0.02] border border-white/5 rounded-[3rem] p-12 flex flex-col relative overflow-hidden backdrop-blur-md">
+                     <div className="absolute -right-10 -bottom-10 text-white/5">
+                        <Award size={200} />
+                     </div>
+                     <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-white/20 mb-12 flex items-center gap-4">
+                        <Award size={18} className="text-yellow-500" /> Achievement Hub
+                     </h3>
+                     <div className="mt-auto">
+                        <div className="p-8 border-2 border-dashed border-white/5 rounded-[2rem] text-center">
+                           <p className="text-[10px] font-black text-white/10 uppercase tracking-[0.3em]">Badge Scanner Offline</p>
+                        </div>
+                     </div>
                   </div>
                </div>
             </div>
           </motion.div>
         ) : !loading && (
-          <div className="flex-grow flex flex-col items-center justify-center opacity-10">
-             <User size={100} className="mb-6" />
-             <p className="text-sm font-black uppercase tracking-[0.5em]">Awaiting Identity Uplink</p>
+          <div className="flex-grow flex flex-col items-center justify-center opacity-5">
+             <User size={120} className="mb-6" />
+             <p className="text-sm font-black uppercase tracking-[1em]">Awaiting ID Uplink</p>
           </div>
         )}
       </AnimatePresence>
@@ -131,15 +158,15 @@ export const PlayerIntel = ({ onJumpToData }: { onJumpToData: (userId: string) =
 };
 
 const MetricItem = ({ label, value }: any) => (
-  <div className="p-5 bg-white/[0.02] border border-white/5 rounded-2xl flex justify-between items-center group hover:bg-white/[0.04] transition-colors">
-    <span className="text-[9px] font-black text-white/20 uppercase tracking-widest">{label}</span>
-    <span className="text-xs font-mono text-white/60 group-hover:text-blue-400 transition-colors">{value}</span>
+  <div className="p-6 bg-white/[0.03] border border-white/5 rounded-3xl flex justify-between items-center group hover:bg-white/[0.05] transition-all">
+    <span className="text-[10px] font-black text-white/20 uppercase tracking-widest">{label}</span>
+    <span className="text-xs font-mono text-white/40 group-hover:text-blue-500 transition-colors">{value}</span>
   </div>
 );
 
 const StatusBox = ({ label, value, color }: any) => (
-  <div className="p-8 bg-white/[0.02] border border-white/5 rounded-[2rem] hover:border-white/10 transition-all">
-    <div className="text-[8px] font-black text-white/10 uppercase tracking-[0.4em] mb-2">{label}</div>
-    <div className={`text-base font-black uppercase tracking-tighter ${color}`}>{value}</div>
+  <div className="p-8 bg-white/[0.03] border border-white/5 rounded-[2.5rem] hover:border-white/10 transition-all text-center">
+    <div className="text-[9px] font-black text-white/10 uppercase tracking-[0.4em] mb-4">{label}</div>
+    <div className={`text-sm font-black uppercase tracking-tighter ${color}`}>{value}</div>
   </div>
 );
